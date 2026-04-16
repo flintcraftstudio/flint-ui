@@ -1,0 +1,126 @@
+package templates
+
+import "github.com/flintcraft/flint-ui/components/button"
+
+templ Buttons() {
+	<div class="space-y-12">
+		@pageHeader("Button", "Solid, outline, and plain buttons across Catalyst's full color palette. Solid buttons default to dark/zinc when no color is supplied. Any variant can render as an <a> by setting Href, and passes htmx or data attributes through Attrs.")
+
+		@section("Default (dark/zinc)", "The zero-value Props renders Catalyst's default dark/zinc solid button.") {
+			<div class="flex flex-wrap items-center gap-3">
+				@button.Button(button.Props{}) {
+					Button text
+				}
+				@button.Button(button.Props{Disabled: true}) {
+					Disabled
+				}
+			</div>
+		}
+
+		@section("Solid — all colors", "One button per color key in components/button/classes.go.") {
+			<div class="flex flex-wrap items-center gap-3">
+				for _, c := range solidColors {
+					@button.Button(button.Props{Color: c}) {
+						{ string(c) }
+					}
+				}
+			</div>
+		}
+
+		@section("Outline", "Neutral outline with zinc text, for secondary actions.") {
+			<div class="flex flex-wrap items-center gap-3">
+				@button.Button(button.Props{Outline: true}) {
+					Outline
+				}
+				@button.Button(button.Props{Outline: true, Disabled: true}) {
+					Disabled
+				}
+			</div>
+		}
+
+		@section("Plain", "Borderless and background-less until hovered.") {
+			<div class="flex flex-wrap items-center gap-3">
+				@button.Button(button.Props{Plain: true}) {
+					Plain
+				}
+				@button.Button(button.Props{Plain: true, Disabled: true}) {
+					Disabled
+				}
+			</div>
+		}
+
+		@section("As a link", "Pass Href and the button renders as an <a> with the same styling.") {
+			<div class="flex flex-wrap items-center gap-3">
+				@button.Button(button.Props{Color: button.ColorIndigo, Href: "#"}) {
+					Learn more
+				}
+				@button.Button(button.Props{Outline: true, Href: "#"}) {
+					Documentation
+				}
+			</div>
+		}
+
+		@section("htmx pass-through", "Extra attributes (hx-*, data-*, aria-*) are forwarded via Attrs.") {
+			<div class="flex flex-wrap items-center gap-3">
+				@button.Button(button.Props{
+					Color: button.ColorDarkZinc,
+					Attrs: templ.Attributes{
+						"hx-post":   "/echo",
+						"hx-target": "#echo-out",
+						"hx-swap":   "innerHTML",
+					},
+				}) {
+					Ping
+				}
+				<div id="echo-out" class="text-sm text-zinc-500"></div>
+			</div>
+		}
+	</div>
+}
+
+// solidColors drives the "all colors" section. Ordering roughly tracks the
+// Catalyst button.tsx source for easy diffing.
+var solidColors = []button.Color{
+	button.ColorDarkZinc,
+	button.ColorLight,
+	button.ColorDarkWhite,
+	button.ColorDark,
+	button.ColorWhite,
+	button.ColorZinc,
+	button.ColorIndigo,
+	button.ColorCyan,
+	button.ColorRed,
+	button.ColorOrange,
+	button.ColorAmber,
+	button.ColorYellow,
+	button.ColorLime,
+	button.ColorGreen,
+	button.ColorEmerald,
+	button.ColorTeal,
+	button.ColorSky,
+	button.ColorBlue,
+	button.ColorViolet,
+	button.ColorPurple,
+	button.ColorFuchsia,
+	button.ColorPink,
+	button.ColorRose,
+}
+
+templ pageHeader(title, blurb string) {
+	<div>
+		<h1 class="text-3xl font-semibold tracking-tight text-zinc-950 dark:text-white">{ title }</h1>
+		<p class="mt-2 max-w-3xl text-zinc-600 dark:text-zinc-400">{ blurb }</p>
+	</div>
+}
+
+templ section(title, body string) {
+	<section class="space-y-4">
+		<div>
+			<h2 class="text-lg font-semibold text-zinc-950 dark:text-white">{ title }</h2>
+			<p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{ body }</p>
+		</div>
+		<div class="rounded-xl border border-zinc-950/10 bg-white p-6 dark:border-white/10 dark:bg-zinc-900">
+			{ children... }
+		</div>
+	</section>
+}

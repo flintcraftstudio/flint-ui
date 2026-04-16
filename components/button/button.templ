@@ -1,0 +1,85 @@
+package button
+
+// Color selects one of Catalyst's 20 solid button palettes. Zero value
+// (empty string) resolves to ColorDarkZinc, matching Catalyst's default.
+type Color string
+
+const (
+	ColorDarkZinc  Color = "dark/zinc"
+	ColorLight     Color = "light"
+	ColorDarkWhite Color = "dark/white"
+	ColorDark      Color = "dark"
+	ColorWhite     Color = "white"
+	ColorZinc      Color = "zinc"
+	ColorIndigo    Color = "indigo"
+	ColorCyan      Color = "cyan"
+	ColorRed       Color = "red"
+	ColorOrange    Color = "orange"
+	ColorAmber     Color = "amber"
+	ColorYellow    Color = "yellow"
+	ColorLime      Color = "lime"
+	ColorGreen     Color = "green"
+	ColorEmerald   Color = "emerald"
+	ColorTeal      Color = "teal"
+	ColorSky       Color = "sky"
+	ColorBlue      Color = "blue"
+	ColorViolet    Color = "violet"
+	ColorPurple    Color = "purple"
+	ColorFuchsia   Color = "fuchsia"
+	ColorPink      Color = "pink"
+	ColorRose      Color = "rose"
+)
+
+// Props is the full input surface of Button.
+//
+// Visual style is chosen as: Outline > Plain > solid-with-Color (default).
+// If Href is set, the component renders an <a>; otherwise a <button>.
+// Attrs passes through htmx attributes, data-* attrs, aria-* overrides, etc.
+type Props struct {
+	Color   Color
+	Outline bool
+	Plain   bool
+	Class   string
+
+	Href     string
+	Type     string
+	Disabled bool
+	Attrs    templ.Attributes
+}
+
+templ Button(props Props) {
+	if props.Href != "" {
+		<a
+			href={ templ.SafeURL(props.Href) }
+			class={ Classes(props) }
+			data-disabled?={ props.Disabled }
+			aria-disabled?={ props.Disabled }
+			{ props.Attrs... }
+		>
+			@touchTarget() {
+				{ children... }
+			}
+		</a>
+	} else {
+		<button
+			type={ resolveType(props.Type) }
+			class={ buttonElClasses(props) }
+			disabled?={ props.Disabled }
+			{ props.Attrs... }
+		>
+			@touchTarget() {
+				{ children... }
+			}
+		</button>
+	}
+}
+
+// touchTarget expands the hit area to at least 44×44px on touch devices,
+// mirroring Catalyst's <TouchTarget> helper.
+templ touchTarget() {
+	<span
+		class="absolute top-1/2 left-1/2 size-[max(100%,2.75rem)] -translate-x-1/2 -translate-y-1/2 pointer-fine:hidden"
+		aria-hidden="true"
+	></span>
+	{ children... }
+}
