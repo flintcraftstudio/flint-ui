@@ -1,0 +1,69 @@
+package fieldset
+
+// Props is the shared shape for Fieldset, FieldGroup, Field, Legend,
+// Description, and ErrorMessage — each wraps its children in a styled
+// element and optionally forwards extra classes/attributes.
+type Props struct {
+	Class string
+	Attrs templ.Attributes
+}
+
+// LabelProps additionally accepts a For target so <label for=""> can wire
+// up to its control. Catalyst relies on Headless UI's Field context to
+// auto-associate; server-rendered templates do it explicitly.
+type LabelProps struct {
+	For   string
+	Class string
+	Attrs templ.Attributes
+}
+
+// Fieldset is the outermost form grouping element. Pair with Legend.
+templ Fieldset(p Props) {
+	<fieldset class={ joinClasses(fieldsetBase, p.Class) } { p.Attrs... }>
+		{ children... }
+	</fieldset>
+}
+
+// Legend is the caption for a Fieldset.
+templ Legend(p Props) {
+	<legend data-slot="legend" class={ joinClasses(legendBase, p.Class) } { p.Attrs... }>
+		{ children... }
+	</legend>
+}
+
+// FieldGroup vertically stacks multiple Fields with Catalyst's space-y-8.
+// Carries data-slot="control" so a parent Field sibling selector can target it.
+templ FieldGroup(p Props) {
+	<div data-slot="control" class={ joinClasses(fieldGroupBase, p.Class) } { p.Attrs... }>
+		{ children... }
+	</div>
+}
+
+// Field wraps a single label + control + description + error. Child
+// order determines the auto-spacing applied by Catalyst's sibling selectors.
+templ Field(p Props) {
+	<div class={ joinClasses(fieldBase, p.Class) } { p.Attrs... }>
+		{ children... }
+	</div>
+}
+
+// Label renders the field label and wires up the <label for=""> target.
+templ Label(p LabelProps) {
+	<label for={ p.For } data-slot="label" class={ joinClasses(labelBase, p.Class) } { p.Attrs... }>
+		{ children... }
+	</label>
+}
+
+// Description is supporting hint text shown below the label or control.
+templ Description(p Props) {
+	<p data-slot="description" class={ joinClasses(descriptionBase, p.Class) } { p.Attrs... }>
+		{ children... }
+	</p>
+}
+
+// ErrorMessage is the validation error shown under a control.
+templ ErrorMessage(p Props) {
+	<p data-slot="error" class={ joinClasses(errorMessageBase, p.Class) } { p.Attrs... }>
+		{ children... }
+	</p>
+}

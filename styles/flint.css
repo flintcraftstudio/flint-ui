@@ -3,17 +3,55 @@
 @source "../components/**/*.templ";
 @source "../examples/showcase/templates/**/*.templ";
 
+/*
+  Token contract — clients override these to brand flint-ui to their palette.
+  See flintcraft-ui-conversion-guide.md § "Semantic Token Contract".
+
+  Every flint-ui component draws only from these tokens. Clients supply a
+  styles/theme.css that redeclares any tokens they want to override at :root;
+  the rest fall through to the defaults here (roughly Catalyst's zinc palette).
+*/
 @theme {
+  /* Typography */
   --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
   --font-sans--font-feature-settings: "cv11";
+
+  /* Neutrals */
+  --color-background: #ffffff;
+  --color-foreground: #18181b;
+  --color-surface: #ffffff;
+  --color-surface-foreground: #18181b;
+  --color-muted: #f4f4f5;
+  --color-muted-foreground: #71717a;
+
+  /* Brand — clients customize these */
+  --color-primary: #18181b;
+  --color-primary-foreground: #ffffff;
+  --color-accent: #d97706;
+  --color-accent-foreground: #ffffff;
+
+  /* Semantic state */
+  --color-danger: #dc2626;
+  --color-danger-foreground: #ffffff;
+  --color-success: #16a34a;
+  --color-success-foreground: #ffffff;
+  --color-warning: #eab308;
+  --color-warning-foreground: #18181b;
+
+  /* Structural */
+  --color-border: #e4e4e7;
+  --color-input: #ffffff;
+  --color-ring: #3b82f6;
 }
 
 /*
   Mirror Headless UI's data-* state attributes onto native CSS selectors so
-  Catalyst class strings (data-hover:, data-focus:, data-active:, data-disabled:)
-  work unchanged in server-rendered HTML without the Headless UI runtime.
+  Catalyst class strings (data-hover:, data-focus:, data-active:, data-disabled:,
+  data-invalid:) work unchanged in server-rendered HTML without the Headless
+  UI runtime.
 */
 @custom-variant data-hover (&:hover, &[data-hover]);
 @custom-variant data-focus (&:focus-visible, &[data-focus]);
 @custom-variant data-active (&:active, &[data-active]);
 @custom-variant data-disabled (&:disabled, &[data-disabled], &[aria-disabled="true"]);
+@custom-variant data-invalid (&:user-invalid, &[data-invalid], &[aria-invalid="true"]);

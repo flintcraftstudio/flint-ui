@@ -29,7 +29,7 @@ func Index() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"space-y-10\"><div><p class=\"text-xs font-semibold uppercase tracking-wider text-zinc-500\">FlintCraft Studio</p><h1 class=\"mt-2 text-4xl font-semibold tracking-tight text-zinc-950 dark:text-white\">flint-ui</h1><p class=\"mt-3 max-w-2xl text-zinc-600 dark:text-zinc-400\">Server-rendered UI components for Go + templ + htmx + Alpine.js + Tailwind CSS projects, converted from the Tailwind Catalyst UI Kit. Pick a component from the sidebar to see every variant, or use this reference when wiring components into a client dashboard.</p></div><div class=\"grid gap-6 sm:grid-cols-2\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"space-y-10\"><div><p class=\"text-xs font-semibold uppercase tracking-wider text-muted-foreground\">FlintCraft Studio</p><h1 class=\"mt-2 text-4xl font-semibold tracking-tight text-foreground\">flint-ui</h1><p class=\"mt-3 max-w-2xl text-muted-foreground\">Server-rendered UI components for Go + templ + htmx + Alpine.js + Tailwind CSS v4 projects, converted from the Tailwind Catalyst UI Kit. Every component draws only from the token contract in <code class=\"rounded bg-muted px-1 py-0.5 text-xs\">styles/flint.css</code>, so a client's brand drops in with a handful of CSS variable overrides.</p></div><div class=\"grid gap-6 sm:grid-cols-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -78,27 +78,27 @@ func card(title, body string) templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"rounded-xl border border-zinc-950/10 bg-white p-5 dark:border-white/10 dark:bg-zinc-900\"><h2 class=\"text-sm font-semibold text-zinc-950 dark:text-white\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"rounded-xl border border-border bg-surface p-5\"><h2 class=\"text-sm font-semibold text-foreground\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/showcase/templates/index.templ`, Line: 26, Col: 73}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/showcase/templates/index.templ`, Line: 27, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</h2><p class=\"mt-1 text-sm text-zinc-600 dark:text-zinc-400\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</h2><p class=\"mt-1 text-sm text-muted-foreground\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(body)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/showcase/templates/index.templ`, Line: 27, Col: 65}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/showcase/templates/index.templ`, Line: 28, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {

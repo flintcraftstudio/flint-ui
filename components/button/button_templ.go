@@ -8,43 +8,25 @@ package button
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-// Color selects one of Catalyst's 20 solid button palettes. Zero value
-// (empty string) resolves to ColorDarkZinc, matching Catalyst's default.
-type Color string
+// Variant selects one of the five semantic button styles. The zero value
+// (empty string) resolves to VariantPrimary.
+type Variant string
 
 const (
-	ColorDarkZinc  Color = "dark/zinc"
-	ColorLight     Color = "light"
-	ColorDarkWhite Color = "dark/white"
-	ColorDark      Color = "dark"
-	ColorWhite     Color = "white"
-	ColorZinc      Color = "zinc"
-	ColorIndigo    Color = "indigo"
-	ColorCyan      Color = "cyan"
-	ColorRed       Color = "red"
-	ColorOrange    Color = "orange"
-	ColorAmber     Color = "amber"
-	ColorYellow    Color = "yellow"
-	ColorLime      Color = "lime"
-	ColorGreen     Color = "green"
-	ColorEmerald   Color = "emerald"
-	ColorTeal      Color = "teal"
-	ColorSky       Color = "sky"
-	ColorBlue      Color = "blue"
-	ColorViolet    Color = "violet"
-	ColorPurple    Color = "purple"
-	ColorFuchsia   Color = "fuchsia"
-	ColorPink      Color = "pink"
-	ColorRose      Color = "rose"
+	VariantPrimary Variant = "primary"
+	VariantAccent  Variant = "accent"
+	VariantDanger  Variant = "danger"
+	VariantSuccess Variant = "success"
+	VariantWarning Variant = "warning"
 )
 
 // Props is the full input surface of Button.
 //
-// Visual style is chosen as: Outline > Plain > solid-with-Color (default).
+// Style precedence: Outline > Plain > solid-with-Variant (default).
 // If Href is set, the component renders an <a>; otherwise a <button>.
 // Attrs passes through htmx attributes, data-* attrs, aria-* overrides, etc.
 type Props struct {
-	Color   Color
+	Variant Variant
 	Outline bool
 	Plain   bool
 	Class   string
@@ -89,7 +71,7 @@ func Button(props Props) templ.Component {
 			var templ_7745c5c3_Var3 templ.SafeURL
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(props.Href))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/button/button.templ`, Line: 53, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/button/button.templ`, Line: 35, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -171,7 +153,7 @@ func Button(props Props) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(resolveType(props.Type))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/button/button.templ`, Line: 65, Col: 33}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/button/button.templ`, Line: 47, Col: 33}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {

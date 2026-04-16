@@ -1,6 +1,7 @@
 package main
 
 import (
+	"html"
 	"log/slog"
 	"net/http"
 	"os"
@@ -25,8 +26,10 @@ func main() {
 
 	mux.Handle("GET /{$}", page("Overview", "", templates.Index()))
 	mux.Handle("GET /buttons", page("Button", "buttons", templates.Buttons()))
+	mux.Handle("GET /inputs", page("Input", "inputs", templates.Inputs()))
 
 	mux.Handle("POST /echo", http.HandlerFunc(echoHandler))
+	mux.Handle("POST /inputs/submit", http.HandlerFunc(inputsSubmitHandler))
 
 	slog.Info("flint-ui showcase listening", "addr", addr)
 	if err := http.ListenAndServe(addr, mux); err != nil {
@@ -46,5 +49,19 @@ func page(title, current string, body templ.Component) http.Handler {
 
 func echoHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	_, _ = w.Write([]byte(`<span class="text-emerald-600">pong</span>`))
+	_, _ = w.Write([]byte(`<span class="text-success">pong</span>`))
+}
+
+func inputsSubmitHandler(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		_, _ = w.Write([]byte(`<span class="text-danger">form parse error</span>`))
+		return
+	}
+	name := html.EscapeString(r.FormValue("name"))
+	email := html.EscapeString(r.FormValue("email"))
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	_, _ = w.Write([]byte(
+		`<span class="text-success">received: ` + name + ` &lt;` + email + `&gt;</span>`,
+	))
 }

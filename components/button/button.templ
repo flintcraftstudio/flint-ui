@@ -1,42 +1,24 @@
 package button
 
-// Color selects one of Catalyst's 20 solid button palettes. Zero value
-// (empty string) resolves to ColorDarkZinc, matching Catalyst's default.
-type Color string
+// Variant selects one of the five semantic button styles. The zero value
+// (empty string) resolves to VariantPrimary.
+type Variant string
 
 const (
-	ColorDarkZinc  Color = "dark/zinc"
-	ColorLight     Color = "light"
-	ColorDarkWhite Color = "dark/white"
-	ColorDark      Color = "dark"
-	ColorWhite     Color = "white"
-	ColorZinc      Color = "zinc"
-	ColorIndigo    Color = "indigo"
-	ColorCyan      Color = "cyan"
-	ColorRed       Color = "red"
-	ColorOrange    Color = "orange"
-	ColorAmber     Color = "amber"
-	ColorYellow    Color = "yellow"
-	ColorLime      Color = "lime"
-	ColorGreen     Color = "green"
-	ColorEmerald   Color = "emerald"
-	ColorTeal      Color = "teal"
-	ColorSky       Color = "sky"
-	ColorBlue      Color = "blue"
-	ColorViolet    Color = "violet"
-	ColorPurple    Color = "purple"
-	ColorFuchsia   Color = "fuchsia"
-	ColorPink      Color = "pink"
-	ColorRose      Color = "rose"
+	VariantPrimary Variant = "primary"
+	VariantAccent  Variant = "accent"
+	VariantDanger  Variant = "danger"
+	VariantSuccess Variant = "success"
+	VariantWarning Variant = "warning"
 )
 
 // Props is the full input surface of Button.
 //
-// Visual style is chosen as: Outline > Plain > solid-with-Color (default).
+// Style precedence: Outline > Plain > solid-with-Variant (default).
 // If Href is set, the component renders an <a>; otherwise a <button>.
 // Attrs passes through htmx attributes, data-* attrs, aria-* overrides, etc.
 type Props struct {
-	Color   Color
+	Variant Variant
 	Outline bool
 	Plain   bool
 	Class   string

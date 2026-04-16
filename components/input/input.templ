@@ -1,0 +1,70 @@
+package input
+
+// Props is the input surface shared by <input> inside Input and by
+// the surrounding wrapper span. Class is forwarded to the wrapper;
+// Attrs are spread onto the <input> element so callers can layer on
+// htmx, data-*, aria-*, and form-library attributes without reaching
+// around the component.
+type Props struct {
+	Type         string
+	Name         string
+	Value        string
+	Placeholder  string
+	ID           string
+	Autocomplete string
+
+	Required bool
+	Disabled bool
+	Readonly bool
+	Invalid  bool
+
+	Class string
+	Attrs templ.Attributes
+}
+
+// Input renders a Catalyst-styled text input. Wraps the <input> in a
+// <span data-slot="control"> so Field auto-spacing and focus-ring layering work.
+templ Input(p Props) {
+	<span data-slot="control" class={ wrapperClasses(p) }>
+		<input
+			type={ resolveType(p.Type) }
+			if p.Name != "" {
+				name={ p.Name }
+			}
+			if p.ID != "" {
+				id={ p.ID }
+			}
+			if p.Value != "" {
+				value={ p.Value }
+			}
+			if p.Placeholder != "" {
+				placeholder={ p.Placeholder }
+			}
+			if p.Autocomplete != "" {
+				autocomplete={ p.Autocomplete }
+			}
+			required?={ p.Required }
+			disabled?={ p.Disabled }
+			readonly?={ p.Readonly }
+			data-invalid?={ p.Invalid }
+			aria-invalid?={ p.Invalid }
+			class={ inputClasses(p) }
+			{ p.Attrs... }
+		/>
+	</span>
+}
+
+// GroupProps is the optional Class/Attrs pair for InputGroup.
+type GroupProps struct {
+	Class string
+	Attrs templ.Attributes
+}
+
+// InputGroup positions one or two <svg data-slot="icon"> siblings
+// around a child Input. Place the icon before Input for a leading icon,
+// after it for a trailing icon, or both.
+templ InputGroup(p GroupProps) {
+	<span data-slot="control" class={ joinClasses(inputGroupBase, p.Class) } { p.Attrs... }>
+		{ children... }
+	</span>
+}

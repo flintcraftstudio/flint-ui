@@ -28,14 +28,17 @@ Every interactive component must pass through htmx attributes cleanly. Accept `A
 ### 3. Alpine.js for Local UI State Only
 Use Alpine.js (`x-data`, `x-show`, `x-on:click`) only for UI state that doesn't need server persistence: dropdown open/closed, tab selection, modal visibility, form field focus states. Never use Alpine for business data.
 
-### 4. Preserve Catalyst Visual Design
-Keep Tailwind classes exactly as Catalyst defines them. Do not "improve" the design, adjust spacing, change colors, or modernize patterns. The design system has already been solved — our job is translating it to templ.
+### 4. Preserve Catalyst Visual Design (Structure, Not Colors)
+Keep Catalyst's spacing, sizing, typography, borders, shadows, transitions, and layout patterns exactly as defined. Do not "improve" the design or modernize patterns. **The one exception is color**: replace Catalyst's hardcoded color classes (`bg-zinc-900`, `text-white`, `bg-red-600`) with semantic token classes (`bg-primary`, `text-primary-foreground`, `bg-danger`) per the Theming section below. Structure is fixed; color is themed.
 
 ### 5. Minimal Component API
 Components should have small, focused prop structs. If a component needs 15 props, it's probably two components. Favor composition over configuration.
 
 ### 6. Accessibility Preserved
 Catalyst includes ARIA attributes, keyboard handling, and focus management. Preserve all of it. If Catalyst's original uses `aria-*` attributes or focus trapping, the templ version must too.
+
+### 7. Semantic Color Tokens Only
+Components never use raw Tailwind color classes (`bg-zinc-900`, `text-red-600`, `border-gray-200`). They use semantic tokens (`bg-primary`, `text-danger`, `border-border`) defined in the Theming section. This is what makes per-client theming possible without component changes. Violating this principle defeats the entire theming system.
 
 ## Go Module Structure
 
@@ -185,19 +188,20 @@ func buttonClasses(props Props) string {
 func variantClasses(v Variant) string {
     switch v {
     case VariantSecondary:
-        return "bg-white text-zinc-900 ring-1 ring-inset ring-zinc-300 hover:bg-zinc-50 focus:ring-zinc-500"
+        return "bg-surface text-foreground ring-1 ring-inset ring-border hover:bg-muted focus:ring-ring"
     case VariantDanger:
-        return "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500"
+        return "bg-danger text-danger-foreground hover:bg-danger/90 focus:ring-danger"
     case VariantGhost:
-        return "text-zinc-700 hover:bg-zinc-100 focus:ring-zinc-500"
+        return "text-foreground hover:bg-muted focus:ring-ring"
     default: // Primary
-        return "bg-zinc-900 text-white hover:bg-zinc-800 focus:ring-zinc-500"
+        return "bg-primary text-primary-foreground hover:bg-primary/90 focus:ring-ring"
     }
 }
 ```
 
 **Rules**:
-- Preserve Catalyst's exact class strings. Do not shorten or reorganize.
+- Use semantic color tokens (`bg-primary`, `bg-danger`), never raw Tailwind colors (`bg-zinc-900`, `bg-red-600`). See the Theming section for the full token list.
+- Preserve Catalyst's non-color classes exactly — spacing, sizing, borders, transitions.
 - One function per decision dimension (variant, size, state).
 - Use `switch` with default for sensible fallbacks.
 
@@ -328,7 +332,9 @@ When converting each component, follow this checklist:
 - [ ] Define props struct with typed constants for variants
 - [ ] Write the `.templ` file following the conversion pattern
 - [ ] Extract class logic to a separate `classes.go` file
-- [ ] Preserve Catalyst's Tailwind classes exactly
+- [ ] Preserve Catalyst's non-color Tailwind classes exactly (spacing, sizing, borders, transitions)
+- [ ] Translate Catalyst color classes to semantic tokens (`bg-primary`, not `bg-zinc-900`) per the Theming section
+- [ ] Verify no raw Tailwind color classes remain: `grep -E "(zinc|gray|slate|red|green|blue|yellow)-[0-9]" components/{name}/`
 - [ ] Add `Attrs templ.Attributes` for htmx pass-through
 - [ ] Add Alpine.js only if local UI state is needed
 - [ ] Preserve all ARIA attributes from Catalyst
@@ -342,39 +348,215 @@ When converting each component, follow this checklist:
 ### What NOT to Do
 - **Do not** introduce React patterns (useState, useEffect equivalents)
 - **Do not** add JavaScript beyond Alpine.js for local UI state
-- **Do not** modify Catalyst's visual design or Tailwind classes
+- **Do not** use raw Tailwind color classes (`bg-zinc-900`, `text-red-600`, `border-gray-200`) in components — use semantic tokens (`bg-primary`, `text-danger`, `border-border`)
+- **Do not** modify Catalyst's non-color design decisions (spacing, sizing, borders, transitions stay exactly as Catalyst defines them)
 - **Do not** create "smart" components that fetch their own data
 - **Do not** add dependencies beyond templ, htmx, Alpine.js, Tailwind
 - **Do not** use CSS-in-JS, styled-components, or similar patterns
 - **Do not** build client-side routing or state management
+- **Do not** introduce new semantic tokens without updating the Theming contract (breaking change)
 
 ## Theming and Client Customization
 
-Catalyst uses Tailwind's default gray (zinc) scale as its neutral. For FlintCraft client projects, each client site extends Tailwind's config to add their brand accent color.
+FlintCraft clients have meaningfully different brand palettes (A-Team Gutters: black/silver/red; Lo Mo: earthy outfitter tones; Rockabilly: warm amber with rockabilly red; Western Skies: forest pine with gold). Components must adapt to each client's brand without component code changes. The mechanism is **semantic color tokens backed by CSS variables**.
 
-Example client `tailwind.config.js`:
+### How It Works
 
-```js
-module.exports = {
-    content: [
-        "./templates/**/*.templ",
-        "./node_modules/github.com/flintcraft/flint-ui/**/*.templ",
-    ],
-    theme: {
-        extend: {
-            colors: {
-                accent: {
-                    50:  '#fef3c7',
-                    500: '#d97706', // A-Team Gutters red, or Lo Mo teal, etc.
-                    900: '#78350f',
-                },
-            },
-        },
-    },
+1. **flint-ui components reference semantic tokens** (`bg-primary`, `text-danger-foreground`) instead of raw Tailwind colors (`bg-zinc-900`, `text-white`).
+2. **Each client site defines CSS variables** for those semantic tokens in their base stylesheet, using their brand palette.
+3. **Each client's `tailwind.config.js` maps the semantic tokens to those CSS variables**, so Tailwind's JIT generates the right utility classes.
+4. **Result**: the same `bg-primary` class renders A-Team's red on A-Team's site and Lo Mo's teal on Lo Mo's site, with zero component changes.
+
+### The Semantic Token Contract
+
+Every flint-ui component is built against exactly this set of tokens. Clients must define all of them. Components may not introduce new tokens without updating this contract (a breaking change that requires a version bump).
+
+| Token | Purpose | Typical Use |
+|---|---|---|
+| `background` | Page background | `bg-background` on `<body>` |
+| `foreground` | Default text color | `text-foreground` on body copy |
+| `surface` | Card/panel backgrounds | `bg-surface` on cards, modals, dropdowns |
+| `surface-foreground` | Text on surface | `text-surface-foreground` |
+| `muted` | Subtle backgrounds | `bg-muted` on hover states, table stripes |
+| `muted-foreground` | Secondary text | `text-muted-foreground` for captions, placeholders |
+| `primary` | Primary action color | `bg-primary` on primary buttons |
+| `primary-foreground` | Text on primary | `text-primary-foreground` |
+| `accent` | Brand accent / secondary action | `bg-accent` for client brand highlights |
+| `accent-foreground` | Text on accent | `text-accent-foreground` |
+| `danger` | Destructive actions, errors | `bg-danger` on delete buttons, error alerts |
+| `danger-foreground` | Text on danger | `text-danger-foreground` |
+| `success` | Positive states | `bg-success` on success alerts, badges |
+| `success-foreground` | Text on success | `text-success-foreground` |
+| `warning` | Caution states | `bg-warning` on warning alerts |
+| `warning-foreground` | Text on warning | `text-warning-foreground` |
+| `border` | Default borders | `border-border` on cards, inputs, dividers |
+| `input` | Input backgrounds | `bg-input` on form fields |
+| `ring` | Focus rings | `focus:ring-ring` on focusable elements |
+
+### Client Site Setup
+
+Each client site needs three things to use flint-ui: CSS variable definitions, Tailwind config mapping, and the content globs pointing at flint-ui.
+
+**1. CSS variables — `styles/theme.css`**
+
+Define all tokens as space-separated RGB triplets. The `<alpha-value>` placeholder in Tailwind lets opacity modifiers work (`bg-primary/50`).
+
+```css
+@layer base {
+  :root {
+    /* Neutrals */
+    --color-background: 255 255 255;
+    --color-foreground: 24 24 27;
+    --color-surface: 255 255 255;
+    --color-surface-foreground: 24 24 27;
+    --color-muted: 244 244 245;
+    --color-muted-foreground: 113 113 122;
+
+    /* Brand — CLIENT CUSTOMIZES THESE */
+    --color-primary: 24 24 27;              /* zinc-900 default; override per client */
+    --color-primary-foreground: 255 255 255;
+    --color-accent: 217 119 6;              /* client brand accent */
+    --color-accent-foreground: 255 255 255;
+
+    /* Semantic states */
+    --color-danger: 220 38 38;
+    --color-danger-foreground: 255 255 255;
+    --color-success: 22 163 74;
+    --color-success-foreground: 255 255 255;
+    --color-warning: 234 179 8;
+    --color-warning-foreground: 24 24 27;
+
+    /* Structural */
+    --color-border: 228 228 231;
+    --color-input: 255 255 255;
+    --color-ring: 24 24 27;
+  }
 }
 ```
 
-Components use semantic color names (`bg-zinc-900` for primary buttons) by default. Clients can override via their Tailwind config or by passing custom classes through `Attrs`.
+**2. Tailwind config — `tailwind.config.js`**
+
+Map semantic token names to the CSS variables. The `rgb(var(--...) / <alpha-value>)` pattern is what enables `bg-primary/50` to work.
+
+```js
+module.exports = {
+  content: [
+    "./templates/**/*.templ",
+    "./internal/**/*.templ",
+    // Include flint-ui so Tailwind scans its classes
+    "./vendor/github.com/flintcraft/flint-ui/**/*.templ",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        background: 'rgb(var(--color-background) / <alpha-value>)',
+        foreground: 'rgb(var(--color-foreground) / <alpha-value>)',
+        surface: {
+          DEFAULT: 'rgb(var(--color-surface) / <alpha-value>)',
+          foreground: 'rgb(var(--color-surface-foreground) / <alpha-value>)',
+        },
+        muted: {
+          DEFAULT: 'rgb(var(--color-muted) / <alpha-value>)',
+          foreground: 'rgb(var(--color-muted-foreground) / <alpha-value>)',
+        },
+        primary: {
+          DEFAULT: 'rgb(var(--color-primary) / <alpha-value>)',
+          foreground: 'rgb(var(--color-primary-foreground) / <alpha-value>)',
+        },
+        accent: {
+          DEFAULT: 'rgb(var(--color-accent) / <alpha-value>)',
+          foreground: 'rgb(var(--color-accent-foreground) / <alpha-value>)',
+        },
+        danger: {
+          DEFAULT: 'rgb(var(--color-danger) / <alpha-value>)',
+          foreground: 'rgb(var(--color-danger-foreground) / <alpha-value>)',
+        },
+        success: {
+          DEFAULT: 'rgb(var(--color-success) / <alpha-value>)',
+          foreground: 'rgb(var(--color-success-foreground) / <alpha-value>)',
+        },
+        warning: {
+          DEFAULT: 'rgb(var(--color-warning) / <alpha-value>)',
+          foreground: 'rgb(var(--color-warning-foreground) / <alpha-value>)',
+        },
+        border: 'rgb(var(--color-border) / <alpha-value>)',
+        input: 'rgb(var(--color-input) / <alpha-value>)',
+        ring: 'rgb(var(--color-ring) / <alpha-value>)',
+      },
+    },
+  },
+}
+```
+
+**3. flint-ui ships a default theme**
+
+flint-ui itself includes `styles/flint.css` with a neutral default theme (essentially Catalyst's zinc-based palette). This lets the showcase app render without additional setup, and gives clients a working baseline they can override selectively — a client only overriding `--color-primary` and `--color-accent` still gets sensible defaults for everything else.
+
+### Example: Per-Client Overrides
+
+Once the contract is in place, each client's site only needs to override the tokens that differ from the default. Most clients only change primary, accent, and maybe border.
+
+**A-Team Gutters** (`/sites/ateamgutters/styles/theme.css`):
+```css
+@layer base {
+  :root {
+    --color-primary: 0 0 0;          /* A-Team black */
+    --color-primary-foreground: 255 255 255;
+    --color-accent: 220 38 38;       /* A-Team red */
+    --color-accent-foreground: 255 255 255;
+  }
+}
+```
+
+**Lo Mo Outfitting** (`/sites/lomo/styles/theme.css`):
+```css
+@layer base {
+  :root {
+    --color-primary: 45 55 72;       /* Slate */
+    --color-primary-foreground: 255 255 255;
+    --color-accent: 13 148 136;      /* Teal & Bone accent */
+    --color-accent-foreground: 255 255 255;
+  }
+}
+```
+
+**Western Skies Contracting** (`/sites/westernskies/styles/theme.css`):
+```css
+@layer base {
+  :root {
+    --color-primary: 20 83 45;       /* Forest pine */
+    --color-primary-foreground: 255 255 255;
+    --color-accent: 202 138 4;       /* Gold */
+    --color-accent-foreground: 24 24 27;
+  }
+}
+```
+
+Each site imports its `theme.css` after flint-ui's base stylesheet. Cascade handles the rest.
+
+### Dark Mode (Future)
+
+The CSS variable pattern makes dark mode trivial to add later without touching component code: define a `.dark` selector (or `@media (prefers-color-scheme: dark)`) that overrides the tokens with dark values. Components stay identical. Not required for v0.x but worth designing the tokens with this in mind — e.g., `background` and `surface` separate so dark mode can invert them independently.
+
+### What This Means for Component Authors
+
+When converting a Catalyst component, translate raw color classes to semantic tokens using this mapping:
+
+| Catalyst class | flint-ui class | Notes |
+|---|---|---|
+| `bg-zinc-900`, `bg-gray-900` | `bg-primary` | Primary button, dark elements |
+| `text-white` (on dark bg) | `text-primary-foreground` | When paired with `bg-primary` |
+| `bg-white` | `bg-surface` | Cards, modals, dropdowns |
+| `text-zinc-900` (on light bg) | `text-foreground` | Default body text |
+| `bg-zinc-50`, `bg-gray-100` | `bg-muted` | Hover states, subtle backgrounds |
+| `text-zinc-500`, `text-gray-500` | `text-muted-foreground` | Captions, placeholders |
+| `border-zinc-200`, `border-gray-300` | `border-border` | Dividers, input borders |
+| `bg-red-600` | `bg-danger` | Delete buttons, error states |
+| `bg-green-600` | `bg-success` | Success badges |
+| `bg-yellow-500` | `bg-warning` | Caution states |
+| `ring-zinc-500`, `ring-blue-500` | `ring-ring` | Focus rings |
+
+Non-color classes (`rounded-md`, `px-4`, `py-2`, `text-sm`, `font-medium`, `transition-colors`, etc.) stay exactly as Catalyst defines them. Only colors get the semantic treatment.
 
 ## Versioning Strategy
 

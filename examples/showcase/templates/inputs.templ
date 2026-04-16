@@ -1,0 +1,133 @@
+package templates
+
+import (
+	"github.com/flintcraft/flint-ui/components/button"
+	"github.com/flintcraft/flint-ui/components/fieldset"
+	"github.com/flintcraft/flint-ui/components/input"
+)
+
+templ Inputs() {
+	<div class="space-y-12">
+		@pageHeader("Input", "Single-line text inputs for every HTML type, with invalid/disabled state, optional leading or trailing icon via InputGroup, and Field/Label/Description/ErrorMessage helpers for composing forms with Catalyst's auto-spacing.")
+
+		@section("Basic", "The zero-value Props renders a type=\"text\" input.") {
+			<div class="max-w-sm">
+				@input.Input(input.Props{Placeholder: "jane@example.com"})
+			</div>
+		}
+
+		@section("With label and description", "Wrap the Input in a Field along with a Label and Description — sibling-selector classes on Field auto-space the rows.") {
+			<div class="max-w-sm">
+				@fieldset.Field(fieldset.Props{}) {
+					@fieldset.Label(fieldset.LabelProps{For: "email"}) {
+						Email address
+					}
+					@fieldset.Description(fieldset.Props{}) {
+						We'll only use this to send receipts.
+					}
+					@input.Input(input.Props{ID: "email", Type: "email", Name: "email", Autocomplete: "email"})
+				}
+			</div>
+		}
+
+		@section("Invalid with error", "Invalid flips on the data-invalid selector. Append an ErrorMessage and Field's sibling selector adds the correct spacing.") {
+			<div class="max-w-sm">
+				@fieldset.Field(fieldset.Props{}) {
+					@fieldset.Label(fieldset.LabelProps{For: "phone"}) {
+						Phone
+					}
+					@input.Input(input.Props{ID: "phone", Type: "tel", Value: "555-not-a-number", Invalid: true})
+					@fieldset.ErrorMessage(fieldset.Props{}) {
+						Enter a valid US phone number.
+					}
+				}
+			</div>
+		}
+
+		@section("Disabled", "Native disabled on the input; Field wrapper picks it up via has-data-disabled:.") {
+			<div class="max-w-sm">
+				@fieldset.Field(fieldset.Props{}) {
+					@fieldset.Label(fieldset.LabelProps{For: "company"}) {
+						Company
+					}
+					@input.Input(input.Props{ID: "company", Value: "Acme Co.", Disabled: true})
+				}
+			</div>
+		}
+
+		@section("Types", "type=\"email\", \"number\", \"password\", \"tel\", \"url\", plus date types get Catalyst's webkit datetime-edit overrides applied automatically.") {
+			<div class="grid max-w-xl grid-cols-1 gap-4 sm:grid-cols-2">
+				@input.Input(input.Props{Type: "email", Placeholder: "email"})
+				@input.Input(input.Props{Type: "number", Placeholder: "123"})
+				@input.Input(input.Props{Type: "password", Placeholder: "••••••••"})
+				@input.Input(input.Props{Type: "tel", Placeholder: "(555) 555-0100"})
+				@input.Input(input.Props{Type: "url", Placeholder: "https://example.com"})
+				@input.Input(input.Props{Type: "date"})
+			</div>
+		}
+
+		@section("With icon", "Wrap Input in InputGroup and drop a <svg data-slot=\"icon\"> before or after it.") {
+			<div class="grid max-w-xl grid-cols-1 gap-4 sm:grid-cols-2">
+				@input.InputGroup(input.GroupProps{}) {
+					@iconSearch()
+					@input.Input(input.Props{Placeholder: "Search orders…"})
+				}
+				@input.InputGroup(input.GroupProps{}) {
+					@input.Input(input.Props{Placeholder: "10.00"})
+					@iconCurrency()
+				}
+			</div>
+		}
+
+		@section("Full form with htmx", "Fieldset + Legend + FieldGroup compose a real form. The submit button posts via htmx and the server swaps the result back in.") {
+			<form
+				hx-post="/inputs/submit"
+				hx-target="#inputs-result"
+				hx-swap="innerHTML"
+				class="max-w-lg"
+			>
+				@fieldset.Fieldset(fieldset.Props{}) {
+					@fieldset.Legend(fieldset.Props{}) {
+						Contact details
+					}
+					@fieldset.FieldGroup(fieldset.Props{}) {
+						@fieldset.Field(fieldset.Props{}) {
+							@fieldset.Label(fieldset.LabelProps{For: "full-name"}) {
+								Full name
+							}
+							@input.Input(input.Props{ID: "full-name", Name: "name", Required: true, Autocomplete: "name"})
+						}
+						@fieldset.Field(fieldset.Props{}) {
+							@fieldset.Label(fieldset.LabelProps{For: "work-email"}) {
+								Work email
+							}
+							@fieldset.Description(fieldset.Props{}) {
+								We'll reply here.
+							}
+							@input.Input(input.Props{ID: "work-email", Type: "email", Name: "email", Required: true, Autocomplete: "email"})
+						}
+					}
+				}
+				<div class="mt-8 flex items-center gap-3">
+					@button.Button(button.Props{Type: "submit", Variant: button.VariantPrimary}) {
+						Submit
+					}
+					<div id="inputs-result" class="text-sm text-muted-foreground"></div>
+				</div>
+			</form>
+		}
+	</div>
+}
+
+templ iconSearch() {
+	<svg data-slot="icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+		<path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 3.473 9.78l2.624 2.623a.75.75 0 1 0 1.06-1.06l-2.624-2.624A5.5 5.5 0 0 0 9 3.5ZM5 9a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z" clip-rule="evenodd"></path>
+	</svg>
+}
+
+templ iconCurrency() {
+	<svg data-slot="icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+		<path d="M10.75 10.818v2.614A3.13 3.13 0 0 0 11.888 13c.482-.315.612-.648.612-.875 0-.227-.13-.56-.612-.875a3.13 3.13 0 0 0-1.138-.432ZM8.33 8.62c.053.055.115.11.184.164.208.16.46.284.736.363V6.603a2.45 2.45 0 0 0-.35.13c-.14.065-.27.143-.386.233-.377.292-.514.627-.514.909 0 .184.058.39.16.585.09.182.227.34.42.475Z"></path>
+		<path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-11.45v-.8a.75.75 0 0 0-1.5 0v.8c-.66.158-1.242.423-1.693.776-.612.473-1.033 1.2-1.033 2.032 0 .666.277 1.243.668 1.702.387.455.901.756 1.44.93v2.857c-.168-.05-.301-.136-.399-.22-.084-.04-.129-.067-.142-.074-.004.015-.003.028-.003.028l-.097-.011a.75.75 0 0 0-.148 1.493c.304.03.621.21.876.465.356.357.928.525 1.506.59V13.45c.71-.167 1.378-.446 1.89-.823.61-.447.968-1.04.968-1.677 0-.674-.356-1.253-.918-1.679-.517-.392-1.184-.648-1.94-.788V6.55c.212.054.404.138.571.24.165.1.305.212.41.324a.75.75 0 0 0 1.093-1.026c-.239-.255-.547-.478-.9-.647a5.05 5.05 0 0 0-1.174-.392Z" clip-rule="evenodd"></path>
+	</svg>
+}
