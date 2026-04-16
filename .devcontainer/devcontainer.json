@@ -1,5 +1,5 @@
 {
-  "name": "standard-template",
+  "name": "flint-ui",
   "image": "mcr.microsoft.com/devcontainers/go:1.25-trixie",
   "features": {
     "ghcr.io/devcontainers/features/node:1": {

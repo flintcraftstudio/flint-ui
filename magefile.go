@@ -10,105 +10,102 @@ import (
 	"github.com/magefile/mage/sh"
 )
 
-const tailwindVersion = "v3.4.17"
+const tailwindVersion = "v4.1.11"
 
-// InstallTailwind downloads the Tailwind standalone CLI for the current platform
+// InstallTailwind downloads the Tailwind v4 standalone CLI.
 func InstallTailwind() error {
 	binary := tailwindBinaryPath()
 	if _, err := os.Stat(binary); err == nil {
 		fmt.Println("Tailwind already installed, skipping.")
 		return nil
 	}
-
+	if err := os.MkdirAll(".bin", 0o755); err != nil {
+		return err
+	}
 	url := tailwindDownloadURL()
 	fmt.Printf("Downloading Tailwind %s from %s\n", tailwindVersion, url)
-
 	if err := sh.Run("curl", "-sLo", binary, url); err != nil {
 		return err
 	}
 	return sh.Run("chmod", "+x", binary)
 }
 
-// BuildCSS compiles Tailwind CSS
+// BuildCSS compiles the showcase stylesheet.
 func BuildCSS() error {
 	return sh.Run(
 		tailwindBinaryPath(),
-		"-c", "./tailwind/tailwind.config.js",
-		"-i", "./tailwind/input.css",
-		"-o", "./web/static/css/site.css",
+		"-i", "./styles/flint.css",
+		"-o", "./examples/showcase/static/css/showcase.css",
 		"--minify",
 	)
 }
 
-// GenerateTempl runs templ generate
+// WatchCSS runs Tailwind in watch mode.
+func WatchCSS() error {
+	return sh.Run(
+		tailwindBinaryPath(),
+		"-i", "./styles/flint.css",
+		"-o", "./examples/showcase/static/css/showcase.css",
+		"--watch",
+	)
+}
+
+// GenerateTempl runs templ generate across the repo.
 func GenerateTempl() error {
 	return sh.Run("templ", "generate")
 }
 
-// BuildGo compiles the Go binary
-func BuildGo() error {
+// Showcase builds CSS + templ then runs the reference site.
+func Showcase() error {
 	if err := GenerateTempl(); err != nil {
 		return err
 	}
-	return sh.Run("go", "build", "-o", "./bin/server", "./cmd/server")
+	if err := BuildCSS(); err != nil {
+		return err
+	}
+	return sh.Run("go", "run", "./examples/showcase")
 }
 
-// Build runs a full production build
+// Build produces a static showcase binary.
 func Build() error {
-	if err := BuildCSS(); err != nil {
-		return err
-	}
-	return BuildGo()
-}
-
-// Dev generates templ, builds CSS, and starts the server
-func Dev() error {
 	if err := GenerateTempl(); err != nil {
 		return err
 	}
 	if err := BuildCSS(); err != nil {
 		return err
 	}
-	return sh.Run("go", "run", "./cmd/server/")
+	return sh.Run("go", "build", "-o", "./bin/showcase", "./examples/showcase")
 }
 
-// Start builds everything (CSS + templ + Go) and starts the server
-func Start() error {
-	if err := Build(); err != nil {
+// Test runs the full Go test suite.
+func Test() error {
+	if err := GenerateTempl(); err != nil {
 		return err
 	}
-	return sh.Run("./bin/server")
-}
-
-// Run starts the server
-func Run() error {
-	return sh.Run("./bin/server")
+	return sh.Run("go", "test", "./...")
 }
 
 func tailwindBinaryPath() string {
 	if runtime.GOOS == "windows" {
-		return "./tailwind/tailwindcss.exe"
+		return "./.bin/tailwindcss.exe"
 	}
-	return "./tailwind/tailwindcss"
+	return "./.bin/tailwindcss"
 }
 
 func tailwindDownloadURL() string {
-	os := runtime.GOOS
-	arch := runtime.GOARCH
-
 	osName := map[string]string{
 		"darwin":  "macos",
 		"linux":   "linux",
 		"windows": "windows",
-	}[os]
+	}[runtime.GOOS]
 
 	archName := map[string]string{
 		"amd64": "x64",
 		"arm64": "arm64",
-	}[arch]
+	}[runtime.GOARCH]
 
 	ext := ""
-	if os == "windows" {
+	if runtime.GOOS == "windows" {
 		ext = ".exe"
 	}
 

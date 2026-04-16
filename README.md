@@ -1,197 +1,99 @@
-# standard-template
+# flint-ui
 
-Static brochure websites offered at Firefly's "standard" tier. Built with Go, templ, and Tailwind CSS.
+Server-rendered UI components for FlintCraft Studio client projects. Built with Go + [templ](https://templ.guide) + htmx + Alpine.js + Tailwind CSS v4, converted from the Tailwind [Catalyst UI Kit](https://tailwindcss.com/plus/ui-kit).
 
-## Tech Stack
+> **Status**: early development. See [`flintcraft-ui-conversion-guide.md`](./flintcraft-ui-conversion-guide.md) for the architectural plan and component roadmap.
 
-- **Go** (stdlib `net/http`) — server, routing, handlers
-- **templ** — type-safe HTML templating
-- **Tailwind CSS** (standalone CLI) — utility-first styling
-- **HTMX** — form interactions without page reloads
-- **Alpine.js** — lightweight client-side interactivity
-- **Mage** — build task runner
-- **Postmark** — transactional email for contact forms
-- **Cloudflare Turnstile** — bot protection
+## Install
 
-## Getting Started
-
-```bash
-mage InstallTailwind   # download Tailwind CLI (once)
-mage Start             # build CSS + templ + Go, then start server
+```sh
+go get github.com/flintcraft/flint-ui@latest
 ```
 
-For watch mode (two terminals):
+Import components one family at a time:
 
-```bash
-mage Dev               # terminal 1: watch CSS
-go run ./cmd/server    # terminal 2: run server on :8080
+```go
+import "github.com/flintcraft/flint-ui/components/button"
 ```
 
-Production build:
+In your `templ` files:
 
-```bash
-mage Build             # CSS + templ generate + go build
-./bin/server
+```go
+@button.Button(button.Props{Color: button.ColorIndigo}) {
+    Save changes
+}
 ```
 
-Docker:
+## Tailwind
 
-```bash
-docker compose up
+flint-ui preserves Catalyst's Tailwind v4 class strings verbatim. Client projects must:
+
+1. Use Tailwind CSS v4.
+2. Scan flint-ui templates as content sources, e.g. in your CSS entry:
+   ```css
+   @source "../node_modules/github.com/flintcraft/flint-ui/components/**/*.templ";
+   ```
+3. Include the `@custom-variant` declarations that alias Headless UI's `data-hover`, `data-focus`, `data-active`, `data-disabled` state attributes to native pseudo-classes. Copy the block from [`styles/flint.css`](./styles/flint.css).
+
+## Running the reference site
+
+The `examples/showcase/` app is a Go binary that renders every component in every variant — the flint-ui equivalent of [catalyst-demo.tailwindui.com](https://catalyst-demo.tailwindui.com/).
+
+```sh
+mage InstallTailwind    # one-time: download the Tailwind v4 standalone CLI
+mage Showcase           # templ generate + CSS build + run showcase on :8080
 ```
 
-## Project Structure
+For watch mode during development:
 
-```
-cmd/server/main.go              # entry point, routing, config
-internal/
-  config/config.go              # env var loading
-  handler/                      # HTTP handlers (home, contact)
-  middleware/                   # request logging
-  mail/postmark.go              # Postmark API client
-  view/                         # templ templates
-    layout.templ                # base HTML wrapper
-    home.templ                  # homepage
-    contact.templ               # contact form
-    nav.templ, footer.templ     # shared partials
-    shared.go                   # constants (SiteName, tracking IDs)
-tailwind/
-  tailwind.config.js            # color palette, fonts, content paths
-  input.css                     # font imports, Tailwind directives
-web/static/
-  css/site.css                  # compiled Tailwind output
-  js/                           # HTMX, Alpine.js, custom scripts
+```sh
+mage WatchCSS           # terminal 1
+go run ./examples/showcase   # terminal 2
 ```
 
-## Environment Variables
-
-All optional with graceful degradation. See `.env.example`.
-
-| Variable | Purpose |
-|---|---|
-| `PORT` | Server port (default: 8080) |
-| `POSTMARK_SERVER_TOKEN` | Postmark API key for contact form emails |
-| `POSTMARK_FROM` | Sender email address |
-| `POSTMARK_TO` | Recipient email address |
-| `GTAG_ID` | Google Analytics tag |
-| `PIXEL_ID` | Facebook Pixel ID |
-| `TURNSTILE_SITE_KEY` | Cloudflare Turnstile site key |
-| `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile secret key |
-
-## Deployment
-
-This template deploys via **GitHub Actions** to a VPS running Docker + Caddy.
-
-### Flow
-
-1. Push to `main` triggers `.github/workflows/deploy.yml`
-2. Docker image is built and pushed to `ghcr.io/flintcraftstudio/{project}:latest`
-3. SSH into VPS triggers `docker compose pull && docker compose up -d` in `/opt/{project}/`
-4. Caddy reverse-proxies `{domain}` to the container's allocated port
-
-### VPS Provisioning
-
-Run `provision.sh` on the VPS to set up a new project:
-
-```bash
-sudo ./provision.sh <project> <domain>
-```
-
-This creates:
-- `/opt/{project}/docker-compose.yml` — pulls from GHCR, maps an allocated port to `8080`
-- `/opt/{project}/.env` — app secrets (Postmark, Turnstile, tracking pixels, etc.)
-- `/etc/caddy/sites/{project}.caddy` — HTTPS reverse proxy with security headers
-- SSH deploy key restricted to `docker compose pull && up -d`
-
-### GitHub Secrets
-
-Set these in **Settings > Secrets and variables > Actions**:
-
-| Secret | Value |
-|---|---|
-| `VPS_HOST` | VPS IP or hostname |
-| `VPS_USER` | `deploy` |
-| `VPS_SSH_KEY` | Private key from `provision.sh` output |
-
-The `GITHUB_TOKEN` (automatic) handles GHCR authentication.
-
-### Container Contract
-
-- Image listens on port **8080**
-- Config via environment variables (see `.env` on VPS)
-- Service name is `app` in both local and production `docker-compose.yml`
-
----
-
-## Claude Code Skills
-
-This repo includes Claude Code skills invoked with `/skill-name` in conversation. Each skill is a structured prompt that guides Claude through a specific workflow.
-
-### `/two-variation-site`
-
-Build a brochure website presenting two distinct brand/design directions for a client to compare side-by-side.
-
-**When to use:** Starting a new client project where you want to present two visual directions (e.g., "warm" vs "bold") from a single codebase.
-
-**Inputs required before code is written:**
-
-1. **Business details** — name, address, phone, email, hours, social links, tagline
-2. **Brand guide for each variation** — color palette (hex values + roles), typography stack (families, sizes, weights for headline/body/accent/UI), voice/tone, layout personality
-3. **Page copy** — approved text for each section of each page
-4. **Images** — hero images, logos, team photos (or placeholders to use)
-5. **Variation names/slugs** — evocative short names for each direction (e.g., "warm" / "bold", "classic" / "modern")
-
-**What it produces:**
-
-- Split-panel landing page at `/` comparing both directions
-- Complete variation A site at `/[slug-a]/`
-- Complete variation B site at `/[slug-b]/`
-- Namespaced Tailwind color palettes (`va-*`, `vb-*`)
-- Separate templ templates per variation with shared business data
-- Scoped navigation (links stay within each variation's URL space)
-
-**Example:**
+## Layout
 
 ```
-/two-variation-site Henderson Bakery
+components/
+  button/               one package per component family
+    button.templ
+    classes.go
+  shared/               shared prop types (Size, etc.)
+styles/
+  flint.css             Tailwind v4 entry: @theme + @custom-variant + @source
+examples/
+  showcase/             reference site, similar to catalyst-demo
+    main.go
+    templates/          showcase pages, one per component
+    static/
+docs/
+  components/           per-component markdown reference
 ```
 
-Claude will ask for any missing inputs before writing code, present a structured summary for confirmation, then build the full site.
+## Principles
 
----
+Non-negotiable:
 
-### `/qc`
+- **Server-rendered first.** No React. No client-side state machinery. Components emit complete HTML.
+- **htmx-compatible by default.** Every component accepts `Attrs templ.Attributes` for `hx-*` pass-through.
+- **Alpine.js only for local UI state.** Dropdown open/closed, modal visibility, tab selection — never business data.
+- **Catalyst's classes preserved verbatim.** Upstream updates can be diff-applied without losing custom edits.
+- **Accessibility preserved.** ARIA attributes, focus management, and keyboard behavior track the Catalyst source.
 
-Run a pre-deploy quality control check against the standard-tier site checklist.
+See [`flintcraft-ui-conversion-guide.md`](./flintcraft-ui-conversion-guide.md) for the full rules.
 
-**When to use:** The site is nearing completion and needs a final review before deployment. This is a read-only audit — it reports issues but does not fix them.
+## Component roadmap
 
-**Inputs required:**
+- [x] Button
+- [ ] Input
+- [ ] Select
+- [ ] Textarea
+- [ ] Checkbox
+- [ ] Badge
+- [ ] Table, Card, Alert, Heading
+- [ ] Modal, Dropdown, Tabs, Toast
+- [ ] DatePicker, Combobox, Pagination, Breadcrumbs
 
-1. **Client name** — used in the report header
+## License
 
-**What it checks (7 sections):**
-
-| Section | What it verifies |
-|---|---|
-| Project Structure | Required files exist (`main.go`, handlers, templates, Dockerfile, etc.) |
-| Build Verification | `mage build` succeeds, `go vet` and `golangci-lint` pass |
-| Functionality | Routing, contact form validation, Postmark integration, config safety |
-| SEO | Unique titles, meta descriptions, heading hierarchy, Open Graph tags, robots.txt, sitemap |
-| Accessibility | Semantic HTML, image alt text, form labels, keyboard navigation, skip link |
-| Security | Security headers, CSRF protection, no hardcoded secrets, no localhost references |
-| Deployment Readiness | `.env.example` complete, Docker config clean, all placeholder copy replaced |
-
-**Output:** A structured report with tiered findings:
-
-- **FAIL** — must fix before deploy
-- **WARN** — should fix, does not block deploy
-- **PASS** — requirement met
-
-Final status: `READY`, `READY WITH WARNINGS`, or `NOT READY`.
-
-**Example:**
-
-```
-/qc Henderson Bakery
-```
+TBD.
