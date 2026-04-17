@@ -78,7 +78,12 @@ type Props struct {
 // filterable options panel. Children should be a flat list of Option
 // elements; nesting breaks the data-label filter lookup.
 templ Combobox(p Props) {
-	<div data-slot="control" x-data={ alpineData() } class={ wrapperClasses(p) }>
+	<div
+		data-slot="control"
+		x-data={ alpineData() }
+		x-on:click.outside="close()"
+		class={ wrapperClasses(p) }
+	>
 		<input
 			type="text"
 			role="combobox"
@@ -123,7 +128,6 @@ templ Combobox(p Props) {
 			x-show="open"
 			x-cloak
 			x-ref="listbox"
-			x-on:click.outside="close()"
 			x-transition:enter="transition ease-out duration-100"
 			x-transition:enter-start="opacity-0 scale-95"
 			x-transition:enter-end="opacity-100 scale-100"
