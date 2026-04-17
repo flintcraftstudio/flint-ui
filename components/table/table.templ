@@ -1,0 +1,115 @@
+// Package table provides Catalyst-style tables. Converted from
+// catalyst-ui-kit/typescript/table.tsx.
+//
+// Catalyst uses React context to propagate the four layout toggles
+// (bleed, dense, grid, striped) from <Table> down to every <TableHeader>
+// and <TableCell>. templ has no analog, so flint-ui takes the boring but
+// honest path: each sub-component accepts the flags it cares about.
+// Callers typically set the flags once in a per-project render helper,
+// so the duplication collapses at the use site.
+//
+// The one Catalyst feature intentionally dropped: href-on-row (absolute
+// <Link> overlay inside the first cell). It's tightly coupled to
+// Catalyst's <Link> + browser focus management, and for flint-ui's
+// server-rendered, htmx-first world it's cleaner to put htmx attrs
+// directly on the <tr> via RowProps.Attrs — `hx-get="/jobs/123"`,
+// `hx-target="#detail"`, `hx-push-url="true"` — which works without JS
+// focus hacks.
+package table
+
+// Props controls the outer <table> wrapper.
+type Props struct {
+	Bleed bool // when true, drops the gutter padding on the outer wrapper
+	Class string
+	Attrs templ.Attributes
+}
+
+// HeadProps, BodyProps are trivial passthroughs kept as structs for forward
+// compatibility (so adding fields later isn't a breaking change).
+type HeadProps struct {
+	Class string
+	Attrs templ.Attributes
+}
+
+type BodyProps struct {
+	Class string
+	Attrs templ.Attributes
+}
+
+// RowProps controls a single <tr>.
+//
+// Striped adds zebra-striping on even rows. It must match the parent Table's
+// striped intent — the Cell border-suppression and Row even:bg styles need
+// to agree. A caller that flips striped on only some rows gets the expected
+// bugs; don't do that.
+type RowProps struct {
+	Striped bool
+	Class   string
+	Attrs   templ.Attributes
+}
+
+// HeaderProps controls a single <th>.
+type HeaderProps struct {
+	Bleed bool
+	Grid  bool
+	Class string
+	Attrs templ.Attributes
+}
+
+// CellProps controls a single <td>.
+//
+// Striped, when true, suppresses the per-cell bottom border (striping
+// supplies the row separation). Dense shrinks vertical padding.
+type CellProps struct {
+	Bleed   bool
+	Dense   bool
+	Grid    bool
+	Striped bool
+	Class   string
+	Attrs   templ.Attributes
+}
+
+// Table is the outer wrapper. Scrolls horizontally on narrow viewports;
+// whitespace-nowrap keeps cells on one line. Children should be <thead>
+// and <tbody> via Head/Body (or raw — flint-ui doesn't police that).
+templ Table(p Props) {
+	<div class="flow-root">
+		<div class={ outerClasses(p) } { p.Attrs... }>
+			<div class={ innerClasses(p) }>
+				<table class="min-w-full text-left text-sm/6 text-foreground">
+					{ children... }
+				</table>
+			</div>
+		</div>
+	</div>
+}
+
+templ Head(p HeadProps) {
+	<thead class={ headClasses(p) } { p.Attrs... }>
+		{ children... }
+	</thead>
+}
+
+templ Body(p BodyProps) {
+	<tbody class={ p.Class } { p.Attrs... }>
+		{ children... }
+	</tbody>
+}
+
+templ Row(p RowProps) {
+	<tr class={ rowClasses(p) } { p.Attrs... }>
+		{ children... }
+	</tr>
+}
+
+templ Header(p HeaderProps) {
+	<th class={ headerClasses(p) } { p.Attrs... }>
+		{ children... }
+	</th>
+}
+
+templ Cell(p CellProps) {
+	<td class={ cellClasses(p) } { p.Attrs... }>
+		{ children... }
+	</td>
+}

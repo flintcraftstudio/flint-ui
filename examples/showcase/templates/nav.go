@@ -24,4 +24,11 @@ var NavSections = []struct {
 			{Slug: "badges", Title: "Badge", Phase: "1"},
 		},
 	},
+	{
+		Heading: "Layout",
+		Items: []NavItem{
+			{Slug: "tables", Title: "Table", Phase: "2"},
+			{Slug: "headings", Title: "Heading", Phase: "2"},
+		},
+	},
 }

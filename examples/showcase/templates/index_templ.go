@@ -37,7 +37,7 @@ func Index() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = card("Phase 2 — Layout", "Table, Card, Alert, Heading.").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = card("Phase 2 — Layout", "Table, Heading. Card deferred; dialog-style Alert folded into phase 3 near Modal.").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

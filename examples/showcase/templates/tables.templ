@@ -1,0 +1,143 @@
+package templates
+
+import "github.com/flintcraft/flint-ui/components/table"
+
+templ Tables() {
+	<div class="space-y-12">
+		@pageHeader("Table", "Dashboard tables for job queues, invoice lists, and scheduling grids. Catalyst's React context is replaced with explicit per-element Props — callers typically factor the flags into a small render helper so the duplication doesn't creep into row loops.")
+
+		@section("Default", "Baseline table: header row, body rows, bottom borders between cells.") {
+			@basicTable()
+		}
+
+		@section("Striped rows", "Zebra stripes (even:bg-muted/60) replace per-cell bottom borders. RowProps.Striped and CellProps.Striped must agree — the showcase wires this with a single `striped := true` at the top of the template.") {
+			@stripedTable()
+		}
+
+		@section("Dense + grid", "Dense shrinks row padding from py-4 to py-2.5. Grid adds vertical dividers between cells — helpful when columns carry unrelated numbers.") {
+			@denseGridTable()
+		}
+
+		@section("With htmx row navigation", "Catalyst's href-on-row feature is intentionally omitted. Use hx-get + hx-target on the <tr> via RowProps.Attrs — server-rendered, no focus hacks, no Alpine.") {
+			@htmxRowTable()
+		}
+	</div>
+}
+
+templ basicTable() {
+	@table.Table(table.Props{}) {
+		@table.Head(table.HeadProps{}) {
+			<tr>
+				@table.Header(table.HeaderProps{}) { Job }
+				@table.Header(table.HeaderProps{}) { Client }
+				@table.Header(table.HeaderProps{}) { Scheduled }
+				@table.Header(table.HeaderProps{}) { Crew }
+			</tr>
+		}
+		@table.Body(table.BodyProps{}) {
+			@basicRow("Gutter install", "218 Pine St", "Apr 18", "North crew")
+			@basicRow("Roof inspection", "Henderson Ranch", "Apr 19", "Solo — Marcus")
+			@basicRow("Deck staining", "14 Birch Ct", "Apr 22", "South crew")
+			@basicRow("Fence repair", "Glacier Peak HOA", "Apr 24", "North crew")
+		}
+	}
+}
+
+templ basicRow(job, client, date, crew string) {
+	@table.Row(table.RowProps{}) {
+		@table.Cell(table.CellProps{}) { { job } }
+		@table.Cell(table.CellProps{}) { { client } }
+		@table.Cell(table.CellProps{}) { { date } }
+		@table.Cell(table.CellProps{}) { { crew } }
+	}
+}
+
+templ stripedTable() {
+	@table.Table(table.Props{}) {
+		@table.Head(table.HeadProps{}) {
+			<tr>
+				@table.Header(table.HeaderProps{}) { Invoice }
+				@table.Header(table.HeaderProps{}) { Client }
+				@table.Header(table.HeaderProps{}) { Amount }
+				@table.Header(table.HeaderProps{}) { Status }
+			</tr>
+		}
+		@table.Body(table.BodyProps{}) {
+			@stripedRow("#2031", "Copper Creek 12", "$4,200", "Paid")
+			@stripedRow("#2032", "Henderson Ranch", "$1,875", "Open")
+			@stripedRow("#2033", "218 Pine St", "$950", "Paid")
+			@stripedRow("#2034", "Glacier Peak HOA", "$6,400", "Overdue")
+			@stripedRow("#2035", "14 Birch Ct", "$1,120", "Draft")
+		}
+	}
+}
+
+templ stripedRow(invoice, client, amount, status string) {
+	@table.Row(table.RowProps{Striped: true}) {
+		@table.Cell(table.CellProps{Striped: true}) { { invoice } }
+		@table.Cell(table.CellProps{Striped: true}) { { client } }
+		@table.Cell(table.CellProps{Striped: true}) { { amount } }
+		@table.Cell(table.CellProps{Striped: true}) { { status } }
+	}
+}
+
+templ denseGridTable() {
+	@table.Table(table.Props{}) {
+		@table.Head(table.HeadProps{}) {
+			<tr>
+				@table.Header(table.HeaderProps{Grid: true}) { Crew }
+				@table.Header(table.HeaderProps{Grid: true}) { Jobs this week }
+				@table.Header(table.HeaderProps{Grid: true}) { Hours logged }
+				@table.Header(table.HeaderProps{Grid: true}) { Utilization }
+			</tr>
+		}
+		@table.Body(table.BodyProps{}) {
+			@denseRow("North crew", "12", "148 h", "92%")
+			@denseRow("South crew", "9", "124 h", "78%")
+			@denseRow("Roofing specialists", "4", "62 h", "64%")
+			@denseRow("Marcus (solo)", "6", "41 h", "85%")
+		}
+	}
+}
+
+templ denseRow(crew, jobs, hours, util string) {
+	@table.Row(table.RowProps{}) {
+		@table.Cell(table.CellProps{Dense: true, Grid: true}) { { crew } }
+		@table.Cell(table.CellProps{Dense: true, Grid: true}) { { jobs } }
+		@table.Cell(table.CellProps{Dense: true, Grid: true}) { { hours } }
+		@table.Cell(table.CellProps{Dense: true, Grid: true}) { { util } }
+	}
+}
+
+templ htmxRowTable() {
+	@table.Table(table.Props{}) {
+		@table.Head(table.HeadProps{}) {
+			<tr>
+				@table.Header(table.HeaderProps{}) { Lead }
+				@table.Header(table.HeaderProps{}) { Source }
+				@table.Header(table.HeaderProps{}) { Captured }
+			</tr>
+		}
+		@table.Body(table.BodyProps{}) {
+			@htmxRow("Ava Wilder", "Google Ads", "Apr 15")
+			@htmxRow("Derek Ostrom", "Referral — Henderson", "Apr 15")
+			@htmxRow("Samir Patel", "Organic search", "Apr 14")
+		}
+	}
+	<div id="lead-detail" class="mt-4 text-sm text-muted-foreground">Click a row — the server echoes the lead name here.</div>
+}
+
+templ htmxRow(name, source, captured string) {
+	@table.Row(table.RowProps{
+		Class: "cursor-pointer hover:bg-muted/40",
+		Attrs: templ.Attributes{
+			"hx-get":    "/tables/detail?name=" + name,
+			"hx-target": "#lead-detail",
+			"hx-swap":   "innerHTML",
+		},
+	}) {
+		@table.Cell(table.CellProps{}) { { name } }
+		@table.Cell(table.CellProps{}) { { source } }
+		@table.Cell(table.CellProps{}) { { captured } }
+	}
+}

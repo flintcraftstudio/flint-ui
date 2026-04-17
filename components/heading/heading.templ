@@ -1,0 +1,58 @@
+// Package heading provides page and section headings. Converted from
+// catalyst-ui-kit/typescript/heading.tsx.
+//
+// Two components:
+//   - Heading   — page-level title (h1 default, renders slightly larger)
+//   - Subheading — section title (h2 default, slightly smaller)
+//
+// Both accept a Level (1–6) so the HTML element matches the document
+// outline even when the visual size is fixed. This is the standard
+// "semantic vs. visual" split — a Subheading as an <h2> inside a page
+// with a Heading <h1> keeps screen-readers happy.
+package heading
+
+// Level picks which HTML element to render (h1 .. h6). Zero value defers
+// to the per-component default: Heading -> 1, Subheading -> 2.
+type Level int
+
+// Props is shared between Heading and Subheading.
+type Props struct {
+	Level Level
+	Class string
+	Attrs templ.Attributes
+}
+
+// Heading renders a page-level title. Defaults to <h1>.
+templ Heading(p Props) {
+	@element(resolveLevel(p.Level, 1), headingClasses(p)) {
+		{ children... }
+	}
+}
+
+// Subheading renders a section title. Defaults to <h2>.
+templ Subheading(p Props) {
+	@element(resolveLevel(p.Level, 2), subheadingClasses(p)) {
+		{ children... }
+	}
+}
+
+// element switches on the level and renders the matching HTML tag. templ
+// doesn't support dynamic tag names, so this is the escape hatch.
+templ element(level int, class string) {
+	switch level {
+		case 1:
+			<h1 class={ class }>{ children... }</h1>
+		case 2:
+			<h2 class={ class }>{ children... }</h2>
+		case 3:
+			<h3 class={ class }>{ children... }</h3>
+		case 4:
+			<h4 class={ class }>{ children... }</h4>
+		case 5:
+			<h5 class={ class }>{ children... }</h5>
+		case 6:
+			<h6 class={ class }>{ children... }</h6>
+		default:
+			<h1 class={ class }>{ children... }</h1>
+	}
+}

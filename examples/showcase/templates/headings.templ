@@ -1,0 +1,44 @@
+package templates
+
+import "github.com/flintcraft/flint-ui/components/heading"
+
+templ Headings() {
+	<div class="space-y-12">
+		@pageHeader("Heading", "Page and section titles with the HTML level decoupled from the visual size. Set Level to match the document outline; the size stays fixed per component.")
+
+		@section("Heading (page title)", "Default renders an <h1>. Pass Level to change the tag without changing the look — useful when a Heading lives inside a modal or card that already has an outer h1.") {
+			<div class="space-y-3">
+				@heading.Heading(heading.Props{}) { Dashboard }
+				@heading.Heading(heading.Props{Level: 2}) { Still visually a Heading, but rendered as h2 }
+			</div>
+		}
+
+		@section("Subheading (section title)", "Default renders an <h2>. Same pattern as Heading — Level controls the tag for a11y, class controls the look.") {
+			<div class="space-y-3">
+				@heading.Subheading(heading.Props{}) { Outstanding invoices }
+				@heading.Subheading(heading.Props{Level: 3}) { Nested section rendered as h3 }
+			</div>
+		}
+
+		@section("Typical page composition", "A page title followed by grouped subheadings — the shape nearly every dashboard view takes.") {
+			<div class="space-y-6">
+				@heading.Heading(heading.Props{}) { Scheduling }
+				<div class="space-y-2">
+					@heading.Subheading(heading.Props{}) { This week }
+					<p class="text-sm text-muted-foreground">12 jobs scheduled across two crews.</p>
+				</div>
+				<div class="space-y-2">
+					@heading.Subheading(heading.Props{}) { Next week }
+					<p class="text-sm text-muted-foreground">7 jobs scheduled, 3 awaiting client confirmation.</p>
+				</div>
+			</div>
+		}
+
+		@section("With trailing actions", "Common dashboard pattern: heading on the left, action button or badge on the right. Wrap with flex; Heading stays clean.") {
+			<div class="flex items-center justify-between">
+				@heading.Subheading(heading.Props{}) { Overdue follow-ups }
+				<span class="rounded-md bg-danger/15 px-2 py-0.5 text-xs font-medium text-danger">4</span>
+			</div>
+		}
+	</div>
+}

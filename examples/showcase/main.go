@@ -32,6 +32,10 @@ func main() {
 	mux.Handle("GET /textareas", page("Textarea", "textareas", templates.Textareas()))
 	mux.Handle("GET /checkboxes", page("Checkbox", "checkboxes", templates.Checkboxes()))
 	mux.Handle("GET /badges", page("Badge", "badges", templates.Badges()))
+	mux.Handle("GET /tables", page("Table", "tables", templates.Tables()))
+	mux.Handle("GET /headings", page("Heading", "headings", templates.Headings()))
+
+	mux.Handle("GET /tables/detail", http.HandlerFunc(tablesDetailHandler))
 
 	mux.Handle("POST /echo", http.HandlerFunc(echoHandler))
 	mux.Handle("POST /inputs/submit", http.HandlerFunc(inputsSubmitHandler))
@@ -100,6 +104,18 @@ func textareasSubmitHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	_, _ = w.Write([]byte(
 		`<span class="text-success">sent: ` + subject + ` (` + strconv.Itoa(chars) + ` chars)</span>`,
+	))
+}
+
+func tablesDetailHandler(w http.ResponseWriter, r *http.Request) {
+	name := html.EscapeString(r.URL.Query().Get("name"))
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if name == "" {
+		_, _ = w.Write([]byte(`<span class="text-muted-foreground">no lead selected</span>`))
+		return
+	}
+	_, _ = w.Write([]byte(
+		`<span class="text-success">loaded detail for: ` + name + `</span>`,
 	))
 }
 
