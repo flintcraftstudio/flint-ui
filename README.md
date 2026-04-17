@@ -104,7 +104,7 @@ See [`flintcraft-ui-conversion-guide.md`](./flintcraft-ui-conversion-guide.md) f
 
 - [x] Button
 - [x] Input (+ InputGroup, Fieldset, FieldGroup, Field, Label, Description, ErrorMessage)
-- [ ] Select
+- [x] Select (package `selectbox` — `select` is a Go reserved keyword)
 - [ ] Textarea
 - [ ] Checkbox
 - [ ] Badge

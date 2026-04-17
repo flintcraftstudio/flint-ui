@@ -27,9 +27,11 @@ func main() {
 	mux.Handle("GET /{$}", page("Overview", "", templates.Index()))
 	mux.Handle("GET /buttons", page("Button", "buttons", templates.Buttons()))
 	mux.Handle("GET /inputs", page("Input", "inputs", templates.Inputs()))
+	mux.Handle("GET /selects", page("Select", "selects", templates.Selects()))
 
 	mux.Handle("POST /echo", http.HandlerFunc(echoHandler))
 	mux.Handle("POST /inputs/submit", http.HandlerFunc(inputsSubmitHandler))
+	mux.Handle("POST /selects/submit", http.HandlerFunc(selectsSubmitHandler))
 
 	slog.Info("flint-ui showcase listening", "addr", addr)
 	if err := http.ListenAndServe(addr, mux); err != nil {
@@ -63,5 +65,19 @@ func inputsSubmitHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	_, _ = w.Write([]byte(
 		`<span class="text-success">received: ` + name + ` &lt;` + email + `&gt;</span>`,
+	))
+}
+
+func selectsSubmitHandler(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		_, _ = w.Write([]byte(`<span class="text-danger">form parse error</span>`))
+		return
+	}
+	region := html.EscapeString(r.FormValue("region"))
+	currency := html.EscapeString(r.FormValue("currency"))
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	_, _ = w.Write([]byte(
+		`<span class="text-success">saved: ` + region + ` / ` + currency + `</span>`,
 	))
 }

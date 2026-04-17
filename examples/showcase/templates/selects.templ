@@ -1,0 +1,156 @@
+package templates
+
+import (
+	"github.com/flintcraft/flint-ui/components/button"
+	"github.com/flintcraft/flint-ui/components/fieldset"
+	"github.com/flintcraft/flint-ui/components/selectbox"
+)
+
+templ Selects() {
+	<div class="space-y-12">
+		@pageHeader("Select", "Native <select> styled to match Input: same wrapper, border, focus ring, and data-invalid / data-disabled behavior. Multi-select drops the chevron and evens out the padding. Options are passed as children so callers retain full control over option tree, selection, and optgroup structure.")
+
+		@section("Basic", "Single-select with a chevron in the reserved right-hand gutter. Options are plain <option> children.") {
+			<div class="max-w-sm">
+				@selectbox.Select(selectbox.Props{}) {
+					<option value="">Pick a region…</option>
+					<option value="us">United States</option>
+					<option value="ca">Canada</option>
+					<option value="mx">Mexico</option>
+				}
+			</div>
+		}
+
+		@section("With label and description", "Wrap in a Field for Catalyst's auto-spacing between Label, Description, control, and (if needed) ErrorMessage.") {
+			<div class="max-w-sm">
+				@fieldset.Field(fieldset.Props{}) {
+					@fieldset.Label(fieldset.LabelProps{For: "project"}) {
+						Project
+					}
+					@fieldset.Description(fieldset.Props{}) {
+						Pick the project to file this under.
+					}
+					@selectbox.Select(selectbox.Props{ID: "project", Name: "project"}) {
+						<option value="">Choose…</option>
+						<option value="ateam">A-Team Gutters</option>
+						<option value="lomo">Lo Mo Outfitting</option>
+						<option value="western">Western Skies Contracting</option>
+					}
+				}
+			</div>
+		}
+
+		@section("Invalid with error", "Invalid flips on the data-invalid selector — border turns danger, ErrorMessage slots in with the right spacing.") {
+			<div class="max-w-sm">
+				@fieldset.Field(fieldset.Props{}) {
+					@fieldset.Label(fieldset.LabelProps{For: "priority"}) {
+						Priority
+					}
+					@selectbox.Select(selectbox.Props{ID: "priority", Invalid: true}) {
+						<option value="">Select priority…</option>
+						<option value="low">Low</option>
+						<option value="med">Medium</option>
+						<option value="high">High</option>
+					}
+					@fieldset.ErrorMessage(fieldset.Props{}) {
+						Priority is required.
+					}
+				}
+			</div>
+		}
+
+		@section("Disabled", "Native disabled on the select; the wrapper picks it up via has-data-disabled: and fades to opacity-50.") {
+			<div class="max-w-sm">
+				@fieldset.Field(fieldset.Props{}) {
+					@fieldset.Label(fieldset.LabelProps{For: "org"}) {
+						Organization
+					}
+					@selectbox.Select(selectbox.Props{ID: "org", Disabled: true}) {
+						<option value="flintcraft" selected>FlintCraft Studio</option>
+					}
+				}
+			</div>
+		}
+
+		@section("With optgroups", "Native <optgroup> elements render with Catalyst's [&_optgroup]:font-semibold selector.") {
+			<div class="max-w-sm">
+				@selectbox.Select(selectbox.Props{}) {
+					<option value="">Pick a service…</option>
+					<optgroup label="Cleaning">
+						<option value="standard">Standard clean</option>
+						<option value="deep">Deep clean</option>
+						<option value="move">Move-out clean</option>
+					</optgroup>
+					<optgroup label="Trades">
+						<option value="gutter">Gutter install</option>
+						<option value="paint">Exterior paint</option>
+					</optgroup>
+				}
+			</div>
+		}
+
+		@section("Multiple", "Multi-select drops the chevron, evens out the horizontal padding, and renders the native list box. Size controls how many rows are visible.") {
+			<div class="max-w-sm">
+				@fieldset.Field(fieldset.Props{}) {
+					@fieldset.Label(fieldset.LabelProps{For: "tags"}) {
+						Tags
+					}
+					@fieldset.Description(fieldset.Props{}) {
+						Hold ⌘/Ctrl to select multiple.
+					}
+					@selectbox.Select(selectbox.Props{ID: "tags", Name: "tags", Multiple: true, Size: 5}) {
+						<option value="new" selected>New lead</option>
+						<option value="returning">Returning customer</option>
+						<option value="vip" selected>VIP</option>
+						<option value="referral">Referral</option>
+						<option value="cold">Cold outreach</option>
+					}
+				}
+			</div>
+		}
+
+		@section("In an htmx form", "Fieldset + FieldGroup + a submit button posting via htmx. The selected region comes back in the swap target.") {
+			<form
+				hx-post="/selects/submit"
+				hx-target="#selects-result"
+				hx-swap="innerHTML"
+				class="max-w-lg"
+			>
+				@fieldset.Fieldset(fieldset.Props{}) {
+					@fieldset.Legend(fieldset.Props{}) {
+						Billing preferences
+					}
+					@fieldset.FieldGroup(fieldset.Props{}) {
+						@fieldset.Field(fieldset.Props{}) {
+							@fieldset.Label(fieldset.LabelProps{For: "region"}) {
+								Region
+							}
+							@selectbox.Select(selectbox.Props{ID: "region", Name: "region", Required: true}) {
+								<option value="">Choose a region…</option>
+								<option value="us-east">US East</option>
+								<option value="us-west">US West</option>
+								<option value="eu">Europe</option>
+							}
+						}
+						@fieldset.Field(fieldset.Props{}) {
+							@fieldset.Label(fieldset.LabelProps{For: "currency"}) {
+								Currency
+							}
+							@selectbox.Select(selectbox.Props{ID: "currency", Name: "currency"}) {
+								<option value="usd" selected>USD — US Dollar</option>
+								<option value="cad">CAD — Canadian Dollar</option>
+								<option value="eur">EUR — Euro</option>
+							}
+						}
+					}
+				}
+				<div class="mt-8 flex items-center gap-3">
+					@button.Button(button.Props{Type: "submit", Variant: button.VariantPrimary}) {
+						Save preferences
+					}
+					<div id="selects-result" class="text-sm text-muted-foreground"></div>
+				</div>
+			</form>
+		}
+	</div>
+}
