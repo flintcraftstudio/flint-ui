@@ -1,0 +1,82 @@
+// Package breadcrumbs provides navigation trails — the row of links at
+// the top of nested dashboard pages showing where the user is in the
+// hierarchy. From-scratch design (Catalyst has no breadcrumbs.tsx).
+//
+// Compound API matches flint-ui convention:
+//
+//	@breadcrumbs.Breadcrumbs(breadcrumbs.Props{}) {
+//	    @breadcrumbs.Item(breadcrumbs.ItemProps{Href: "/"}) { Dashboard }
+//	    @breadcrumbs.Item(breadcrumbs.ItemProps{Href: "/jobs"}) { Jobs }
+//	    @breadcrumbs.Current(breadcrumbs.CurrentProps{}) { Henderson Ranch }
+//	}
+//
+// Item renders a link followed by a chevron separator; Current renders
+// the final unlinked entry with aria-current="page" and no trailing
+// separator. Order matters — callers put Current last and only once.
+//
+// No Alpine, no keyboard wiring. Pure server-rendered navigation.
+package breadcrumbs
+
+// Props controls the Breadcrumbs root <nav>.
+type Props struct {
+	// AriaLabel overrides the default "Breadcrumb" label on the outer
+	// <nav>. Useful on pages with multiple nav regions.
+	AriaLabel string
+	Class     string
+	Attrs     templ.Attributes
+}
+
+// Breadcrumbs wraps the list of Items and a final Current in a
+// semantic <nav><ol> structure.
+templ Breadcrumbs(p Props) {
+	<nav aria-label={ ariaLabelOr(p.AriaLabel) } class={ rootClasses(p) } { p.Attrs... }>
+		<ol class="flex flex-wrap items-center gap-2">
+			{ children... }
+		</ol>
+	</nav>
+}
+
+// ItemProps controls a single linked breadcrumb.
+type ItemProps struct {
+	Href  string
+	Class string
+	Attrs templ.Attributes
+}
+
+// Item renders one linked crumb followed by a chevron separator. Use
+// for every step in the trail except the final one — Current is the
+// unlinked "you are here" entry.
+templ Item(p ItemProps) {
+	<li class="flex items-center gap-2">
+		<a href={ templ.SafeURL(p.Href) } class={ linkClasses(p) } { p.Attrs... }>
+			{ children... }
+		</a>
+		@separator()
+	</li>
+}
+
+// CurrentProps controls the final unlinked breadcrumb. Separate type
+// from ItemProps because Current has no Href and shouldn't accept one.
+type CurrentProps struct {
+	Class string
+	Attrs templ.Attributes
+}
+
+// Current renders the final crumb as a non-link with aria-current="page".
+// No trailing separator. Place last.
+templ Current(p CurrentProps) {
+	<li class="flex items-center gap-2">
+		<span aria-current="page" class={ currentClasses(p) } { p.Attrs... }>
+			{ children... }
+		</span>
+	</li>
+}
+
+// separator renders the chevron-right glyph between crumbs. Marked
+// aria-hidden — the `<nav aria-label="Breadcrumb">` + `<ol>` structure
+// already conveys the trail semantics; the chevron is purely visual.
+templ separator() {
+	<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-4 shrink-0 text-muted-foreground/60">
+		<path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 1 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06z" clip-rule="evenodd"/>
+	</svg>
+}

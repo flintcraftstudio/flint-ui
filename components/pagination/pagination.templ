@@ -1,0 +1,154 @@
+// Package pagination provides numbered page navigation for long tables
+// and lists. Converted from catalyst-ui-kit/typescript/pagination.tsx.
+//
+// Server-driven: each page renders as a link (<a href>). Apply hx-*
+// attributes via Attrs if you want htmx-driven page swaps instead of
+// full navigations — the component doesn't know or care which.
+//
+// Layout matches Catalyst's: Previous on the left, List of page numbers
+// in the middle (hidden on mobile — small viewports rely on Previous /
+// Next only), Next on the right. `grow basis-0` on Previous and Next
+// keeps them balanced regardless of how many pages render in between.
+//
+// No Alpine state. No keyboard plugins. Pagination is the simplest
+// component in flint-ui after Badge.
+package pagination
+
+import "github.com/flintcraft/flint-ui/components/button"
+
+// Props controls the Pagination root <nav>.
+type Props struct {
+	// AriaLabel overrides the default "Page navigation" label on the
+	// outer <nav>. Useful when a page has multiple paginations —
+	// "Jobs pagination" / "Invoices pagination" — so screen readers
+	// can tell them apart.
+	AriaLabel string
+	Class     string
+	Attrs     templ.Attributes
+}
+
+// Pagination is the outer <nav> that holds Previous / List / Next.
+templ Pagination(p Props) {
+	<nav aria-label={ ariaLabelOr(p.AriaLabel) } class={ rootClasses(p) } { p.Attrs... }>
+		{ children... }
+	</nav>
+}
+
+// LinkProps is the shared shape for Previous and Next.
+//
+// Href is empty on the first-page Previous and the last-page Next —
+// the component renders a disabled button instead of a link so the
+// caller doesn't conditionally swap components.
+type LinkProps struct {
+	Href  string
+	Class string
+	Attrs templ.Attributes
+}
+
+// Previous is the left-aligned "back one page" link. Children is the
+// label text ("Previous" by convention). An icon is prepended.
+// Href empty means first page; the button renders disabled.
+templ Previous(p LinkProps) {
+	<span class={ prevWrapperClasses(p.Class) }>
+		@button.Button(button.Props{
+			Plain:    true,
+			Href:     p.Href,
+			Disabled: p.Href == "",
+			Attrs:    mergeAttrs(p.Attrs, templ.Attributes{"aria-label": "Previous page"}),
+		}) {
+			@prevIcon()
+			{ children... }
+		}
+	</span>
+}
+
+// Next is the right-aligned "forward one page" link. Children is the
+// label text ("Next" by convention). An icon is appended.
+// Href empty means last page; the button renders disabled.
+templ Next(p LinkProps) {
+	<span class={ nextWrapperClasses(p.Class) }>
+		@button.Button(button.Props{
+			Plain:    true,
+			Href:     p.Href,
+			Disabled: p.Href == "",
+			Attrs:    mergeAttrs(p.Attrs, templ.Attributes{"aria-label": "Next page"}),
+		}) {
+			{ children... }
+			@nextIcon()
+		}
+	</span>
+}
+
+// ListProps controls the middle page-number wrapper.
+type ListProps struct {
+	Class string
+	Attrs templ.Attributes
+}
+
+// List wraps the numbered Pages between Previous and Next. Hidden on
+// mobile (sm:flex) — small viewports rely on Previous / Next only. If
+// your mobile design needs page numbers too, override via Class.
+templ List(p ListProps) {
+	<span class={ listClasses(p) } { p.Attrs... }>
+		{ children... }
+	</span>
+}
+
+// PageProps controls a single numbered Page.
+//
+// Children is the visible number (or whatever string represents the
+// page — some apps use "1 / 10" tokens). Current picks the highlighted
+// current-page variant.
+type PageProps struct {
+	Href    string
+	Current bool
+	Class   string
+	Attrs   templ.Attributes
+}
+
+// Page is one numbered link in the List. Catalyst's current-page
+// highlight is a `before:absolute` overlay on the Button — flint-ui
+// mirrors that via Class so the underlying button.Button chrome stays
+// unchanged.
+templ Page(p PageProps) {
+	@button.Button(button.Props{
+		Plain: true,
+		Href:  p.Href,
+		Class: pageClasses(p),
+		Attrs: mergeAttrs(p.Attrs, pageAriaAttrs(p)),
+	}) {
+		<span class="-mx-0.5">
+			{ children... }
+		</span>
+	}
+}
+
+// GapProps controls the ellipsis that stands in for collapsed page
+// ranges in long paginations.
+type GapProps struct {
+	Class string
+	Attrs templ.Attributes
+}
+
+// Gap renders the ellipsis between non-adjacent page numbers. Children
+// is usually "…" but callers can pass anything — some designs use
+// "N more" or a chevron.
+templ Gap(p GapProps) {
+	<span aria-hidden="true" class={ gapClasses(p) } { p.Attrs... }>
+		{ children... }
+	</span>
+}
+
+// prevIcon / nextIcon preserve Catalyst's stroke-based arrows. Marked
+// data-slot="icon" so the button's icon spacing rules apply.
+templ prevIcon() {
+	<svg data-slot="icon" viewBox="0 0 16 16" fill="none" aria-hidden="true" class="stroke-current">
+		<path d="M2.75 8H13.25M2.75 8L5.25 5.5M2.75 8L5.25 10.5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+	</svg>
+}
+
+templ nextIcon() {
+	<svg data-slot="icon" viewBox="0 0 16 16" fill="none" aria-hidden="true" class="stroke-current">
+		<path d="M13.25 8L2.75 8M13.25 8L10.75 10.5M13.25 8L10.75 5.5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+	</svg>
+}

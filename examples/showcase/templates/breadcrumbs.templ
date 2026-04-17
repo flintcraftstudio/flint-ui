@@ -1,0 +1,61 @@
+package templates
+
+import (
+	"github.com/flintcraft/flint-ui/components/badge"
+	"github.com/flintcraft/flint-ui/components/breadcrumbs"
+)
+
+templ Breadcrumbs() {
+	<div class="space-y-12">
+		@pageHeader("Breadcrumbs", "Navigation trail showing where the user is in a nested hierarchy. Compound API: Item renders a link followed by a chevron separator; Current renders the final unlinked entry with aria-current=\"page\" and no trailing chevron.")
+
+		@section("Basic", "A typical three-level trail — top-level section, list, detail.") {
+			@breadcrumbs.Breadcrumbs(breadcrumbs.Props{}) {
+				@breadcrumbs.Item(breadcrumbs.ItemProps{Href: "/"}) { Dashboard }
+				@breadcrumbs.Item(breadcrumbs.ItemProps{Href: "/jobs"}) { Jobs }
+				@breadcrumbs.Current(breadcrumbs.CurrentProps{}) { Henderson Ranch }
+			}
+		}
+
+		@section("Two levels", "Short breadcrumbs work as well — the chevron separator appears between linked items but not before Current.") {
+			@breadcrumbs.Breadcrumbs(breadcrumbs.Props{}) {
+				@breadcrumbs.Item(breadcrumbs.ItemProps{Href: "/"}) { Dashboard }
+				@breadcrumbs.Current(breadcrumbs.CurrentProps{}) { Settings }
+			}
+		}
+
+		@section("Long trail with wrapping", "The outer ol uses flex-wrap, so deeply nested trails wrap to multiple lines on narrow viewports rather than overflowing horizontally.") {
+			<div class="max-w-md">
+				@breadcrumbs.Breadcrumbs(breadcrumbs.Props{}) {
+					@breadcrumbs.Item(breadcrumbs.ItemProps{Href: "/"}) { Dashboard }
+					@breadcrumbs.Item(breadcrumbs.ItemProps{Href: "/clients"}) { Clients }
+					@breadcrumbs.Item(breadcrumbs.ItemProps{Href: "/clients/42"}) { Henderson Ranch }
+					@breadcrumbs.Item(breadcrumbs.ItemProps{Href: "/clients/42/jobs"}) { Jobs }
+					@breadcrumbs.Item(breadcrumbs.ItemProps{Href: "/clients/42/jobs/1834"}) { #1834 gutters install }
+					@breadcrumbs.Current(breadcrumbs.CurrentProps{}) { Timeline }
+				}
+			</div>
+		}
+
+		@section("Rich content in crumbs", "Children can be any templ content — drop a Badge or icon into a crumb when status context helps the user locate themselves.") {
+			@breadcrumbs.Breadcrumbs(breadcrumbs.Props{}) {
+				@breadcrumbs.Item(breadcrumbs.ItemProps{Href: "/"}) { Dashboard }
+				@breadcrumbs.Item(breadcrumbs.ItemProps{Href: "/jobs"}) { Jobs }
+				@breadcrumbs.Current(breadcrumbs.CurrentProps{}) {
+					<span class="flex items-center gap-2">
+						Henderson Ranch
+						@badge.Badge(badge.Props{Variant: badge.VariantWarning}) { Blocked }
+					</span>
+				}
+			}
+		}
+
+		@section("Custom aria-label", "Override the default \"Breadcrumb\" label when the page has multiple nav regions (e.g., a primary trail and an inline per-section trail).") {
+			@breadcrumbs.Breadcrumbs(breadcrumbs.Props{AriaLabel: "Project hierarchy"}) {
+				@breadcrumbs.Item(breadcrumbs.ItemProps{Href: "/projects"}) { Projects }
+				@breadcrumbs.Item(breadcrumbs.ItemProps{Href: "/projects/flint-ui"}) { flint-ui }
+				@breadcrumbs.Current(breadcrumbs.CurrentProps{}) { Phase 4 }
+			}
+		}
+	</div>
+}

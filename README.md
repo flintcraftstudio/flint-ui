@@ -110,8 +110,7 @@ See [`flintcraft-ui-conversion-guide.md`](./flintcraft-ui-conversion-guide.md) f
 - [x] Badge
 - [x] Table, Heading, Card, Alert
 - [x] Modal, Dropdown, Tabs, Toast
-- [x] Tooltip, Accordion, Slide-over, Copy-to-Clipboard, Popover
-- [ ] Pagination, Breadcrumbs (+ extract shared `floating/` package)
+- [x] Tooltip, Accordion, Slide-over, Copy-to-Clipboard, Popover, Pagination, Breadcrumbs
 - [ ] Combobox, Command Palette, DatePicker
 
 ## License

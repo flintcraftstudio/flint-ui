@@ -47,6 +47,8 @@ func main() {
 	mux.Handle("GET /slideovers", page("Slide-over", "slideovers", templates.Slideovers()))
 	mux.Handle("GET /clipboards", page("Clipboard", "clipboards", templates.Clipboards()))
 	mux.Handle("GET /popovers", page("Popover", "popovers", templates.Popovers()))
+	mux.Handle("GET /paginations", page("Pagination", "paginations", templates.Paginations()))
+	mux.Handle("GET /breadcrumbs", page("Breadcrumbs", "breadcrumbs", templates.Breadcrumbs()))
 
 	mux.Handle("GET /tables/detail", http.HandlerFunc(tablesDetailHandler))
 

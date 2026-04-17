@@ -1,0 +1,76 @@
+package templates
+
+import "github.com/flintcraft/flint-ui/components/pagination"
+
+templ Paginations() {
+	<div class="space-y-12">
+		@pageHeader("Pagination", "Numbered page navigation for long tables and lists. Converted from Catalyst. Server-driven via plain hrefs; Attrs passes through hx-* for htmx-driven page swaps. Previous and Next auto-disable when Href is empty.")
+
+		@section("Basic", "Typical dashboard pagination: Previous + 5 numbered pages + Next. Current page is highlighted via the before:bg-muted overlay on the button.") {
+			@pagination.Pagination(pagination.Props{}) {
+				@pagination.Previous(pagination.LinkProps{Href: "?page=2"}) { Previous }
+				@pagination.List(pagination.ListProps{}) {
+					@pagination.Page(pagination.PageProps{Href: "?page=1"}) { 1 }
+					@pagination.Page(pagination.PageProps{Href: "?page=2"}) { 2 }
+					@pagination.Page(pagination.PageProps{Href: "?page=3", Current: true}) { 3 }
+					@pagination.Page(pagination.PageProps{Href: "?page=4"}) { 4 }
+					@pagination.Page(pagination.PageProps{Href: "?page=5"}) { 5 }
+				}
+				@pagination.Next(pagination.LinkProps{Href: "?page=4"}) { Next }
+			}
+		}
+
+		@section("With gaps", "Long paginations collapse middle ranges to an ellipsis. The Gap component is aria-hidden because the <nav> + <ol> structure already conveys the trail.") {
+			@pagination.Pagination(pagination.Props{}) {
+				@pagination.Previous(pagination.LinkProps{Href: "?page=42"}) { Previous }
+				@pagination.List(pagination.ListProps{}) {
+					@pagination.Page(pagination.PageProps{Href: "?page=1"}) { 1 }
+					@pagination.Page(pagination.PageProps{Href: "?page=2"}) { 2 }
+					@pagination.Gap(pagination.GapProps{}) { &hellip; }
+					@pagination.Page(pagination.PageProps{Href: "?page=42"}) { 42 }
+					@pagination.Page(pagination.PageProps{Href: "?page=43", Current: true}) { 43 }
+					@pagination.Page(pagination.PageProps{Href: "?page=44"}) { 44 }
+					@pagination.Gap(pagination.GapProps{}) { &hellip; }
+					@pagination.Page(pagination.PageProps{Href: "?page=99"}) { 99 }
+					@pagination.Page(pagination.PageProps{Href: "?page=100"}) { 100 }
+				}
+				@pagination.Next(pagination.LinkProps{Href: "?page=44"}) { Next }
+			}
+		}
+
+		@section("First page", "On the first page, Previous has no Href and renders as a disabled button. The caller doesn't swap components — Href=\"\" triggers the disabled state automatically.") {
+			@pagination.Pagination(pagination.Props{}) {
+				@pagination.Previous(pagination.LinkProps{}) { Previous }
+				@pagination.List(pagination.ListProps{}) {
+					@pagination.Page(pagination.PageProps{Href: "?page=1", Current: true}) { 1 }
+					@pagination.Page(pagination.PageProps{Href: "?page=2"}) { 2 }
+					@pagination.Page(pagination.PageProps{Href: "?page=3"}) { 3 }
+				}
+				@pagination.Next(pagination.LinkProps{Href: "?page=2"}) { Next }
+			}
+		}
+
+		@section("Last page", "Mirror case — Next has no Href on the final page.") {
+			@pagination.Pagination(pagination.Props{}) {
+				@pagination.Previous(pagination.LinkProps{Href: "?page=2"}) { Previous }
+				@pagination.List(pagination.ListProps{}) {
+					@pagination.Page(pagination.PageProps{Href: "?page=1"}) { 1 }
+					@pagination.Page(pagination.PageProps{Href: "?page=2"}) { 2 }
+					@pagination.Page(pagination.PageProps{Href: "?page=3", Current: true}) { 3 }
+				}
+				@pagination.Next(pagination.LinkProps{}) { Next }
+			}
+		}
+
+		@section("htmx-driven", "Drop hx-get onto Previous / Next / Page via Attrs and pagination becomes an in-page swap — the server returns the new table fragment and htmx replaces it without a full reload.") {
+			<pre class="overflow-x-auto rounded-md bg-muted p-4 text-xs text-foreground">{ `@pagination.Page(pagination.PageProps{
+    Href: "#",
+    Attrs: templ.Attributes{
+        "hx-get":    "/jobs?page=2",
+        "hx-target": "#jobs-table",
+        "hx-swap":   "outerHTML",
+    },
+}) { 2 }` }</pre>
+		}
+	</div>
+}
