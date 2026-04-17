@@ -35,6 +35,7 @@ func main() {
 	mux.Handle("GET /tables", page("Table", "tables", templates.Tables()))
 	mux.Handle("GET /headings", page("Heading", "headings", templates.Headings()))
 	mux.Handle("GET /modals", page("Modal", "modals", templates.Modals()))
+	mux.Handle("GET /dropdowns", page("Dropdown", "dropdowns", templates.Dropdowns()))
 
 	mux.Handle("GET /tables/detail", http.HandlerFunc(tablesDetailHandler))
 

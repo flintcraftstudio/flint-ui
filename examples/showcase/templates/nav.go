@@ -35,6 +35,7 @@ var NavSections = []struct {
 		Heading: "Interactive",
 		Items: []NavItem{
 			{Slug: "modals", Title: "Modal", Phase: "3"},
+			{Slug: "dropdowns", Title: "Dropdown", Phase: "3"},
 		},
 	},
 }

@@ -1,0 +1,233 @@
+package templates
+
+import (
+	"github.com/flintcraft/flint-ui/components/button"
+	"github.com/flintcraft/flint-ui/components/dropdown"
+)
+
+templ Dropdowns() {
+	<div class="space-y-12">
+		@pageHeader("Dropdown", "Click-to-open menu with keyboard navigation. Wrap a Dropdown.Button trigger and a Dropdown.Menu panel inside Dropdown — Alpine handles the open state, $focus drives ArrowUp/Down/Home/End. Items can be buttons or links; htmx attrs pass through cleanly. Requires the Alpine Focus plugin (already loaded by the showcase layout, same as Modal).")
+
+		@section("Basic", "Default trigger style is the primary Button; the menu anchors below the trigger and pins to its left edge.") {
+			<div class="flex flex-wrap items-center gap-4">
+				@dropdown.Dropdown(dropdown.Props{}) {
+					@dropdown.Button(dropdown.ButtonProps{}) {
+						Actions
+						@chevronDown()
+					}
+					@dropdown.Menu(dropdown.MenuProps{}) {
+						@dropdown.Item(dropdown.ItemProps{}) { Edit job }
+						@dropdown.Item(dropdown.ItemProps{}) { Duplicate }
+						@dropdown.Item(dropdown.ItemProps{Disabled: true}) { Archive (coming soon) }
+						@dropdown.Divider(dropdown.SubProps{})
+						@dropdown.Item(dropdown.ItemProps{Class: "text-danger data-focus:bg-danger data-focus:text-danger-foreground data-hover:bg-danger data-hover:text-danger-foreground"}) {
+							Delete
+						}
+					}
+				}
+				<span class="text-sm text-muted-foreground">Try ArrowDown / ArrowUp / Esc / Tab.</span>
+			</div>
+		}
+
+		@section("Trigger styles", "Dropdown.Button forwards Variant / Outline / Plain to the underlying flint-ui Button — pick whichever fits the surrounding UI.") {
+			<div class="flex flex-wrap items-center gap-4">
+				@dropdown.Dropdown(dropdown.Props{}) {
+					@dropdown.Button(dropdown.ButtonProps{Outline: true}) {
+						Filter
+						@chevronDown()
+					}
+					@dropdown.Menu(dropdown.MenuProps{}) {
+						@dropdown.Item(dropdown.ItemProps{}) { All jobs }
+						@dropdown.Item(dropdown.ItemProps{}) { Scheduled }
+						@dropdown.Item(dropdown.ItemProps{}) { In progress }
+						@dropdown.Item(dropdown.ItemProps{}) { Completed }
+					}
+				}
+				@dropdown.Dropdown(dropdown.Props{}) {
+					@dropdown.Button(dropdown.ButtonProps{Plain: true}) {
+						More
+						@dotsHorizontal()
+					}
+					@dropdown.Menu(dropdown.MenuProps{}) {
+						@dropdown.Item(dropdown.ItemProps{}) { Reassign crew }
+						@dropdown.Item(dropdown.ItemProps{}) { Mark as invoiced }
+						@dropdown.Item(dropdown.ItemProps{}) { Send reminder }
+					}
+				}
+				@dropdown.Dropdown(dropdown.Props{}) {
+					@dropdown.Button(dropdown.ButtonProps{Variant: button.VariantAccent}) {
+						New
+						@chevronDown()
+					}
+					@dropdown.Menu(dropdown.MenuProps{}) {
+						@dropdown.Item(dropdown.ItemProps{Href: "#"}) { Job }
+						@dropdown.Item(dropdown.ItemProps{Href: "#"}) { Invoice }
+						@dropdown.Item(dropdown.ItemProps{Href: "#"}) { Estimate }
+					}
+				}
+			</div>
+		}
+
+		@section("Anchor positioning", "Pick where the menu lands relative to the trigger. Defaults to bottom-start. Use end alignment when the trigger sits near the right edge so the menu doesn't overflow the viewport.") {
+			<div class="flex flex-wrap items-end justify-between gap-4">
+				@dropdown.Dropdown(dropdown.Props{}) {
+					@dropdown.Button(dropdown.ButtonProps{Outline: true}) {
+						Bottom-start
+						@chevronDown()
+					}
+					@dropdown.Menu(dropdown.MenuProps{Anchor: dropdown.AnchorBottomStart}) {
+						@dropdown.Item(dropdown.ItemProps{}) { Item one }
+						@dropdown.Item(dropdown.ItemProps{}) { Item two }
+					}
+				}
+				@dropdown.Dropdown(dropdown.Props{}) {
+					@dropdown.Button(dropdown.ButtonProps{Outline: true}) {
+						Bottom-end
+						@chevronDown()
+					}
+					@dropdown.Menu(dropdown.MenuProps{Anchor: dropdown.AnchorBottomEnd}) {
+						@dropdown.Item(dropdown.ItemProps{}) { Item one }
+						@dropdown.Item(dropdown.ItemProps{}) { Item two }
+					}
+				}
+				@dropdown.Dropdown(dropdown.Props{}) {
+					@dropdown.Button(dropdown.ButtonProps{Outline: true}) {
+						Top-start
+						@chevronUp()
+					}
+					@dropdown.Menu(dropdown.MenuProps{Anchor: dropdown.AnchorTopStart}) {
+						@dropdown.Item(dropdown.ItemProps{}) { Item one }
+						@dropdown.Item(dropdown.ItemProps{}) { Item two }
+					}
+				}
+				@dropdown.Dropdown(dropdown.Props{}) {
+					@dropdown.Button(dropdown.ButtonProps{Outline: true}) {
+						Top-end
+						@chevronUp()
+					}
+					@dropdown.Menu(dropdown.MenuProps{Anchor: dropdown.AnchorTopEnd}) {
+						@dropdown.Item(dropdown.ItemProps{}) { Item one }
+						@dropdown.Item(dropdown.ItemProps{}) { Item two }
+					}
+				}
+			</div>
+		}
+
+		@section("With icons, descriptions, and shortcuts", "Items use a subgrid layout so icon, label, description, and shortcut all align across the menu. Mark icons with data-slot=\"icon\" so the shared item styles position and tint them. Description and Shortcut are optional sub-components that drop into the right grid cells.") {
+			<div class="flex flex-wrap items-center gap-4">
+				@dropdown.Dropdown(dropdown.Props{}) {
+					@dropdown.Button(dropdown.ButtonProps{Outline: true}) {
+						Crew options
+						@chevronDown()
+					}
+					@dropdown.Menu(dropdown.MenuProps{Class: "min-w-[18rem]"}) {
+						@dropdown.Item(dropdown.ItemProps{Href: "#"}) {
+							@iconUserPlus()
+							@dropdown.Label(dropdown.SubProps{}) { Add crew member }
+							@dropdown.Description(dropdown.SubProps{}) { Send an invite by email }
+							@dropdown.Shortcut(dropdown.ShortcutProps{Keys: []string{"⌘", "N"}})
+						}
+						@dropdown.Item(dropdown.ItemProps{Href: "#"}) {
+							@iconCalendar()
+							@dropdown.Label(dropdown.SubProps{}) { Schedule shift }
+							@dropdown.Description(dropdown.SubProps{}) { Pick a date and crew assignment }
+							@dropdown.Shortcut(dropdown.ShortcutProps{Keys: []string{"⌘", "S"}})
+						}
+						@dropdown.Divider(dropdown.SubProps{})
+						@dropdown.Item(dropdown.ItemProps{Href: "#"}) {
+							@iconArrowRight()
+							@dropdown.Label(dropdown.SubProps{}) { View timesheet }
+						}
+					}
+				}
+			</div>
+		}
+
+		@section("Sections, headings, and a header", "Use Header for a non-interactive top row (signed-in user, current org). Group related Items into a Section with a Heading. Dividers visually break sections apart.") {
+			<div class="flex flex-wrap items-center gap-4">
+				@dropdown.Dropdown(dropdown.Props{}) {
+					@dropdown.Button(dropdown.ButtonProps{Plain: true}) {
+						<span class="inline-flex size-7 items-center justify-center rounded-full bg-muted text-xs font-semibold text-foreground">JS</span>
+						<span class="text-sm font-medium">Jaden Sturgis</span>
+						@chevronDown()
+					}
+					@dropdown.Menu(dropdown.MenuProps{Anchor: dropdown.AnchorBottomEnd, Class: "min-w-[16rem]"}) {
+						@dropdown.Header(dropdown.SubProps{}) {
+							<div class="text-sm font-medium text-foreground">Jaden Sturgis</div>
+							<div class="text-xs text-muted-foreground">jaden@flintcraft.studio</div>
+						}
+						@dropdown.Divider(dropdown.SubProps{})
+						@dropdown.Section(dropdown.SubProps{}) {
+							@dropdown.Heading(dropdown.SubProps{}) { Account }
+							@dropdown.Item(dropdown.ItemProps{Href: "#"}) {
+								@dropdown.Label(dropdown.SubProps{}) { Profile }
+							}
+							@dropdown.Item(dropdown.ItemProps{Href: "#"}) {
+								@dropdown.Label(dropdown.SubProps{}) { Notifications }
+							}
+						}
+						@dropdown.Divider(dropdown.SubProps{})
+						@dropdown.Section(dropdown.SubProps{}) {
+							@dropdown.Heading(dropdown.SubProps{}) { Workspace }
+							@dropdown.Item(dropdown.ItemProps{Href: "#"}) {
+								@dropdown.Label(dropdown.SubProps{}) { Members }
+							}
+							@dropdown.Item(dropdown.ItemProps{Href: "#"}) {
+								@dropdown.Label(dropdown.SubProps{}) { Billing }
+							}
+						}
+						@dropdown.Divider(dropdown.SubProps{})
+						@dropdown.Item(dropdown.ItemProps{Attrs: templ.Attributes{
+							"hx-post":   "/echo",
+							"hx-target": "#dropdown-out",
+							"hx-swap":   "innerHTML",
+						}}) {
+							@dropdown.Label(dropdown.SubProps{}) { Sign out }
+						}
+					}
+				}
+				<div id="dropdown-out" class="text-sm text-muted-foreground"></div>
+			</div>
+		}
+	</div>
+}
+
+// inline icons used by the showcase. Marked data-slot="icon" so the dropdown
+// item styles position them in the icon column and re-tint on focus/hover.
+
+templ chevronDown() {
+	<svg data-slot="icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+		<path fill-rule="evenodd" d="M5.22 7.22a.75.75 0 0 1 1.06 0L10 10.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 8.28a.75.75 0 0 1 0-1.06z" clip-rule="evenodd"/>
+	</svg>
+}
+
+templ chevronUp() {
+	<svg data-slot="icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+		<path fill-rule="evenodd" d="M14.78 12.78a.75.75 0 0 1-1.06 0L10 9.06l-3.72 3.72a.75.75 0 1 1-1.06-1.06l4.25-4.25a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06z" clip-rule="evenodd"/>
+	</svg>
+}
+
+templ dotsHorizontal() {
+	<svg data-slot="icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+		<path d="M6 10a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm5.5 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm5.5 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+	</svg>
+}
+
+templ iconUserPlus() {
+	<svg data-slot="icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+		<path d="M10 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3.465 14.493a1.23 1.23 0 0 0 .41 1.412A9.96 9.96 0 0 0 10 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 0 0-13.074.003zM16 4a.75.75 0 0 1 .75.75v1.5h1.5a.75.75 0 0 1 0 1.5h-1.5v1.5a.75.75 0 0 1-1.5 0v-1.5h-1.5a.75.75 0 0 1 0-1.5h1.5v-1.5A.75.75 0 0 1 16 4z"/>
+	</svg>
+}
+
+templ iconCalendar() {
+	<svg data-slot="icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+		<path fill-rule="evenodd" d="M5.75 2a.75.75 0 0 1 .75.75V4h7V2.75a.75.75 0 0 1 1.5 0V4h.25A2.75 2.75 0 0 1 18 6.75v8.5A2.75 2.75 0 0 1 15.25 18H4.75A2.75 2.75 0 0 1 2 15.25v-8.5A2.75 2.75 0 0 1 4.75 4H5V2.75A.75.75 0 0 1 5.75 2zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75z" clip-rule="evenodd"/>
+	</svg>
+}
+
+templ iconArrowRight() {
+	<svg data-slot="icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+		<path fill-rule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10z" clip-rule="evenodd"/>
+	</svg>
+}
