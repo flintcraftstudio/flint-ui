@@ -15,7 +15,7 @@ import "github.com/flintcraft/flint-ui/components/accordion"
 | `accordion.Accordion`    | `<div>` with `x-data`                     | Owns the Alpine state for the whole group.              |
 | `accordion.Item`         | `<div>` with borders                     | One disclosure pair. Wraps a Trigger and a Panel.       |
 | `accordion.Trigger`      | `<h3><button aria-expanded aria-controls>` | The clickable header. Chevron auto-appended and rotates on open. |
-| `accordion.Panel`        | `<div role="region">`                    | The collapsible content. Uses `x-show` + `x-collapse`.   |
+| `accordion.Panel`        | `<div role="region"><div>…</div></div>`  | Two-level: outer shell x-collapse animates; inner box holds padding/typography. |
 
 ## Quick example
 
@@ -116,6 +116,8 @@ The smooth height transition requires the [Alpine Collapse plugin](https://alpin
 
 Without the plugin, Alpine silently ignores the `x-collapse` directive and panels snap open/closed via plain `x-show`. Progressive enhancement — same as Modal/Dropdown's relationship with `@alpinejs/focus`.
 
+The Panel is a two-level structure: an outer shell the plugin animates (no padding or border on it — padding on a collapsing element causes a jumpy look) and an inner content box holding the padding, text, and caller-supplied `Class`. Duration is explicitly 200ms on both Panel (`x-collapse.duration.200ms`) and Trigger chevron (`transition-transform duration-200 ease-in-out`) so the two motions read as one.
+
 ## Keyboard
 
 | Key               | Behavior                            |
@@ -188,5 +190,5 @@ When the accordion sits inside a card that already has borders, pass `ItemProps.
 | Field      | Type               | Default | Notes                                                 |
 | ---------- | ------------------ | ------- | ----------------------------------------------------- |
 | `Name`     | `string`           | `""`    | Required. Must mirror the parent Item's Name.         |
-| `Class`    | `string`           | `""`    | Appended to the panel `<div>`.                        |
-| `Attrs`    | `templ.Attributes` | `nil`   | Spread onto the panel.                                |
+| `Class`    | `string`           | `""`    | Appended to the **inner** content box (padding, typography, background). |
+| `Attrs`    | `templ.Attributes` | `nil`   | Spread onto the **outer** shell (id, role, aria-labelledby already present). |

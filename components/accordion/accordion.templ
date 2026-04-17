@@ -148,14 +148,15 @@ templ triggerHeading(level int) {
 }
 
 // chevron is the trailing indicator on every Trigger. Rotates 180° when
-// its Item is open. class="shrink-0" keeps it from being squeezed by a
-// long trigger label.
+// its Item is open. Duration + easing match Panel's x-collapse (200ms
+// ease-in-out) so the chevron and panel appear to move as one motion.
+// shrink-0 keeps it from being squeezed by a long trigger label.
 templ chevron(name string) {
 	<svg
 		viewBox="0 0 20 20"
 		fill="currentColor"
 		aria-hidden="true"
-		class="ml-2 size-5 shrink-0 transition-transform"
+		class="ml-2 size-5 shrink-0 transition-transform duration-200 ease-in-out"
 		x-bind:class={ alpineChevronExpr(name) }
 	>
 		<path fill-rule="evenodd" d="M5.22 7.22a.75.75 0 0 1 1.06 0L10 10.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 8.28a.75.75 0 0 1 0-1.06z" clip-rule="evenodd"/>
@@ -165,27 +166,41 @@ templ chevron(name string) {
 // PanelProps controls a single Panel region.
 //
 // Name must mirror the parent Item's Name.
+//
+// The rendered Panel has two levels: an outer shell x-collapse animates,
+// and an inner content box holding the padding and text styles. Class
+// targets the inner box — where padding, background, and typography
+// adjustments naturally belong. Attrs targets the outer shell — where
+// id, role, aria-labelledby, and any extra Alpine/data hooks live.
 type PanelProps struct {
 	Name  string
 	Class string
 	Attrs templ.Attributes
 }
 
-// Panel renders the collapsible region. x-show toggles visibility;
-// x-collapse (from @alpinejs/collapse) smooths the height transition
-// when the plugin is loaded, otherwise Alpine silently no-ops the
-// directive and the panel snaps open/closed.
+// Panel renders the collapsible region. The outer <div> holds only
+// structural attrs and is the element x-collapse animates — no padding
+// or border on it so the height transition is clean. Padding and text
+// styling live on an inner wrapper so the animation doesn't fight the
+// padding collapse (a common source of choppy-looking accordions).
+//
+// x-collapse.duration.200ms sets a symmetric 200ms on open and close
+// (Alpine's default is 250ms, slightly longer than feels right for a
+// short-range UI transition). Chevron's transition-duration matches so
+// the two motions read as one. Without @alpinejs/collapse loaded, the
+// directive is ignored and the panel snaps open/closed via plain x-show.
 templ Panel(p PanelProps) {
 	<div
 		id={ panelID(p.Name) }
 		role="region"
 		aria-labelledby={ triggerID(p.Name) }
 		x-show={ alpineIsOpenExpr(p.Name) }
-		x-collapse
+		x-collapse.duration.200ms
 		x-cloak
-		class={ panelClasses(p) }
 		{ p.Attrs... }
 	>
-		{ children... }
+		<div class={ panelClasses(p) }>
+			{ children... }
+		</div>
 	</div>
 }
