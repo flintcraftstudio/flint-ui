@@ -4,6 +4,17 @@ Server-rendered UI components for FlintCraft Studio client projects. Built with 
 
 > **Status**: early development. See [`flintcraft-ui-conversion-guide.md`](./flintcraft-ui-conversion-guide.md) for the architectural plan and component roadmap.
 
+## For coding agents
+
+flint-ui exists to speed up internal dashboard development. The component catalog below is the entry point — use it to pick the right component, then open its markdown reference for props, variants, and examples.
+
+- **Invocation pattern**: `@<package>.<Func>(<package>.Props{...}) { children }` inside a `.templ` file.
+- **Per-component docs**: every component has a reference in [`docs/components/`](./docs/components/) — open it before using the component. Each doc has: import, usage examples, a full props table, variants, and accessibility notes.
+- **Semantic tokens**: components never hard-code colors. Rebrand via the CSS variables in [`styles/flint.css`](./styles/flint.css) (see [Tailwind](#tailwind) below).
+- **htmx**: every component accepts `Attrs templ.Attributes` for `hx-*` / `data-*` / `aria-*` pass-through on the root element.
+- **Alpine**: only for local UI state (open/closed, selected tab). Never application data.
+- **Showcase**: run `mage Showcase` to see every component live on `:8080`.
+
 ## Install
 
 ```sh
@@ -27,6 +38,44 @@ In your `templ` files:
     Save changes
 }
 ```
+
+## Component catalog
+
+All components live under `github.com/flintcraft/flint-ui/components/<package>`. `Main templ functions` lists the exported entry points you invoke with `@package.Func(...)`. Click through to the doc for the full prop surface.
+
+| Component | Package | Main templ functions | Purpose | Docs |
+| --- | --- | --- | --- | --- |
+| Accordion | `accordion` | `Accordion`, `Item`, `Trigger`, `Panel` | Disclosure panels — header reveals/hides paired content. | [accordion.md](./docs/components/accordion.md) |
+| Alert | `alert` | `Alert`, `Title`, `Description`, `Actions` | Inline status banner (info / success / warning / danger). | [alert.md](./docs/components/alert.md) |
+| Avatar | `avatar` | `Avatar`, `AvatarButton` | User image or initials, optionally wrapped in a button with touch target. | [avatar.md](./docs/components/avatar.md) |
+| Badge | `badge` | `Badge` | Compact semantic status label. | [badge.md](./docs/components/badge.md) |
+| Breadcrumbs | `breadcrumbs` | `Breadcrumbs`, `Item`, `Current` | Navigation trail for nested hierarchies. | [breadcrumbs.md](./docs/components/breadcrumbs.md) |
+| Button | `button` | `Button` | Solid / outline / plain button; renders `<a>` when `Href` is set. | [button.md](./docs/components/button.md) |
+| Card | `card` | `Card`, `Header`, `Body`, `Footer` | Surface container for grouping related content. | [card.md](./docs/components/card.md) |
+| Checkbox | `checkbox` | `Checkbox`, `CheckboxGroup`, `CheckboxField` | Native checkbox control with styled sibling box, plus stacked group. | [checkbox.md](./docs/components/checkbox.md) |
+| Clipboard | `clipboard` | `Copy` | Alpine wrapper that copies a value to the system clipboard. | [clipboard.md](./docs/components/clipboard.md) |
+| Combobox | `combobox` | `Combobox`, `Option` | Searchable single-select — text input with filterable dropdown. | [combobox.md](./docs/components/combobox.md) |
+| Command Palette | `command` | `Palette`, `Group`, `Item` | Cmd+K / Ctrl+K overlay for searching and invoking actions. | [command.md](./docs/components/command.md) |
+| Description List | `descriptionlist` | `DescriptionList`, `Term`, `Details` | Semantic `<dl>` / `<dt>` / `<dd>` two-column key/value display. | [description-list.md](./docs/components/description-list.md) |
+| Divider | `divider` | `Divider` | Semantic `<hr>` with regular or soft variants. | [divider.md](./docs/components/divider.md) |
+| Dropdown | `dropdown` | `Dropdown`, `Button`, `Menu`, `Item`, `Header`, `Section`, `Heading`, `Divider`, `Label`, `Description`, `Shortcut` | Alpine-powered menu with click-outside / ESC / Tab close and focus navigation. | [dropdown.md](./docs/components/dropdown.md) |
+| Fieldset | `fieldset` | `Fieldset`, `Legend`, `FieldGroup`, `Field`, `Label`, `Description`, `ErrorMessage` | Form layout primitives — `Field` auto-spaces label / description / control / error. | [fieldset.md](./docs/components/fieldset.md) |
+| Heading | `heading` | `Heading`, `Subheading` | Page (`<h1>`) and section (`<h2>`) titles; `Level` decouples tag from visual size. | [heading.md](./docs/components/heading.md) |
+| Input | `input` | `Input`, `InputGroup` | Text input, plus `InputGroup` for leading/trailing icons. | [input.md](./docs/components/input.md) |
+| Modal | `modal` | `Modal`, `Title`, `Description`, `Body`, `Actions` | Dialog + alert dialog in one component (`Props.Alert` switches layout). | [modal.md](./docs/components/modal.md) |
+| Pagination | `pagination` | `Pagination`, `Previous`, `Next`, `List`, `Page`, `Gap` | Numbered page navigation for tables and lists. | [pagination.md](./docs/components/pagination.md) |
+| Popover | `popover` | `Popover`, `Button`, `Panel` | Click-activated floating panel with arbitrary content. | [popover.md](./docs/components/popover.md) |
+| Radio | `radio` | `Radio`, `RadioGroup`, `RadioField` | Native `<input type="radio">` exclusive-choice control. | [radio.md](./docs/components/radio.md) |
+| Select | `selectbox` | `Select` | Native `<select>` styled to match `Input`. Package is `selectbox` because `select` is a Go keyword. | [select.md](./docs/components/select.md) |
+| Slide-over | `slideover` | `Slideover`, `Title`, `Description`, `Body`, `Actions` | Edge-anchored side drawer sharing Modal's teleport + focus-trap plumbing. | [slideover.md](./docs/components/slideover.md) |
+| Switch | `toggle` | `Switch`, `SwitchGroup`, `SwitchField` | On/off toggle — native `<input type="checkbox" role="switch">`. Package is `toggle`. | [switch.md](./docs/components/switch.md) |
+| Table | `table` | `Table`, `Head`, `Body`, `Row`, `Header`, `Cell` | Data table; each sub-component carries the `bleed` / `dense` / `grid` / `striped` flags it needs. | [table.md](./docs/components/table.md) |
+| Tabs | `tabs` | `Tabs`, `List`, `Tab`, `Panel` | Tabbed navigation with two drivers — set `Mode` to `ModeServer` (htmx) or `ModeAlpine`. | [tabs.md](./docs/components/tabs.md) |
+| Textarea | `textarea` | `Textarea` | Multi-line input; resizable by default, `NonResizable` when layout owns sizing. | [textarea.md](./docs/components/textarea.md) |
+| Toast | `toast` | `Container` | Ephemeral notifications. Render `Container` once in layout; fire via `flint:toast` window event (Alpine) or `HX-Trigger` header (htmx). | [toast.md](./docs/components/toast.md) |
+| Tooltip | `tooltip` | `Tooltip` | Hover- and focus-activated hint bubble over a trigger. | [tooltip.md](./docs/components/tooltip.md) |
+
+> **DatePicker** is deferred — `<input type="date">` covers most dashboard cases.
 
 ## Tailwind
 
@@ -99,21 +148,6 @@ Non-negotiable:
 - **Accessibility preserved.** ARIA attributes, focus management, and keyboard behavior track the Catalyst source.
 
 See [`flintcraft-ui-conversion-guide.md`](./flintcraft-ui-conversion-guide.md) for the full rules and the semantic token contract.
-
-## Component roadmap
-
-- [x] Button
-- [x] Input (+ InputGroup, Fieldset, FieldGroup, Field, Label, Description, ErrorMessage)
-- [x] Select (package `selectbox` — `select` is a Go reserved keyword)
-- [x] Textarea
-- [x] Checkbox
-- [x] Badge
-- [x] Table, Heading, Card, Alert
-- [x] Modal, Dropdown, Tabs, Toast
-- [x] Tooltip, Accordion, Slide-over, Copy-to-Clipboard, Popover, Pagination, Breadcrumbs
-- [x] Combobox, Command Palette
-- [x] Avatar (+ AvatarButton), Radio, Switch, Divider, Description List
-- [ ] DatePicker (deferred; native `<input type="date">` covers most cases)
 
 ## License
 
