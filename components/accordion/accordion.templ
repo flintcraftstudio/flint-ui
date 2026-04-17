@@ -1,0 +1,191 @@
+// Package accordion provides disclosure panels — click a trigger to reveal
+// its paired content. From-scratch design (Catalyst has no accordion.tsx).
+//
+// Two interaction types:
+//
+//   - TypeMultiple (default): each panel toggles independently. Natural
+//     for settings groups or reference material where the reader may want
+//     several panels open at once.
+//
+//   - TypeSingle: opening a panel closes whichever was previously open.
+//     Natural for FAQs or mobile navigation where focus should stay on
+//     one item.
+//
+// State lives in Alpine, centralized on the Accordion root. The root owns
+// `active` (an array of open Item names) and a `toggle(n)` method; child
+// components reference both via the inherited x-data scope. Centralizing
+// the state is what lets TypeSingle close the previously-open item when
+// a new one opens.
+//
+// Accordion is always Alpine-driven — no ModeServer variant. Which panels
+// are expanded is local, ephemeral UI state; if you need server state to
+// dictate which section is visible, reach for Tabs (ModeServer) instead.
+//
+// Collapse animation (smooth height transitions) requires the Alpine
+// Collapse plugin: load @alpinejs/collapse before alpinejs core. The
+// Panel emits `x-collapse`; without the plugin Alpine silently ignores
+// the directive and panels snap open/closed via plain x-show. Same
+// progressive-enhancement pattern as @alpinejs/focus on Modal/Dropdown.
+//
+// A11y: each Trigger is a <button> with aria-expanded + aria-controls;
+// each Panel is a <div role="region"> with id + aria-labelledby; the
+// button is wrapped in an <h3> by default (override via Item.HeadingLevel
+// 1-6) so the document outline stays correct.
+package accordion
+
+// Type controls whether multiple panels can be open at once. TypeMultiple
+// is the zero value — each panel toggles independently.
+type Type string
+
+const (
+	TypeMultiple Type = "multiple"
+	TypeSingle   Type = "single"
+)
+
+// Props controls the Accordion root.
+//
+// Defaults:
+//   - Type     = TypeMultiple (each panel independent)
+//
+// Default (empty string) opens nothing on first render.
+type Props struct {
+	Type    Type
+	Default string
+	Class   string
+	Attrs   templ.Attributes
+}
+
+// Accordion is the root. Owns the Alpine state and renders a vertical
+// list of Items as children. No visual chrome of its own beyond a
+// flex-col; Items carry the borders.
+templ Accordion(p Props) {
+	<div
+		x-data={ alpineData(p) }
+		class={ rootClasses(p) }
+		{ p.Attrs... }
+	>
+		{ children... }
+	</div>
+}
+
+// ItemProps controls a single disclosure pair.
+//
+// Name is required and must be stable (URL/id-safe characters). It
+// derives the trigger/panel IDs and drives the Alpine toggle.
+//
+// HeadingLevel picks the <h1>..<h6> tag wrapping the Trigger button,
+// so the accordion fits the surrounding document outline. Zero value
+// defaults to 3.
+type ItemProps struct {
+	Name         string
+	HeadingLevel int
+	Class        string
+	Attrs        templ.Attributes
+}
+
+// Item wraps a Trigger and a Panel. Doesn't emit its own Alpine state —
+// state is on the Accordion root, keyed by Name.
+templ Item(p ItemProps) {
+	<div class={ itemClasses(p) } { p.Attrs... }>
+		{ children... }
+	</div>
+}
+
+// TriggerProps controls a single Trigger button.
+//
+// Name must mirror the parent Item's Name — same rule as tabs.TabProps.
+// Disabled renders a native disabled button; the panel stays closed
+// regardless of the root's active array.
+type TriggerProps struct {
+	Name         string
+	HeadingLevel int
+	Disabled     bool
+	Class        string
+	Attrs        templ.Attributes
+}
+
+// Trigger renders the header button inside its paired heading. Children
+// is the trigger's label — usually plain text, but can include a Badge
+// or icon. A chevron is appended automatically and rotates on open.
+templ Trigger(p TriggerProps) {
+	@triggerHeading(resolveHeadingLevel(p.HeadingLevel)) {
+		<button
+			type="button"
+			id={ triggerID(p.Name) }
+			aria-controls={ panelID(p.Name) }
+			x-bind:aria-expanded={ alpineIsOpenExpr(p.Name) }
+			x-on:click={ alpineToggleExpr(p.Name) }
+			disabled?={ p.Disabled }
+			class={ triggerClasses(p) }
+			{ p.Attrs... }
+		>
+			<span class="flex-1 text-left">
+				{ children... }
+			</span>
+			@chevron(p.Name)
+		</button>
+	}
+}
+
+// triggerHeading switches on the level and renders the matching heading
+// tag. templ doesn't support dynamic tag names; same pattern as the
+// heading package's element helper.
+templ triggerHeading(level int) {
+	switch level {
+		case 1:
+			<h1 class="m-0">{ children... }</h1>
+		case 2:
+			<h2 class="m-0">{ children... }</h2>
+		case 4:
+			<h4 class="m-0">{ children... }</h4>
+		case 5:
+			<h5 class="m-0">{ children... }</h5>
+		case 6:
+			<h6 class="m-0">{ children... }</h6>
+		default:
+			<h3 class="m-0">{ children... }</h3>
+	}
+}
+
+// chevron is the trailing indicator on every Trigger. Rotates 180° when
+// its Item is open. class="shrink-0" keeps it from being squeezed by a
+// long trigger label.
+templ chevron(name string) {
+	<svg
+		viewBox="0 0 20 20"
+		fill="currentColor"
+		aria-hidden="true"
+		class="ml-2 size-5 shrink-0 transition-transform"
+		x-bind:class={ alpineChevronExpr(name) }
+	>
+		<path fill-rule="evenodd" d="M5.22 7.22a.75.75 0 0 1 1.06 0L10 10.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 8.28a.75.75 0 0 1 0-1.06z" clip-rule="evenodd"/>
+	</svg>
+}
+
+// PanelProps controls a single Panel region.
+//
+// Name must mirror the parent Item's Name.
+type PanelProps struct {
+	Name  string
+	Class string
+	Attrs templ.Attributes
+}
+
+// Panel renders the collapsible region. x-show toggles visibility;
+// x-collapse (from @alpinejs/collapse) smooths the height transition
+// when the plugin is loaded, otherwise Alpine silently no-ops the
+// directive and the panel snaps open/closed.
+templ Panel(p PanelProps) {
+	<div
+		id={ panelID(p.Name) }
+		role="region"
+		aria-labelledby={ triggerID(p.Name) }
+		x-show={ alpineIsOpenExpr(p.Name) }
+		x-collapse
+		x-cloak
+		class={ panelClasses(p) }
+		{ p.Attrs... }
+	>
+		{ children... }
+	</div>
+}

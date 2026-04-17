@@ -1,0 +1,137 @@
+package templates
+
+import (
+	"github.com/flintcraft/flint-ui/components/accordion"
+	"github.com/flintcraft/flint-ui/components/badge"
+)
+
+templ Accordions() {
+	<div class="space-y-12">
+		@pageHeader("Accordion", "Disclosure panels with a clickable header and a collapsible body. TypeMultiple (default) lets each panel toggle independently; TypeSingle closes the previously-open panel when a new one opens. Alpine owns the state; loading @alpinejs/collapse enables the smooth height animation (already loaded by the showcase layout).")
+
+		@section("Multiple (default)", "Each panel toggles independently. Good for settings groups or reference material where the reader may want several panels open at once.") {
+			<div class="max-w-2xl">
+				@accordion.Accordion(accordion.Props{}) {
+					@accordion.Item(accordion.ItemProps{Name: "materials"}) {
+						@accordion.Trigger(accordion.TriggerProps{Name: "materials"}) {
+							What materials are included?
+						}
+						@accordion.Panel(accordion.PanelProps{Name: "materials"}) {
+							Seamless aluminum gutter stock, all hangers, end caps, outlets, and downspouts. Color is chosen at the walk-through. Any structural repairs to fascia or soffit are billed separately after inspection.
+						}
+					}
+					@accordion.Item(accordion.ItemProps{Name: "timing"}) {
+						@accordion.Trigger(accordion.TriggerProps{Name: "timing"}) {
+							How far out are you booking?
+						}
+						@accordion.Panel(accordion.PanelProps{Name: "timing"}) {
+							Two to three weeks for most residential work; same-week for emergency leaks if we have a crew free. Commercial jobs are scheduled individually.
+						}
+					}
+					@accordion.Item(accordion.ItemProps{Name: "warranty"}) {
+						@accordion.Trigger(accordion.TriggerProps{Name: "warranty"}) {
+							Is the work warrantied?
+						}
+						@accordion.Panel(accordion.PanelProps{Name: "warranty"}) {
+							Ten-year workmanship warranty. Material warranty passes through from the manufacturer (typically 20–30 years on seamless aluminum).
+						}
+					}
+				}
+			</div>
+		}
+
+		@section("Single", "Opening a panel closes whichever was open before. Good for FAQs and mobile nav where focus should stay on one item.") {
+			<div class="max-w-2xl">
+				@accordion.Accordion(accordion.Props{Type: accordion.TypeSingle}) {
+					@accordion.Item(accordion.ItemProps{Name: "quote"}) {
+						@accordion.Trigger(accordion.TriggerProps{Name: "quote"}) {
+							How do I get a quote?
+						}
+						@accordion.Panel(accordion.PanelProps{Name: "quote"}) {
+							Submit the contact form with a photo of the affected area, or call the office. We schedule a free on-site estimate within three business days.
+						}
+					}
+					@accordion.Item(accordion.ItemProps{Name: "payment"}) {
+						@accordion.Trigger(accordion.TriggerProps{Name: "payment"}) {
+							What payment methods do you accept?
+						}
+						@accordion.Panel(accordion.PanelProps{Name: "payment"}) {
+							Check, ACH, and all major cards. Larger jobs are usually split 50% on start and 50% on completion.
+						}
+					}
+					@accordion.Item(accordion.ItemProps{Name: "area"}) {
+						@accordion.Trigger(accordion.TriggerProps{Name: "area"}) {
+							What area do you service?
+						}
+						@accordion.Panel(accordion.PanelProps{Name: "area"}) {
+							Missoula, Hamilton, and the Bitterroot Valley as a primary service area. We've traveled as far as Polson for commercial jobs — call the office and we'll work it out.
+						}
+					}
+				}
+			</div>
+		}
+
+		@section("Default open, with badges and a disabled item", "Props.Default picks the item that starts open. Triggers accept rich children — drop a Badge in alongside the label for status. Disabled triggers can't be toggled.") {
+			<div class="max-w-2xl">
+				@accordion.Accordion(accordion.Props{Default: "overview"}) {
+					@accordion.Item(accordion.ItemProps{Name: "overview"}) {
+						@accordion.Trigger(accordion.TriggerProps{Name: "overview"}) {
+							<span class="flex items-center gap-3">
+								Overview
+								@badge.Badge(badge.Props{Variant: badge.VariantSuccess}) { Active }
+							</span>
+						}
+						@accordion.Panel(accordion.PanelProps{Name: "overview"}) {
+							8 active jobs, 3 awaiting client approval, $12,400 outstanding across two open invoices.
+						}
+					}
+					@accordion.Item(accordion.ItemProps{Name: "crew"}) {
+						@accordion.Trigger(accordion.TriggerProps{Name: "crew"}) {
+							<span class="flex items-center gap-3">
+								Crew assignments
+								@badge.Badge(badge.Props{Variant: badge.VariantWarning}) { 2 unassigned }
+							</span>
+						}
+						@accordion.Panel(accordion.PanelProps{Name: "crew"}) {
+							Two jobs this week still need a crew assigned. Open Schedule to reassign or add a shift.
+						}
+					}
+					@accordion.Item(accordion.ItemProps{Name: "archive"}) {
+						@accordion.Trigger(accordion.TriggerProps{Name: "archive", Disabled: true}) {
+							<span class="flex items-center gap-3">
+								Archive
+								@badge.Badge(badge.Props{Variant: badge.VariantMuted}) { Coming soon }
+							</span>
+						}
+						@accordion.Panel(accordion.PanelProps{Name: "archive"}) {
+							Archived jobs view arrives in phase 2.
+						}
+					}
+				}
+			</div>
+		}
+
+		@section("HeadingLevel", "The trigger button is wrapped in a heading for document outline purposes. Default h3 suits most dashboard uses; override per Item when the surrounding page demands a different level.") {
+			<div class="max-w-2xl">
+				@accordion.Accordion(accordion.Props{}) {
+					@accordion.Item(accordion.ItemProps{Name: "h2-example"}) {
+						@accordion.Trigger(accordion.TriggerProps{Name: "h2-example", HeadingLevel: 2}) {
+							Rendered as h2
+						}
+						@accordion.Panel(accordion.PanelProps{Name: "h2-example"}) {
+							Inspect the DOM — the trigger sits inside an &lt;h2&gt;. Use this when the accordion is the top-level content on a page with no other headings above it.
+						}
+					}
+					@accordion.Item(accordion.ItemProps{Name: "h4-example"}) {
+						@accordion.Trigger(accordion.TriggerProps{Name: "h4-example", HeadingLevel: 4}) {
+							Rendered as h4
+						}
+						@accordion.Panel(accordion.PanelProps{Name: "h4-example"}) {
+							Use this when the accordion sits inside a section that already uses h3.
+						}
+					}
+				}
+			</div>
+		}
+	</div>
+}
