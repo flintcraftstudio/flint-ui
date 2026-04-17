@@ -36,6 +36,8 @@ func main() {
 	mux.Handle("GET /headings", page("Heading", "headings", templates.Headings()))
 	mux.Handle("GET /modals", page("Modal", "modals", templates.Modals()))
 	mux.Handle("GET /dropdowns", page("Dropdown", "dropdowns", templates.Dropdowns()))
+	mux.Handle("GET /tabs", page("Tabs", "tabs", templates.Tabs()))
+	mux.Handle("GET /tabs/job", http.HandlerFunc(tabsJobHandler))
 
 	mux.Handle("GET /tables/detail", http.HandlerFunc(tablesDetailHandler))
 
@@ -119,6 +121,23 @@ func tablesDetailHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(
 		`<span class="text-success">loaded detail for: ` + name + `</span>`,
 	))
+}
+
+// tabsJobHandler re-renders the server-mode tabs section for the htmx
+// showcase. Each tab click hits this with ?tab=X; the handler returns
+// the whole JobTabsServer fragment so htmx can outerHTML-swap it into
+// the same #server-tabs-root container.
+func tabsJobHandler(w http.ResponseWriter, r *http.Request) {
+	tab := r.URL.Query().Get("tab")
+	switch tab {
+	case "overview", "crew", "billing":
+	default:
+		tab = "overview"
+	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if err := templates.JobTabsServer(tab).Render(r.Context(), w); err != nil {
+		slog.Error("render error", "path", r.URL.Path, "err", err)
+	}
 }
 
 func checkboxesSubmitHandler(w http.ResponseWriter, r *http.Request) {

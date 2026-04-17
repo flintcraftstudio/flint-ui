@@ -1,0 +1,142 @@
+package templates
+
+import (
+	"github.com/flintcraft/flint-ui/components/badge"
+	"github.com/flintcraft/flint-ui/components/button"
+	"github.com/flintcraft/flint-ui/components/tabs"
+)
+
+templ Tabs() {
+	<div class="space-y-12">
+		@pageHeader("Tabs", "Tabbed sections in two interaction modes. ModeAlpine pre-renders every panel and toggles visibility client-side — instant, no roundtrip. ModeServer renders only the active panel; each Tab swaps the whole tabs section via htmx, so the server stays the source of truth when actions in one tab affect content in another.")
+
+		@section("Alpine mode (default)", "Each panel is rendered up front; clicking a tab is an Alpine state change. Try ArrowLeft / ArrowRight / Home / End on the tab list — focus rotates and activates, skipping disabled tabs.") {
+			@tabs.Tabs(tabs.Props{Mode: tabs.ModeAlpine, Active: "overview"}) {
+				@tabs.List(tabs.ListProps{Mode: tabs.ModeAlpine}) {
+					@tabs.Tab(tabs.TabProps{Name: "overview", Mode: tabs.ModeAlpine, Active: "overview"}) { Overview }
+					@tabs.Tab(tabs.TabProps{Name: "schedule", Mode: tabs.ModeAlpine, Active: "overview"}) { Schedule }
+					@tabs.Tab(tabs.TabProps{Name: "invoices", Mode: tabs.ModeAlpine, Active: "overview"}) { Invoices }
+					@tabs.Tab(tabs.TabProps{Name: "archive", Mode: tabs.ModeAlpine, Active: "overview", Disabled: true}) { Archive (locked) }
+				}
+				@tabs.Panel(tabs.PanelProps{Name: "overview", Active: "overview"}) {
+					<div class="space-y-3">
+						<h3 class="text-base font-semibold text-foreground">Henderson Ranch — overview</h3>
+						<p class="text-sm text-muted-foreground">8 active jobs, 3 awaiting client approval, $12,400 outstanding across two open invoices.</p>
+					</div>
+				}
+				@tabs.Panel(tabs.PanelProps{Name: "schedule", Active: "overview"}) {
+					<div class="space-y-3">
+						<h3 class="text-base font-semibold text-foreground">This week</h3>
+						<ul class="space-y-1 text-sm text-muted-foreground">
+							<li>Tue 4/22 — Crew A — gutters install (4hr)</li>
+							<li>Wed 4/23 — Crew B — siding repair (full day)</li>
+							<li>Fri 4/25 — Crew A — followup walkthrough (1hr)</li>
+						</ul>
+					</div>
+				}
+				@tabs.Panel(tabs.PanelProps{Name: "invoices", Active: "overview"}) {
+					<div class="space-y-3">
+						<h3 class="text-base font-semibold text-foreground">Open invoices</h3>
+						<div class="flex items-center gap-3 text-sm">
+							<span class="font-mono text-foreground">#1028</span>
+							<span class="text-muted-foreground">$8,200</span>
+							@badge.Badge(badge.Props{Variant: badge.VariantWarning}) { 14 days overdue }
+						</div>
+						<div class="flex items-center gap-3 text-sm">
+							<span class="font-mono text-foreground">#1031</span>
+							<span class="text-muted-foreground">$4,200</span>
+							@badge.Badge(badge.Props{Variant: badge.VariantSuccess}) { Due Apr 28 }
+						</div>
+					</div>
+				}
+			}
+		}
+
+		@section("Server mode (htmx)", "Each tab is an htmx button that re-fetches the whole tabs section with the new active tab baked in. Use this when picking a tab needs fresh server state — not just a different view of pre-loaded data. The hx-target points at the tabs container itself; clicking swaps it via outerHTML.") {
+			<div id="server-tabs-mount">
+				@JobTabsServer("overview")
+			</div>
+		}
+
+		@section("Sub-component prop convention", "Like modal.SubProps.Alert, each sub-component (List, Tab, Panel) carries Mode and (where relevant) Active that must mirror the parent Tabs. Verbose, but explicit — and a per-page helper template can wrap the redundancy when a caller has many tabs.") {
+			<div class="text-sm text-muted-foreground">
+				Pattern: define a small wrapper in your project that takes <code class="rounded bg-muted px-1 py-0.5 text-xs">name, label, active</code> and forwards the rest to <code class="rounded bg-muted px-1 py-0.5 text-xs">tabs.Tab</code>. The Tabs component stays generic; your usage stays terse.
+			</div>
+		}
+	</div>
+}
+
+// JobTabsServer is the server-mode example. The /tabs/job?tab=X handler
+// re-renders this whole component with a new Active value, and htmx swaps
+// it into the same #server-tabs-mount container via outerHTML. The result:
+// each tab click is a server roundtrip, the tab pill highlight comes from
+// the freshly-server-rendered aria-selected, and any caller-side state
+// (e.g. recent edits in tab A) shows up in tab B because the server
+// rebuilt the world.
+templ JobTabsServer(active string) {
+	@tabs.Tabs(tabs.Props{
+		Mode:   tabs.ModeServer,
+		Active: active,
+		Attrs:  templ.Attributes{"id": "server-tabs-root"},
+	}) {
+		@tabs.List(tabs.ListProps{Mode: tabs.ModeServer}) {
+			@serverJobTab("overview", active, "Overview")
+			@serverJobTab("crew", active, "Crew")
+			@serverJobTab("billing", active, "Billing")
+		}
+		<div class="mt-4">
+			@serverJobPanel(active)
+		</div>
+	}
+}
+
+// serverJobTab is the per-page helper the showcase header alludes to —
+// it absorbs the Mode/Active redundancy so the tabs.List call stays
+// readable. Real client projects would write the equivalent.
+templ serverJobTab(name, active, label string) {
+	@tabs.Tab(tabs.TabProps{
+		Name:   name,
+		Mode:   tabs.ModeServer,
+		Active: active,
+		Attrs: templ.Attributes{
+			"hx-get":    "/tabs/job?tab=" + name,
+			"hx-target": "#server-tabs-root",
+			"hx-swap":   "outerHTML",
+		},
+	}) {
+		{ label }
+	}
+}
+
+templ serverJobPanel(active string) {
+	switch active {
+		case "overview":
+			<div role="tabpanel" class="space-y-2">
+				<h3 class="text-base font-semibold text-foreground">Job #1834 — Henderson Ranch</h3>
+				<p class="text-sm text-muted-foreground">Server-rendered overview. Each tab swap re-fetches this section with fresh data — handy when an action in another tab changes what should appear here.</p>
+			</div>
+		case "crew":
+			<div role="tabpanel" class="space-y-2">
+				<h3 class="text-base font-semibold text-foreground">Assigned crew</h3>
+				<ul class="space-y-1 text-sm text-muted-foreground">
+					<li>Marcus L. — lead, 6yr</li>
+					<li>Devon T. — installer, 3yr</li>
+					<li>Riley K. — apprentice, 6mo</li>
+				</ul>
+				<div class="pt-2">
+					@button.Button(button.Props{Outline: true}) { Reassign }
+				</div>
+			</div>
+		case "billing":
+			<div role="tabpanel" class="space-y-2">
+				<h3 class="text-base font-semibold text-foreground">Billing</h3>
+				<p class="text-sm text-muted-foreground">Estimate $14,200 · Invoiced $8,200 · Paid $0</p>
+				<div class="pt-2 flex gap-2">
+					@button.Button(button.Props{Variant: button.VariantPrimary}) { Send invoice }
+					@button.Button(button.Props{Plain: true}) { Adjust estimate }
+				</div>
+			</div>
+		default:
+			<div role="tabpanel" class="text-sm text-muted-foreground">Unknown tab.</div>
+	}
+}

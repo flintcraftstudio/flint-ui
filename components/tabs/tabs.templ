@@ -1,0 +1,208 @@
+// Package tabs provides tabbed interfaces in two interaction modes.
+//
+// ModeAlpine (default): every panel is server-rendered up front; Alpine's
+// x-show toggles which one is visible based on the active tab. Switching
+// is instant — no roundtrip. Pick this when each tab's content is static
+// or cheap to render with whatever the page already has in scope.
+//
+// ModeServer: the tablist and the active panel are server-rendered; each
+// Tab carries hx-* attrs (caller-provided via Attrs) that swap a fresh
+// server-rendered tabs section into the same hx-target. Pick this when
+// content depends on server state that other tabs' actions can mutate
+// (a form in tab A changes what tab B should show) — the server stays
+// the source of truth, every tab switch reflects the latest state.
+//
+// Both modes follow the WAI-ARIA Tabs Pattern: role="tablist" containing
+// role="tab"s, panels with role="tabpanel" linked via aria-controls and
+// aria-labelledby, only-active tab is tabindex=0 (roving tabindex).
+//
+// Keyboard navigation in ModeAlpine: ArrowLeft/ArrowRight rotate focus
+// AND activation, Home/End jump to first/last. Disabled tabs are skipped.
+// ModeServer relies on native Tab-key focus between buttons; arrow-key
+// roving with htmx activation is left for a future version.
+//
+// Sub-components (List, Tab, Panel) carry Mode and (where relevant)
+// Active that must match the parent Tabs — same convention as
+// modal.SubProps.Alert.
+package tabs
+
+// Mode picks the interaction model. ModeAlpine is the zero value.
+type Mode string
+
+const (
+	ModeAlpine Mode = "alpine"
+	ModeServer Mode = "server"
+)
+
+// Props controls the outer Tabs container.
+//
+// Active is required: in ModeAlpine it sets the initial active tab; in
+// ModeServer it is the currently-active tab and drives aria-selected /
+// tabindex on the rendered HTML.
+type Props struct {
+	Mode   Mode
+	Active string
+	Class  string
+	Attrs  templ.Attributes
+}
+
+// Tabs renders the outer container. In ModeAlpine the root carries
+// `x-data="{ active, moveTab() }"` so List's keyboard handlers can call
+// moveTab. In ModeServer the root carries `data-tabs-active` for
+// inspectability but no Alpine state.
+templ Tabs(p Props) {
+	if p.Mode == ModeServer {
+		<div data-tabs-active={ p.Active } class={ rootClasses(p) } { p.Attrs... }>
+			{ children... }
+		</div>
+	} else {
+		<div x-data={ alpineData(p.Active) } class={ rootClasses(p) } { p.Attrs... }>
+			{ children... }
+		</div>
+	}
+}
+
+// ListProps wraps the row of Tabs. Mode controls whether Alpine keyboard
+// handlers are wired up.
+type ListProps struct {
+	Mode  Mode
+	Class string
+	Attrs templ.Attributes
+}
+
+// List is the role="tablist" wrapper. ModeAlpine adds keyboard handlers
+// (Arrow keys, Home, End) that delegate to moveTab on the parent x-data.
+templ List(p ListProps) {
+	if p.Mode == ModeServer {
+		<div role="tablist" class={ listClasses(p) } { p.Attrs... }>
+			{ children... }
+		</div>
+	} else {
+		<div
+			role="tablist"
+			x-on:keydown.right.prevent="moveTab(1)"
+			x-on:keydown.left.prevent="moveTab(-1)"
+			x-on:keydown.home.prevent="moveTab('first')"
+			x-on:keydown.end.prevent="moveTab('last')"
+			class={ listClasses(p) }
+			{ p.Attrs... }
+		>
+			{ children... }
+		</div>
+	}
+}
+
+// TabProps controls one tab button.
+//
+// Name is required and must be stable; it identifies the tab in
+// aria-controls / aria-labelledby and (in ModeAlpine) is what the active
+// state is compared against. Active mirrors the parent's Active so the
+// server can render aria-selected / tabindex correctly on first paint —
+// even in ModeAlpine, where Alpine takes over via x-bind once it loads,
+// this prevents a brief unselected flash.
+type TabProps struct {
+	Name     string
+	Mode     Mode
+	Active   string
+	Disabled bool
+	Class    string
+	Attrs    templ.Attributes
+}
+
+// Tab dispatches to one of two internal templates so the Alpine and
+// server paths can carry different attribute sets without conditional
+// attributes (which templ doesn't support inside a single element).
+templ Tab(p TabProps) {
+	if p.Mode == ModeServer {
+		@serverTab(p) {
+			{ children... }
+		}
+	} else {
+		@alpineTab(p) {
+			{ children... }
+		}
+	}
+}
+
+templ serverTab(p TabProps) {
+	<button
+		type="button"
+		role="tab"
+		id={ tabID(p.Name) }
+		data-tab-name={ p.Name }
+		aria-controls={ panelID(p.Name) }
+		aria-selected={ ariaSelected(p.Active == p.Name) }
+		tabindex={ tabindexAttr(p.Active == p.Name) }
+		class={ tabClasses(p) }
+		disabled?={ p.Disabled }
+		{ p.Attrs... }
+	>
+		{ children... }
+	</button>
+}
+
+templ alpineTab(p TabProps) {
+	<button
+		type="button"
+		role="tab"
+		id={ tabID(p.Name) }
+		data-tab-name={ p.Name }
+		aria-controls={ panelID(p.Name) }
+		aria-selected={ ariaSelected(p.Active == p.Name) }
+		tabindex={ tabindexAttr(p.Active == p.Name) }
+		x-bind:aria-selected={ alpineSelectedExpr(p.Name) }
+		x-bind:tabindex={ alpineTabindexExpr(p.Name) }
+		x-on:click={ alpineClickExpr(p.Name) }
+		class={ tabClasses(p) }
+		disabled?={ p.Disabled }
+		{ p.Attrs... }
+	>
+		{ children... }
+	</button>
+}
+
+// PanelProps controls a single panel. PanelProps is only meaningful in
+// ModeAlpine — in ModeServer the active panel is rendered directly by
+// the caller (no Panel component needed).
+//
+// Active mirrors the parent's Active. The panel sets x-cloak when its
+// Name doesn't match Active so non-active panels start hidden via the
+// [x-cloak] CSS rule, preventing the briefly-all-visible flash before
+// Alpine evaluates x-show.
+type PanelProps struct {
+	Name   string
+	Active string
+	Class  string
+	Attrs  templ.Attributes
+}
+
+// Panel renders one tabpanel. Use one Panel per Tab in ModeAlpine; their
+// Names must match. Hidden / shown by Alpine's x-show after init.
+templ Panel(p PanelProps) {
+	if p.Active != p.Name {
+		<div
+			role="tabpanel"
+			id={ panelID(p.Name) }
+			aria-labelledby={ tabID(p.Name) }
+			x-show={ alpineShowExpr(p.Name) }
+			x-cloak
+			tabindex="0"
+			class={ panelClasses(p) }
+			{ p.Attrs... }
+		>
+			{ children... }
+		</div>
+	} else {
+		<div
+			role="tabpanel"
+			id={ panelID(p.Name) }
+			aria-labelledby={ tabID(p.Name) }
+			x-show={ alpineShowExpr(p.Name) }
+			tabindex="0"
+			class={ panelClasses(p) }
+			{ p.Attrs... }
+		>
+			{ children... }
+		</div>
+	}
+}
