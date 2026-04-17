@@ -40,6 +40,7 @@ func main() {
 	mux.Handle("GET /tabs/job", http.HandlerFunc(tabsJobHandler))
 	mux.Handle("GET /toasts", page("Toast", "toasts", templates.Toasts()))
 	mux.Handle("POST /toasts/echo", http.HandlerFunc(toastsEchoHandler))
+	mux.Handle("GET /tooltips", page("Tooltip", "tooltips", templates.Tooltips()))
 
 	mux.Handle("GET /tables/detail", http.HandlerFunc(tablesDetailHandler))
 

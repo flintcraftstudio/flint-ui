@@ -40,4 +40,10 @@ var NavSections = []struct {
 			{Slug: "toasts", Title: "Toast", Phase: "3"},
 		},
 	},
+	{
+		Heading: "Utility",
+		Items: []NavItem{
+			{Slug: "tooltips", Title: "Tooltip", Phase: "4"},
+		},
+	},
 }

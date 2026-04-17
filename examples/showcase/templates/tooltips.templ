@@ -1,0 +1,121 @@
+package templates
+
+import (
+	"github.com/flintcraft/flint-ui/components/button"
+	"github.com/flintcraft/flint-ui/components/input"
+	"github.com/flintcraft/flint-ui/components/tooltip"
+)
+
+templ Tooltips() {
+	<div class="space-y-12">
+		@pageHeader("Tooltip", "Hover- and focus-activated hint bubble over a trigger. Wrap any trigger in tooltip.Tooltip; pass the hint as Props.Label and a unique ID. The caller sets aria-describedby={ID} on the actual focusable element so screen readers announce the hint on focus. Escape dismisses; mouseleave / blur dismiss too.")
+
+		@section("Icon button hints", "The classic use case — a tight row of icon-only buttons where the tooltip supplies the label. Try hovering and also Tab-ing through with your keyboard.") {
+			<div class="flex flex-wrap items-center gap-3">
+				@tooltip.Tooltip(tooltip.Props{ID: "tip-archive", Label: "Archive job"}) {
+					@button.Button(button.Props{Plain: true, Attrs: templ.Attributes{"aria-describedby": "tip-archive", "aria-label": "Archive"}}) {
+						@iconArchive()
+					}
+				}
+				@tooltip.Tooltip(tooltip.Props{ID: "tip-duplicate", Label: "Duplicate job"}) {
+					@button.Button(button.Props{Plain: true, Attrs: templ.Attributes{"aria-describedby": "tip-duplicate", "aria-label": "Duplicate"}}) {
+						@iconCopy()
+					}
+				}
+				@tooltip.Tooltip(tooltip.Props{ID: "tip-share", Label: "Share with client"}) {
+					@button.Button(button.Props{Plain: true, Attrs: templ.Attributes{"aria-describedby": "tip-share", "aria-label": "Share"}}) {
+						@iconShare()
+					}
+				}
+				@tooltip.Tooltip(tooltip.Props{ID: "tip-delete", Label: "Delete — this can't be undone"}) {
+					@button.Button(button.Props{Plain: true, Class: "text-danger", Attrs: templ.Attributes{"aria-describedby": "tip-delete", "aria-label": "Delete"}}) {
+						@iconTrash()
+					}
+				}
+			</div>
+		}
+
+		@section("Anchor positioning", "Tooltip anchors are always center-aligned on the perpendicular axis. Pick the side that keeps the bubble inside the viewport — top is the conventional default.") {
+			<div class="flex flex-wrap items-center justify-center gap-16 py-8">
+				@tooltip.Tooltip(tooltip.Props{ID: "tip-top", Label: "Top anchor", Anchor: tooltip.AnchorTop}) {
+					@button.Button(button.Props{Outline: true, Attrs: templ.Attributes{"aria-describedby": "tip-top"}}) { Top }
+				}
+				@tooltip.Tooltip(tooltip.Props{ID: "tip-bottom", Label: "Bottom anchor", Anchor: tooltip.AnchorBottom}) {
+					@button.Button(button.Props{Outline: true, Attrs: templ.Attributes{"aria-describedby": "tip-bottom"}}) { Bottom }
+				}
+				@tooltip.Tooltip(tooltip.Props{ID: "tip-left", Label: "Left anchor", Anchor: tooltip.AnchorLeft}) {
+					@button.Button(button.Props{Outline: true, Attrs: templ.Attributes{"aria-describedby": "tip-left"}}) { Left }
+				}
+				@tooltip.Tooltip(tooltip.Props{ID: "tip-right", Label: "Right anchor", Anchor: tooltip.AnchorRight}) {
+					@button.Button(button.Props{Outline: true, Attrs: templ.Attributes{"aria-describedby": "tip-right"}}) { Right }
+				}
+			</div>
+		}
+
+		@section("Long-form hints", "Tooltips have a sensible max-width and wrap naturally. Override via Class if a specific use needs a wider or narrower bubble. Keep the text short — if you need more, reach for Popover instead (future).") {
+			<div class="flex flex-wrap items-center gap-3">
+				@tooltip.Tooltip(tooltip.Props{ID: "tip-retention", Label: "Records are retained for seven years to meet Montana contractor-licensing requirements. Export any time before deleting."}) {
+					@button.Button(button.Props{Outline: true, Attrs: templ.Attributes{"aria-describedby": "tip-retention"}}) { Retention policy }
+				}
+				@tooltip.Tooltip(tooltip.Props{ID: "tip-wider", Label: "Widened bubble", Class: "max-w-md"}) {
+					@button.Button(button.Props{Outline: true, Attrs: templ.Attributes{"aria-describedby": "tip-wider"}}) { Wider via Class }
+				}
+			</div>
+		}
+
+		@section("On form inputs", "Tooltips attach to any focusable element, not just buttons. Because focusin/focusout bubble from the input, the wrapper captures focus events without any extra wiring on the input itself.") {
+			<div class="max-w-sm">
+				<label for="tooltip-invoice" class="mb-1 block text-sm font-medium">Invoice number</label>
+				@tooltip.Tooltip(tooltip.Props{ID: "tip-invoice-format", Label: "Format: YYYY-### — the year plus a three-digit counter.", Anchor: tooltip.AnchorRight}) {
+					@input.Input(input.Props{
+						Name:        "invoice",
+						ID:          "tooltip-invoice",
+						Placeholder: "2026-042",
+						Attrs: templ.Attributes{
+							"aria-describedby": "tip-invoice-format",
+						},
+					})
+				}
+			</div>
+		}
+
+		@section("aria-describedby linkage", "The tooltip bubble carries role=\"tooltip\" and an id matching Props.ID. The caller attaches aria-describedby={ID} on the actual focusable element so screen readers announce the hint when the trigger gains focus. Without this, the tooltip is visual-only.") {
+			<pre class="overflow-x-auto rounded-md bg-muted p-4 text-xs text-foreground">{ `@tooltip.Tooltip(tooltip.Props{ID: "tip-save", Label: "Save draft"}) {
+    @button.Button(button.Props{
+        Attrs: templ.Attributes{
+            "aria-describedby": "tip-save",
+        },
+    }) { Save }
+}` }</pre>
+		}
+	</div>
+}
+
+// Inline icons used only by the Tooltip showcase. Kept local so the tooltip
+// package itself stays icon-free.
+
+templ iconArchive() {
+	<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5">
+		<path d="M2 3a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3z"/>
+		<path fill-rule="evenodd" d="M3 8h14v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8zm5 2a.75.75 0 0 0 0 1.5h4a.75.75 0 0 0 0-1.5H8z" clip-rule="evenodd"/>
+	</svg>
+}
+
+templ iconCopy() {
+	<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5">
+		<path d="M7 3.5A1.5 1.5 0 0 1 8.5 2h3.879a1.5 1.5 0 0 1 1.06.44l3.122 3.12A1.5 1.5 0 0 1 17 6.622V12.5a1.5 1.5 0 0 1-1.5 1.5H8.5A1.5 1.5 0 0 1 7 12.5v-9z"/>
+		<path d="M4.5 6A1.5 1.5 0 0 0 3 7.5v9A1.5 1.5 0 0 0 4.5 18h7a1.5 1.5 0 0 0 1.5-1.5v-1.5h-4A2.5 2.5 0 0 1 6.5 12.5v-6.5h-2z"/>
+	</svg>
+}
+
+templ iconShare() {
+	<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5">
+		<path d="M13 4.5a2.5 2.5 0 1 1 .702 1.737L6.97 9.604a2.518 2.518 0 0 1 0 .792l6.733 3.367a2.5 2.5 0 1 1-.671 1.341l-6.733-3.367a2.5 2.5 0 1 1 0-3.475l6.733-3.366A2.52 2.52 0 0 1 13 4.5z"/>
+	</svg>
+}
+
+templ iconTrash() {
+	<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5">
+		<path fill-rule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022.841 10.518A2.75 2.75 0 0 0 7.596 19h4.807a2.75 2.75 0 0 0 2.742-2.53l.841-10.52.149.023a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5zM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4zM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5z" clip-rule="evenodd"/>
+	</svg>
+}

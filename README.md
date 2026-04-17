@@ -105,12 +105,16 @@ See [`flintcraft-ui-conversion-guide.md`](./flintcraft-ui-conversion-guide.md) f
 - [x] Button
 - [x] Input (+ InputGroup, Fieldset, FieldGroup, Field, Label, Description, ErrorMessage)
 - [x] Select (package `selectbox` — `select` is a Go reserved keyword)
-- [ ] Textarea
-- [ ] Checkbox
-- [ ] Badge
-- [ ] Table, Card, Alert, Heading
-- [ ] Modal, Dropdown, Tabs, Toast
-- [ ] DatePicker, Combobox, Pagination, Breadcrumbs
+- [x] Textarea
+- [x] Checkbox
+- [x] Badge
+- [x] Table, Heading
+- [ ] Card, Alert
+- [x] Modal, Dropdown, Tabs, Toast
+- [x] Tooltip
+- [ ] Accordion, Slide-over, Copy-to-Clipboard
+- [ ] Popover, Pagination, Breadcrumbs (+ extract shared `floating/` package)
+- [ ] Combobox, Command Palette, DatePicker
 
 ## License
 

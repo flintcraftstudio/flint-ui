@@ -310,12 +310,33 @@ These require Alpine.js for local state.
 
 ### Phase 4: Specialized (convert as needed)
 
-Build these only when a client project requires them.
+Build these only when a client project requires them. Order reflects usefulness-per-complexity — earlier items are cheap and widely applicable, later items are heavy and narrow.
 
-15. **DatePicker** — for scheduling tools.
-16. **Combobox** — searchable select for long lists.
-17. **Pagination** — for long tables.
-18. **Breadcrumbs** — for nested navigation.
+**Foundational gaps** (surfaced by Pines catalog review; Catalyst doesn't ship them):
+
+15. **Tooltip** — hover/focus hint over any trigger. Small Alpine x-data, `aria-describedby`, no portal needed for most cases. Universal utility.
+16. **Accordion** — disclosure panel for FAQs, settings groups, mobile nav. Trivial Alpine state, `aria-expanded` + `aria-controls`. High value on brochure sites.
+17. **Slide-over** — side drawer for filters, detail panes, mobile nav. Reuses Modal's teleport + `x-trap.inert.noscroll` + event-driven open pattern; only the enter/leave transition changes (translate-x vs scale).
+18. **Copy-to-Clipboard** — trigger + clipboard write + transient "copied" state. Tiny Alpine primitive; common for share links, API keys, wallet addresses.
+19. **Popover** — click-anchored floating panel with arbitrary content (not a menu). Shares anchor/positioning logic with Dropdown — extract a shared `components/floating/` helper (anchor enum, transition classes per anchor, `x-on:click.outside`) before building Popover so Dropdown/Tooltip/Popover/HoverCard don't each reinvent it.
+
+**From the original roadmap:**
+
+20. **Pagination** — table companion; server-driven links with current-page styling.
+21. **Breadcrumbs** — nested-navigation trail, last item unlinked.
+22. **Combobox** — searchable select for long lists. Non-trivial keyboard nav; uses the same Alpine Focus plugin pattern as Dropdown.
+23. **Command Palette** — cmd+K search across app actions. High-impact for admin dashboards; complex (keyboard nav, fuzzy match, section grouping). Build only when an admin tool warrants it.
+24. **DatePicker** — for scheduling tools. Heaviest component in the set; consider whether a native `<input type="date">` wrapped with flint-ui styling covers 80% of cases before building a full calendar grid.
+
+**Shared infrastructure to build alongside:**
+
+- `components/floating/` — anchor positioning + transition classes, consumed by Dropdown (refactor), Tooltip, Popover, HoverCard.
+- Anchor-aware Dropdown transitions — current Dropdown uses uniform opacity+scale; a `bottom-end` menu should slide down, a `top-start` menu should slide up. Pick this up when extracting `floating/`.
+
+**Explicitly out of scope:**
+
+- Marketing section blocks (heros, pricing tables, footers). These belong in per-client site scaffolds, not in a shared component library — every client's hero needs to look different on purpose.
+- Copy-paste HTML snippet model (Pines-style). flint-ui's templ-package model is the intentional alternative; it's what makes consistent rebranding via semantic tokens possible.
 
 ## Implementation Rules for the Coding Agent
 
