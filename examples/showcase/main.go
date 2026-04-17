@@ -45,6 +45,7 @@ func main() {
 	mux.Handle("GET /tooltips", page("Tooltip", "tooltips", templates.Tooltips()))
 	mux.Handle("GET /accordions", page("Accordion", "accordions", templates.Accordions()))
 	mux.Handle("GET /slideovers", page("Slide-over", "slideovers", templates.Slideovers()))
+	mux.Handle("GET /clipboards", page("Clipboard", "clipboards", templates.Clipboards()))
 
 	mux.Handle("GET /tables/detail", http.HandlerFunc(tablesDetailHandler))
 

@@ -1,0 +1,111 @@
+package templates
+
+import (
+	"github.com/flintcraft/flint-ui/components/button"
+	"github.com/flintcraft/flint-ui/components/clipboard"
+)
+
+templ Clipboards() {
+	<div class="space-y-12">
+		@pageHeader("Copy-to-Clipboard", "Tiny Alpine primitive for API keys, share links, and inline values. clipboard.Copy wraps any trigger and exposes { copied, copy() } to its children via Alpine's inherited scope. The component is a wrapper, not an opinionated button — pick whichever trigger and feedback pattern fits your UI.")
+
+		@section("Icon swap", "The most common pattern: an icon-only button that swaps copy → check when clicked, reverting after two seconds.") {
+			<div class="flex flex-wrap items-center gap-6">
+				<code class="rounded-md bg-muted px-3 py-2 font-mono text-sm text-foreground">wlg-live-abc123xyz</code>
+				@clipboard.Copy(clipboard.Props{Value: "wlg-live-abc123xyz"}) {
+					@button.Button(button.Props{
+						Plain: true,
+						Attrs: templ.Attributes{
+							"x-on:click": "copy()",
+							"aria-label": "Copy API key",
+						},
+					}) {
+						<span x-show="!copied" x-cloak>
+							@copyIcon()
+						</span>
+						<span x-show="copied" x-cloak class="text-success">
+							@checkIcon()
+						</span>
+					}
+				}
+			</div>
+		}
+
+		@section("Text swap", "A labeled button that changes its text during the two-second feedback window. Good when the trigger needs to be discoverable — the copy action has a verb, not just an icon.") {
+			<div class="flex flex-wrap items-center gap-3">
+				@clipboard.Copy(clipboard.Props{Value: "https://flintcraft.studio/lead/7a2e8c"}) {
+					@button.Button(button.Props{
+						Outline: true,
+						Attrs:   templ.Attributes{"x-on:click": "copy()"},
+					}) {
+						<span x-show="!copied" x-cloak>Copy share link</span>
+						<span x-show="copied" x-cloak>Copied</span>
+					}
+				}
+			</div>
+		}
+
+		@section("Inline with displayed value", "A common shape for API key rows, wallet addresses, and license keys: the value itself is visible in a code block, with a small copy button at the trailing edge. The code block is its own element; the copy component just wraps the trigger.") {
+			<div class="max-w-md">
+				<label for="live-key" class="text-sm font-medium text-foreground">Live API key</label>
+				<div class="mt-1 flex items-center gap-2 rounded-md border border-border bg-muted/40 px-3 py-2">
+					<code id="live-key" class="flex-1 truncate font-mono text-sm text-foreground">flint_live_sk_8a3f9c2d7e1b4f6a0c5d8e9f2a1b3c4d</code>
+					@clipboard.Copy(clipboard.Props{Value: "flint_live_sk_8a3f9c2d7e1b4f6a0c5d8e9f2a1b3c4d"}) {
+						@button.Button(button.Props{
+							Plain: true,
+							Attrs: templ.Attributes{
+								"x-on:click": "copy()",
+								"aria-label": "Copy API key",
+							},
+						}) {
+							<span x-show="!copied" x-cloak>
+								@copyIcon()
+							</span>
+							<span x-show="copied" x-cloak class="text-success">
+								@checkIcon()
+							</span>
+						}
+					}
+				</div>
+				<p class="mt-2 text-xs text-muted-foreground">Rotate your keys every 90 days from the Settings → API page.</p>
+			</div>
+		}
+
+		@section("Screen reader feedback", "Add aria-live=\"polite\" on a visible element tied to the copied state so screen readers announce the confirmation. The component doesn't render this automatically because the right placement depends on your UI.") {
+			<pre class="overflow-x-auto rounded-md bg-muted p-4 text-xs text-foreground">{ `@clipboard.Copy(clipboard.Props{Value: "abc123"}) {
+    @button.Button(button.Props{
+        Attrs: templ.Attributes{"x-on:click": "copy()"},
+    }) {
+        <span x-show="!copied">Copy</span>
+        <span x-show="copied">Copied</span>
+    }
+    <span aria-live="polite" class="sr-only"
+          x-text="copied ? 'Copied to clipboard' : ''"></span>
+}` }</pre>
+		}
+
+		@section("Error handling", "On insecure contexts (http outside localhost) the Clipboard API rejects. The component dispatches a clipboard-error event on the wrapper with the attempted value as detail — wire a listener if you need to handle the failure.") {
+			<pre class="overflow-x-auto rounded-md bg-muted p-4 text-xs text-foreground">{ `@clipboard.Copy(clipboard.Props{
+    Value: "abc123",
+    Attrs: templ.Attributes{
+        "x-on:clipboard-error": "$dispatch('flint:toast', { variant: 'danger', title: 'Copy failed' })",
+    },
+}) {
+    ...
+}` }</pre>
+		}
+	</div>
+}
+
+templ copyIcon() {
+	<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5">
+		<path d="M7 3.5A1.5 1.5 0 0 1 8.5 2h3.879a1.5 1.5 0 0 1 1.06.44l3.122 3.12A1.5 1.5 0 0 1 17 6.622V12.5a1.5 1.5 0 0 1-1.5 1.5H8.5A1.5 1.5 0 0 1 7 12.5v-9z"/>
+		<path d="M4.5 6A1.5 1.5 0 0 0 3 7.5v9A1.5 1.5 0 0 0 4.5 18h7a1.5 1.5 0 0 0 1.5-1.5v-1.5h-4A2.5 2.5 0 0 1 6.5 12.5v-6.5h-2z"/>
+	</svg>
+}
+
+templ checkIcon() {
+	<svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="size-5">
+		<path fill-rule="evenodd" d="M16.7 5.7a.75.75 0 0 0-1.04-1.08l-7.74 7.45-2.8-2.7a.75.75 0 1 0-1.04 1.08l3.32 3.2a.75.75 0 0 0 1.04 0l8.26-7.95z" clip-rule="evenodd"/>
+	</svg>
+}

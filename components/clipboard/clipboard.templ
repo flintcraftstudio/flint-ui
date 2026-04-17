@@ -1,0 +1,86 @@
+// Package clipboard provides a Copy wrapper that writes a value to the
+// system clipboard on demand. Tiny Alpine primitive for API keys, share
+// links, wallet addresses, and similar copy-me-please patterns.
+//
+// Architecture: the wrapper is an inline span with x-data exposing
+// { copied, copy() }. Children reference those identifiers via Alpine's
+// inherited scope:
+//
+//	@clipboard.Copy(clipboard.Props{Value: "wlg-live-abc123"}) {
+//	    @button.Button(button.Props{
+//	        Plain: true,
+//	        Attrs: templ.Attributes{"x-on:click": "copy()"},
+//	    }) {
+//	        <span x-show="!copied">Copy</span>
+//	        <span x-show="copied" class="text-success">Copied</span>
+//	    }
+//	}
+//
+// The value rides on a data-value attribute; copy() reads it via
+// this.$el.dataset.value so the x-data expression itself is a constant
+// string. templ handles HTML-attribute escaping automatically, which
+// sidesteps every "what if Value contains a quote" concern — the value
+// never gets embedded in a JS string literal.
+//
+// A11y: the component doesn't render a trigger of its own, so there's
+// no prescribed a11y pattern. Callers should either (a) add
+// aria-label="Copy X" on their trigger when the visible text alone
+// doesn't describe the action, or (b) include aria-live="polite" on a
+// visible element that reflects the copied state — without it, screen
+// reader users get no feedback on click.
+//
+// Browser requirements: navigator.clipboard.writeText requires a secure
+// context (https or localhost). On insecure contexts the Promise
+// rejects silently — consider adding an error-path handler via a
+// x-on:copy-error listener if this is a concern for your deployment.
+package clipboard
+
+// alpineData is the constant x-data expression. Reads the value from
+// `data-value` on the root element (this.$el.dataset.value) instead of
+// embedding it in the JS source, so the expression is value-agnostic
+// and templ's HTML escaping handles any special characters in the
+// value.
+const alpineData = `{
+	copied: false,
+	copy() {
+		const v = this.$el.dataset.value;
+		navigator.clipboard.writeText(v).then(() => {
+			this.copied = true;
+			setTimeout(() => { this.copied = false }, 2000);
+		}).catch(() => {
+			this.$dispatch('clipboard-error', v);
+		});
+	}
+}`
+
+// Props controls the Copy wrapper.
+//
+// Value is the text that copy() writes to the clipboard. Required.
+type Props struct {
+	Value string
+	Class string
+	Attrs templ.Attributes
+}
+
+// Copy wraps a trigger and provides Alpine state ({ copied, copy() })
+// to its children via inherited scope. The wrapper itself is an inline
+// span so it doesn't disrupt surrounding layout — pass Class to widen
+// or restyle it if needed.
+templ Copy(p Props) {
+	<span
+		x-data={ alpineData }
+		data-value={ p.Value }
+		class={ wrapperClass(p) }
+		{ p.Attrs... }
+	>
+		{ children... }
+	</span>
+}
+
+func wrapperClass(p Props) string {
+	base := "inline-flex items-center"
+	if p.Class != "" {
+		return base + " " + p.Class
+	}
+	return base
+}

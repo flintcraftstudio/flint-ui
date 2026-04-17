@@ -48,6 +48,7 @@ var NavSections = []struct {
 			{Slug: "tooltips", Title: "Tooltip", Phase: "4"},
 			{Slug: "accordions", Title: "Accordion", Phase: "4"},
 			{Slug: "slideovers", Title: "Slide-over", Phase: "4"},
+			{Slug: "clipboards", Title: "Copy-to-Clipboard", Phase: "4"},
 		},
 	},
 }
