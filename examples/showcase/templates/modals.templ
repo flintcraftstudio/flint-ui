@@ -1,0 +1,173 @@
+package templates
+
+import (
+	"github.com/flintcraft/flint-ui/components/button"
+	"github.com/flintcraft/flint-ui/components/input"
+	"github.com/flintcraft/flint-ui/components/fieldset"
+	"github.com/flintcraft/flint-ui/components/modal"
+	"github.com/flintcraft/flint-ui/components/textarea"
+)
+
+templ Modals() {
+	<div class="space-y-12">
+		@pageHeader("Modal", "Dialog and alert overlays. One component covers both Catalyst primitives — set Alert for the compact confirm layout, leave it off for the larger dialog with slide-up on mobile. State lives in Alpine; open via $dispatch('flint:modal-open', 'name'). Requires x-data on a common ancestor (typically <body>) so Alpine processes the trigger's x-on:click.")
+
+		@section("Dialog", "Catalyst's default dialog. Larger panel, slide-up transition on mobile, scale-in on sm+. Trigger with any element that dispatches the open event.") {
+			<div class="flex flex-wrap items-center gap-3">
+				@button.Button(button.Props{
+					Attrs: templ.Attributes{"x-on:click": "$dispatch('flint:modal-open', 'schedule-job')"},
+				}) { Schedule job }
+				<span class="text-sm text-muted-foreground">Opens a full form dialog — try ESC and clicking the backdrop.</span>
+			</div>
+			@scheduleJobDialog()
+		}
+
+		@section("Alert (confirmation)", "Compact, centered on mobile, lighter backdrop. Use for destructive confirms and short yes/no decisions — anything where the body is a single question.") {
+			<div class="flex flex-wrap items-center gap-3">
+				@button.Button(button.Props{
+					Variant: button.VariantDanger,
+					Attrs:   templ.Attributes{"x-on:click": "$dispatch('flint:modal-open', 'delete-invoice')"},
+				}) { Delete invoice }
+				<span class="text-sm text-muted-foreground">Destructive action with a hard confirm.</span>
+			</div>
+			@deleteInvoiceAlert()
+		}
+
+		@section("Sizes", "Panel width at sm+. Below sm the panel fills the viewport regardless of size. Dialog defaults to lg; Alert defaults to md.") {
+			<div class="flex flex-wrap items-center gap-3">
+				@button.Button(button.Props{
+					Outline: true,
+					Attrs:   templ.Attributes{"x-on:click": "$dispatch('flint:modal-open', 'size-sm')"},
+				}) { Small }
+				@button.Button(button.Props{
+					Outline: true,
+					Attrs:   templ.Attributes{"x-on:click": "$dispatch('flint:modal-open', 'size-lg')"},
+				}) { Large }
+				@button.Button(button.Props{
+					Outline: true,
+					Attrs:   templ.Attributes{"x-on:click": "$dispatch('flint:modal-open', 'size-3xl')"},
+				}) { Extra wide }
+			</div>
+			@sizeDemo("size-sm", modal.SizeSM, "Small")
+			@sizeDemo("size-lg", modal.SizeLG, "Large")
+			@sizeDemo("size-3xl", modal.Size3XL, "Extra wide")
+		}
+
+		@section("Multiple modals on one page", "Each modal has a unique name; dispatching with that name opens just that one. Global $dispatch('flint:modal-close') closes every open modal — handy after an htmx form submit.") {
+			<div class="flex flex-wrap items-center gap-3">
+				@button.Button(button.Props{
+					Plain: true,
+					Attrs: templ.Attributes{"x-on:click": "$dispatch('flint:modal-open', 'modal-a')"},
+				}) { Open A }
+				@button.Button(button.Props{
+					Plain: true,
+					Attrs: templ.Attributes{"x-on:click": "$dispatch('flint:modal-open', 'modal-b')"},
+				}) { Open B }
+				@button.Button(button.Props{
+					Outline: true,
+					Attrs:   templ.Attributes{"x-on:click": "$dispatch('flint:modal-close')"},
+				}) { Close all }
+			</div>
+			@namedModal("modal-a", "Modal A", "Opened by name. Only the button that dispatches 'modal-a' brings me up.")
+			@namedModal("modal-b", "Modal B", "Independent of Modal A. Dispatching 'flint:modal-close' without a detail closes both of us.")
+		}
+	</div>
+}
+
+templ scheduleJobDialog() {
+	@modal.Modal(modal.Props{Name: "schedule-job"}) {
+		@modal.Title(modal.SubProps{}) { Schedule a job }
+		@modal.Description(modal.SubProps{}) {
+			Pick the crew and timeframe. The client will be notified once you confirm.
+		}
+		@modal.Body(modal.SubProps{}) {
+			<form class="space-y-4">
+				@fieldset.Field(fieldset.Props{}) {
+					@fieldset.Label(fieldset.LabelProps{For: "schedule-client"}) { Client }
+					@input.Input(input.Props{
+						Name:        "client",
+						Placeholder: "e.g. Henderson Ranch",
+						Attrs:       templ.Attributes{"id": "schedule-client"},
+					})
+				}
+				@fieldset.Field(fieldset.Props{}) {
+					@fieldset.Label(fieldset.LabelProps{For: "schedule-date"}) { Date }
+					@input.Input(input.Props{
+						Name:  "date",
+						Type:  "date",
+						Attrs: templ.Attributes{"id": "schedule-date"},
+					})
+				}
+				@fieldset.Field(fieldset.Props{}) {
+					@fieldset.Label(fieldset.LabelProps{For: "schedule-notes"}) { Notes }
+					@textarea.Textarea(textarea.Props{
+						Name:        "notes",
+						Rows:        3,
+						Placeholder: "Crew assignment, gear needed, access instructions…",
+						Attrs:       templ.Attributes{"id": "schedule-notes"},
+					})
+				}
+			</form>
+		}
+		@modal.Actions(modal.SubProps{}) {
+			@button.Button(button.Props{
+				Plain: true,
+				Attrs: templ.Attributes{"x-on:click": "open = false"},
+			}) { Cancel }
+			@button.Button(button.Props{
+				Attrs: templ.Attributes{"x-on:click": "open = false"},
+			}) { Schedule }
+		}
+	}
+}
+
+templ deleteInvoiceAlert() {
+	@modal.Modal(modal.Props{Name: "delete-invoice", Alert: true}) {
+		@modal.Title(modal.SubProps{Alert: true}) { Delete invoice #1028? }
+		@modal.Description(modal.SubProps{Alert: true}) {
+			This will remove the invoice from the client's ledger. You can't undo this.
+		}
+		@modal.Actions(modal.SubProps{Alert: true}) {
+			@button.Button(button.Props{
+				Plain: true,
+				Attrs: templ.Attributes{"x-on:click": "open = false"},
+			}) { Cancel }
+			@button.Button(button.Props{
+				Variant: button.VariantDanger,
+				Attrs:   templ.Attributes{"x-on:click": "open = false"},
+			}) { Delete }
+		}
+	}
+}
+
+templ sizeDemo(name string, size modal.Size, label string) {
+	@modal.Modal(modal.Props{Name: name, Size: size}) {
+		@modal.Title(modal.SubProps{}) { { label } dialog }
+		@modal.Description(modal.SubProps{}) {
+			The panel caps at the size you picked on sm+. Resize the viewport below the sm breakpoint and it fills the width regardless.
+		}
+		@modal.Body(modal.SubProps{}) {
+			<p class="text-sm/6 text-foreground">
+				This content scrolls if it overflows the viewport. The backdrop stays fixed and body scroll is locked while the modal is open.
+			</p>
+		}
+		@modal.Actions(modal.SubProps{}) {
+			@button.Button(button.Props{
+				Attrs: templ.Attributes{"x-on:click": "open = false"},
+			}) { Close }
+		}
+	}
+}
+
+templ namedModal(name, title, body string) {
+	@modal.Modal(modal.Props{Name: name, Alert: true}) {
+		@modal.Title(modal.SubProps{Alert: true}) { { title } }
+		@modal.Description(modal.SubProps{Alert: true}) { { body } }
+		@modal.Actions(modal.SubProps{Alert: true}) {
+			@button.Button(button.Props{
+				Plain: true,
+				Attrs: templ.Attributes{"x-on:click": "open = false"},
+			}) { Close }
+		}
+	}
+}

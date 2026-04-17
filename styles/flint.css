@@ -55,3 +55,12 @@
 @custom-variant data-active (&:active, &[data-active]);
 @custom-variant data-disabled (&:disabled, &[data-disabled], &[aria-disabled="true"]);
 @custom-variant data-invalid (&:user-invalid, &[data-invalid], &[aria-invalid="true"]);
+
+/*
+  Alpine x-cloak: hide elements until Alpine initializes. Used by any flint-ui
+  component with Alpine state that needs FOUC prevention — Modal, Dropdown,
+  and any caller-authored Alpine component. Alpine strips the x-cloak
+  attribute on init, which unhides the element and hands display control to
+  x-show / x-if.
+*/
+[x-cloak] { display: none !important; }

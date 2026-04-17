@@ -1,0 +1,153 @@
+// Package modal provides Catalyst-style dialog and alert overlays. Converted
+// from catalyst-ui-kit/typescript/dialog.tsx and alert.tsx — both share the
+// same backdrop + panel structure with Alert rendering a smaller, centered
+// panel. A single component handles both: set Props.Alert = true for the
+// compact layout.
+//
+// State lives in Alpine. The caller opens the modal by dispatching a window
+// event:
+//
+//	<button x-on:click="$dispatch('flint:modal-open', 'delete-invoice')">
+//	    Delete
+//	</button>
+//
+// and closes it with ESC, a backdrop click, any button inside the modal with
+// x-on:click="open = false", or by dispatching 'flint:modal-close' (omit the
+// detail to close every modal; pass the name to target one).
+//
+// The modal teleports to <body> to escape stacking contexts. This means a
+// parent with transform / overflow:hidden / filter won't break positioning.
+//
+// Focus management requires the Alpine Focus plugin. The panel uses
+// x-trap.inert.noscroll to trap Tab, mark siblings inert, and lock body
+// scroll while open — matching Headless UI's behavior in the Catalyst
+// original. Load @alpinejs/focus BEFORE alpinejs core in your page.
+package modal
+
+// Size controls the panel's max-width on the sm+ breakpoint. Below sm the
+// panel fills the viewport. Defaults: Dialog -> SizeLG, Alert -> SizeMD.
+type Size string
+
+const (
+	SizeXS  Size = "xs"
+	SizeSM  Size = "sm"
+	SizeMD  Size = "md"
+	SizeLG  Size = "lg"
+	SizeXL  Size = "xl"
+	Size2XL Size = "2xl"
+	Size3XL Size = "3xl"
+	Size4XL Size = "4xl"
+	Size5XL Size = "5xl"
+)
+
+// Props controls the outer Modal.
+//
+// Name is required and must be a stable identifier — callers dispatch
+// 'flint:modal-open' with this name to open the modal. Use URL-safe
+// characters only ([A-Za-z0-9_-]); the name is embedded in a JS string
+// literal so anything exotic will break parsing.
+//
+// Alert flips the layout to Catalyst's compact alert-dialog style:
+// smaller default size, tighter padding, centered title text on mobile,
+// fade-only (no slide-up) enter transition.
+type Props struct {
+	Name  string
+	Size  Size
+	Alert bool
+	Class string
+	Attrs templ.Attributes
+}
+
+// SubProps is the shared shape for Title / Description / Body / Actions.
+// Alert must match the parent Modal's Alert flag — the sub-components
+// render different classes for the two layouts (centered vs left-aligned
+// title, tighter margins for Alert).
+type SubProps struct {
+	Alert bool
+	Class string
+	Attrs templ.Attributes
+}
+
+// Modal renders the outer dialog: backdrop, grid, and panel. Children
+// render inside the panel; compose with Title / Description / Body / Actions.
+templ Modal(p Props) {
+	<template x-teleport="body">
+		<div
+			x-data={ alpineData(p.Name) }
+			x-on:flint:modal-open.window={ openHandler(p.Name) }
+			x-on:flint:modal-close.window={ closeHandler(p.Name) }
+			x-on:keydown.escape.window="open && (open = false)"
+			x-show="open"
+			x-cloak
+			class="fixed inset-0 z-50"
+		>
+			<div
+				x-show="open"
+				x-transition:enter="transition duration-100 ease-out"
+				x-transition:enter-start="opacity-0"
+				x-transition:enter-end="opacity-100"
+				x-transition:leave="transition duration-100 ease-in"
+				x-transition:leave-start="opacity-100"
+				x-transition:leave-end="opacity-0"
+				class={ backdropClasses(p) }
+				aria-hidden="true"
+			></div>
+			<div
+				class={ scrollClasses(p) }
+				role="dialog"
+				aria-modal="true"
+				x-on:click.self="open = false"
+			>
+				<div class={ gridClasses(p) } x-on:click.self="open = false">
+					<div
+						x-show="open"
+						x-trap.inert.noscroll="open"
+						x-transition:enter="transition duration-100 ease-out"
+						x-transition:enter-start={ panelHiddenClasses(p) }
+						x-transition:enter-end={ panelVisibleClasses() }
+						x-transition:leave="transition duration-100 ease-in"
+						x-transition:leave-start={ panelVisibleClasses() }
+						x-transition:leave-end={ panelHiddenClasses(p) }
+						class={ panelClasses(p) }
+						{ p.Attrs... }
+					>
+						{ children... }
+					</div>
+				</div>
+			</div>
+		</div>
+	</template>
+}
+
+// Title renders the dialog title. Use as an <h2>; set heading level via
+// SubProps.Attrs if your document outline needs something else.
+templ Title(p SubProps) {
+	<h2 class={ titleClasses(p) } { p.Attrs... }>
+		{ children... }
+	</h2>
+}
+
+// Description renders the short supporting copy that sits under the title.
+templ Description(p SubProps) {
+	<p class={ descriptionClasses(p) } { p.Attrs... }>
+		{ children... }
+	</p>
+}
+
+// Body wraps the main dialog content — forms, longer text, whatever sits
+// between the title/description and the actions footer.
+templ Body(p SubProps) {
+	<div class={ bodyClasses(p) } { p.Attrs... }>
+		{ children... }
+	</div>
+}
+
+// Actions is the footer row that holds the dialog's buttons. Catalyst
+// reverses order on mobile (primary on top) and switches to a right-aligned
+// row on sm+. Children should be flint-ui Buttons; they'll stretch full-width
+// on mobile via the `*:w-full` class, then shrink to their content on sm+.
+templ Actions(p SubProps) {
+	<div class={ actionsClasses(p) } { p.Attrs... }>
+		{ children... }
+	</div>
+}

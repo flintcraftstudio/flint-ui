@@ -11,9 +11,10 @@ templ Layout(title, current string, body templ.Component) {
 			<link rel="stylesheet" href="https://rsms.me/inter/inter.css"/>
 			<link rel="stylesheet" href="/static/css/showcase.css"/>
 			<script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+			<script src="https://unpkg.com/@alpinejs/focus@3.14.1/dist/cdn.min.js" defer></script>
 			<script src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js" defer></script>
 		</head>
-		<body class="min-h-screen">
+		<body x-data class="min-h-screen">
 			<div class="flex min-h-screen">
 				@sidebar(current)
 				<main class="flex-1 px-6 py-10 sm:px-10 lg:px-14">
