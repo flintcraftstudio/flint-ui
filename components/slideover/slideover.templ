@@ -1,0 +1,161 @@
+// Package slideover provides side drawer overlays — full-height panels
+// that slide in from the left or right edge of the viewport. From-scratch
+// design (Catalyst has no slideover.tsx). The implementation intentionally
+// mirrors modal's teleport + event-driven open + focus-trap patterns;
+// only the panel's layout and enter/leave transitions differ.
+//
+// State lives in Alpine. The caller opens a slideover by dispatching a
+// window event:
+//
+//	<button x-on:click="$dispatch('flint:slideover-open', 'job-filters')">
+//	    Filters
+//	</button>
+//
+// and closes it with ESC, a backdrop click, any button inside the panel
+// with x-on:click="open = false", or by dispatching
+// 'flint:slideover-close' (omit the detail to close every slideover on
+// the page; pass the name to target one).
+//
+// The panel teleports to <body> to escape stacking contexts — a parent
+// with transform / overflow:hidden / filter won't break positioning.
+// Focus trap + body-scroll lock require the Alpine Focus plugin; load
+// @alpinejs/focus BEFORE alpinejs core (same requirement as Modal and
+// Dropdown).
+//
+// Layout inside the panel is flex-col:
+//   - Title and Description sit at the top (natural flow, shrink-0).
+//   - Body is flex-1 overflow-y-auto — fills and scrolls.
+//   - Actions has mt-auto so it pins to the bottom of the panel
+//     regardless of content length.
+//
+// This is the one place Slideover's sub-component geometry differs from
+// Modal. A modal is a compact vertical stack; a slideover is a full-
+// height drawer where the scrollable body needs to know it's the flex
+// child.
+package slideover
+
+// Side picks which viewport edge the panel anchors to and slides from.
+type Side string
+
+const (
+	SideRight Side = "right" // default
+	SideLeft  Side = "left"
+)
+
+// Size controls the panel's max-width. Below sm the panel fills the
+// viewport width (w-screen); at sm+ it tops out at the chosen size so
+// long content pages don't turn into edge-to-edge walls of text.
+type Size string
+
+const (
+	SizeSM  Size = "sm"
+	SizeMD  Size = "md"
+	SizeLG  Size = "lg" // default
+	SizeXL  Size = "xl"
+	Size2XL Size = "2xl"
+)
+
+// Props controls the outer Slideover.
+//
+// Name is required and must be a stable identifier — callers dispatch
+// 'flint:slideover-open' with this name to open the panel. Use URL-safe
+// characters only ([A-Za-z0-9_-:.]); the name is embedded in a JS string
+// literal so anything exotic will break parsing.
+//
+// Side picks which edge the panel slides in from (default SideRight).
+// Size picks the max-width cap (default SizeLG).
+type Props struct {
+	Name  string
+	Side  Side
+	Size  Size
+	Class string
+	Attrs templ.Attributes
+}
+
+// SubProps is the shared shape for Title / Description / Body / Actions.
+type SubProps struct {
+	Class string
+	Attrs templ.Attributes
+}
+
+// Slideover renders the outer drawer: backdrop, edge-anchored flex
+// container, and panel. Children render inside the panel's flex-col;
+// compose with Title / Description / Body / Actions.
+templ Slideover(p Props) {
+	<template x-teleport="body">
+		<div
+			x-data={ alpineData(p.Name) }
+			x-on:flint:slideover-open.window={ openHandler(p.Name) }
+			x-on:flint:slideover-close.window={ closeHandler(p.Name) }
+			x-on:keydown.escape.window="open && (open = false)"
+			x-show="open"
+			x-cloak
+			class="fixed inset-0 z-50"
+		>
+			<div
+				x-show="open"
+				x-transition:enter="transition-opacity duration-200 ease-out"
+				x-transition:enter-start="opacity-0"
+				x-transition:enter-end="opacity-100"
+				x-transition:leave="transition-opacity duration-150 ease-in"
+				x-transition:leave-start="opacity-100"
+				x-transition:leave-end="opacity-0"
+				x-on:click="open = false"
+				class={ backdropClasses(p) }
+				aria-hidden="true"
+			></div>
+			<div class={ anchorClasses(p) } role="dialog" aria-modal="true">
+				<div
+					x-show="open"
+					x-trap.inert.noscroll="open"
+					x-transition:enter="transform transition duration-300 ease-out"
+					x-transition:enter-start={ panelHiddenClasses(p) }
+					x-transition:enter-end={ panelVisibleClasses() }
+					x-transition:leave="transform transition duration-200 ease-in"
+					x-transition:leave-start={ panelVisibleClasses() }
+					x-transition:leave-end={ panelHiddenClasses(p) }
+					class={ panelClasses(p) }
+					{ p.Attrs... }
+				>
+					{ children... }
+				</div>
+			</div>
+		</div>
+	</template>
+}
+
+// Title renders the drawer title. Use as an <h2>; set a different
+// heading level via SubProps.Attrs if your document outline needs it.
+// Does not shrink — sits in the panel's natural flow above Body.
+templ Title(p SubProps) {
+	<h2 class={ titleClasses(p) } { p.Attrs... }>
+		{ children... }
+	</h2>
+}
+
+// Description renders the short supporting copy that sits under the
+// title.
+templ Description(p SubProps) {
+	<p class={ descriptionClasses(p) } { p.Attrs... }>
+		{ children... }
+	</p>
+}
+
+// Body is the flex-1 scrollable middle region. Content that doesn't fit
+// the viewport scrolls within the body — the panel itself never scrolls,
+// so Title at the top and Actions at the bottom stay in place.
+templ Body(p SubProps) {
+	<div class={ bodyClasses(p) } { p.Attrs... }>
+		{ children... }
+	</div>
+}
+
+// Actions is the footer row that holds the drawer's buttons. mt-auto
+// pins it to the bottom of the panel if Body is shorter than the
+// viewport or absent. Children should be flint-ui Buttons; they stretch
+// full-width on mobile and shrink to content at sm+, matching Modal.
+templ Actions(p SubProps) {
+	<div class={ actionsClasses(p) } { p.Attrs... }>
+		{ children... }
+	</div>
+}

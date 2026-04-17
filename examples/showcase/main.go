@@ -42,6 +42,7 @@ func main() {
 	mux.Handle("POST /toasts/echo", http.HandlerFunc(toastsEchoHandler))
 	mux.Handle("GET /tooltips", page("Tooltip", "tooltips", templates.Tooltips()))
 	mux.Handle("GET /accordions", page("Accordion", "accordions", templates.Accordions()))
+	mux.Handle("GET /slideovers", page("Slide-over", "slideovers", templates.Slideovers()))
 
 	mux.Handle("GET /tables/detail", http.HandlerFunc(tablesDetailHandler))
 

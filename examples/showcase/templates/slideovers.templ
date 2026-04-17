@@ -1,0 +1,225 @@
+package templates
+
+import (
+	"github.com/flintcraft/flint-ui/components/badge"
+	"github.com/flintcraft/flint-ui/components/button"
+	"github.com/flintcraft/flint-ui/components/checkbox"
+	"github.com/flintcraft/flint-ui/components/fieldset"
+	"github.com/flintcraft/flint-ui/components/input"
+	"github.com/flintcraft/flint-ui/components/slideover"
+)
+
+templ Slideovers() {
+	<div class="space-y-12">
+		@pageHeader("Slide-over", "Side drawers for filters, detail panes, and mobile nav. Shares Modal's teleport + event-driven open + focus-trap plumbing; the differences are a full-height edge-anchored panel and horizontal slide transitions. Dispatch $dispatch('flint:slideover-open', 'name') to open by name.")
+
+		@section("Right drawer (default)", "Filters pane sliding in from the right — the standard dashboard pattern. Title + Description sit at the top, Body is flex-1 and scrolls, Actions pin to the bottom via mt-auto.") {
+			<div class="flex flex-wrap items-center gap-3">
+				@button.Button(button.Props{
+					Outline: true,
+					Attrs:   templ.Attributes{"x-on:click": "$dispatch('flint:slideover-open', 'job-filters')"},
+				}) { Filter jobs }
+				<span class="text-sm text-muted-foreground">Try ESC, backdrop click, and tabbing through to see the focus trap.</span>
+			</div>
+			@jobFiltersDrawer()
+		}
+
+		@section("Left drawer", "Side = slideover.SideLeft anchors to the left edge and slides in from the left. Useful for mobile navigation where the burger menu lives top-left.") {
+			<div class="flex flex-wrap items-center gap-3">
+				@button.Button(button.Props{
+					Plain: true,
+					Attrs: templ.Attributes{"x-on:click": "$dispatch('flint:slideover-open', 'mobile-nav')"},
+				}) { Open nav }
+			</div>
+			@mobileNavDrawer()
+		}
+
+		@section("Sizes", "Max-width at sm+. Below sm the panel fills the viewport width regardless of Size. Default is Size.LG.") {
+			<div class="flex flex-wrap items-center gap-3">
+				@button.Button(button.Props{
+					Outline: true,
+					Attrs:   templ.Attributes{"x-on:click": "$dispatch('flint:slideover-open', 'size-sm')"},
+				}) { Small }
+				@button.Button(button.Props{
+					Outline: true,
+					Attrs:   templ.Attributes{"x-on:click": "$dispatch('flint:slideover-open', 'size-lg')"},
+				}) { Large }
+				@button.Button(button.Props{
+					Outline: true,
+					Attrs:   templ.Attributes{"x-on:click": "$dispatch('flint:slideover-open', 'size-2xl')"},
+				}) { Extra wide }
+			</div>
+			@sizeDrawer("size-sm", slideover.SizeSM, "Small drawer")
+			@sizeDrawer("size-lg", slideover.SizeLG, "Large drawer")
+			@sizeDrawer("size-2xl", slideover.Size2XL, "Extra-wide drawer")
+		}
+
+		@section("Detail pane (long body)", "When the body overflows the viewport, only the Body scrolls — Title and Actions stay pinned. Good for client detail views with notes, timelines, activity logs.") {
+			<div class="flex flex-wrap items-center gap-3">
+				@button.Button(button.Props{
+					Attrs: templ.Attributes{"x-on:click": "$dispatch('flint:slideover-open', 'job-detail')"},
+				}) { View job detail }
+			</div>
+			@jobDetailDrawer()
+		}
+	</div>
+}
+
+templ jobFiltersDrawer() {
+	@slideover.Slideover(slideover.Props{Name: "job-filters"}) {
+		@slideover.Title(slideover.SubProps{}) { Filter jobs }
+		@slideover.Description(slideover.SubProps{}) {
+			Narrow the list by crew, status, and date range.
+		}
+		@slideover.Body(slideover.SubProps{}) {
+			<form class="space-y-6">
+				@fieldset.Fieldset(fieldset.Props{}) {
+					@fieldset.Legend(fieldset.Props{}) { Status }
+					@fieldset.FieldGroup(fieldset.Props{}) {
+						@checkbox.CheckboxField(checkbox.GroupProps{}) {
+							@checkbox.Checkbox(checkbox.Props{ID: "status-scheduled", Name: "status", Value: "scheduled", Checked: true})
+							@fieldset.Label(fieldset.LabelProps{For: "status-scheduled"}) { Scheduled }
+						}
+						@checkbox.CheckboxField(checkbox.GroupProps{}) {
+							@checkbox.Checkbox(checkbox.Props{ID: "status-in-progress", Name: "status", Value: "in-progress", Checked: true})
+							@fieldset.Label(fieldset.LabelProps{For: "status-in-progress"}) { In progress }
+						}
+						@checkbox.CheckboxField(checkbox.GroupProps{}) {
+							@checkbox.Checkbox(checkbox.Props{ID: "status-awaiting", Name: "status", Value: "awaiting-approval"})
+							@fieldset.Label(fieldset.LabelProps{For: "status-awaiting"}) { Awaiting approval }
+						}
+						@checkbox.CheckboxField(checkbox.GroupProps{}) {
+							@checkbox.Checkbox(checkbox.Props{ID: "status-completed", Name: "status", Value: "completed"})
+							@fieldset.Label(fieldset.LabelProps{For: "status-completed"}) { Completed }
+						}
+					}
+				}
+				@fieldset.Field(fieldset.Props{}) {
+					@fieldset.Label(fieldset.LabelProps{For: "filter-from"}) { From }
+					@input.Input(input.Props{
+						Name: "from",
+						Type: "date",
+						ID:   "filter-from",
+					})
+				}
+				@fieldset.Field(fieldset.Props{}) {
+					@fieldset.Label(fieldset.LabelProps{For: "filter-to"}) { To }
+					@input.Input(input.Props{
+						Name: "to",
+						Type: "date",
+						ID:   "filter-to",
+					})
+				}
+			</form>
+		}
+		@slideover.Actions(slideover.SubProps{}) {
+			@button.Button(button.Props{
+				Plain: true,
+				Attrs: templ.Attributes{"x-on:click": "open = false"},
+			}) { Cancel }
+			@button.Button(button.Props{
+				Attrs: templ.Attributes{"x-on:click": "open = false"},
+			}) { Apply filters }
+		}
+	}
+}
+
+templ mobileNavDrawer() {
+	@slideover.Slideover(slideover.Props{Name: "mobile-nav", Side: slideover.SideLeft, Size: slideover.SizeSM}) {
+		@slideover.Title(slideover.SubProps{}) { Navigation }
+		@slideover.Body(slideover.SubProps{}) {
+			<nav class="flex flex-col gap-1 text-sm">
+				<a href="#" class="rounded-md px-3 py-2 text-foreground hover:bg-muted">Dashboard</a>
+				<a href="#" class="rounded-md px-3 py-2 text-foreground hover:bg-muted">Jobs</a>
+				<a href="#" class="rounded-md px-3 py-2 text-foreground hover:bg-muted">Invoices</a>
+				<a href="#" class="rounded-md px-3 py-2 text-foreground hover:bg-muted">Clients</a>
+				<a href="#" class="rounded-md px-3 py-2 text-foreground hover:bg-muted">Crew</a>
+				<a href="#" class="rounded-md px-3 py-2 text-foreground hover:bg-muted">Settings</a>
+			</nav>
+		}
+	}
+}
+
+templ sizeDrawer(name string, size slideover.Size, label string) {
+	@slideover.Slideover(slideover.Props{Name: name, Size: size}) {
+		@slideover.Title(slideover.SubProps{}) { { label } }
+		@slideover.Description(slideover.SubProps{}) {
+			The panel caps at the size you picked on sm+. Below sm it fills the viewport regardless.
+		}
+		@slideover.Body(slideover.SubProps{}) {
+			<p class="text-sm/6 text-foreground">
+				Body fills the vertical space between the title and the actions. Long content scrolls inside the body only.
+			</p>
+		}
+		@slideover.Actions(slideover.SubProps{}) {
+			@button.Button(button.Props{
+				Attrs: templ.Attributes{"x-on:click": "open = false"},
+			}) { Close }
+		}
+	}
+}
+
+templ jobDetailDrawer() {
+	@slideover.Slideover(slideover.Props{Name: "job-detail", Size: slideover.SizeXL}) {
+		@slideover.Title(slideover.SubProps{}) { Henderson Ranch — gutters install }
+		@slideover.Description(slideover.SubProps{}) {
+			Job #1834 · scheduled Tue 4/22 · Crew A
+		}
+		@slideover.Body(slideover.SubProps{}) {
+			<div class="space-y-6">
+				<div>
+					<h3 class="text-sm font-semibold text-foreground">Status</h3>
+					<div class="mt-2 flex items-center gap-2">
+						@badge.Badge(badge.Props{Variant: badge.VariantSuccess}) { Scheduled }
+						<span class="text-sm text-muted-foreground">Confirmed with client 4/18</span>
+					</div>
+				</div>
+				<div>
+					<h3 class="text-sm font-semibold text-foreground">Notes</h3>
+					<ul class="mt-2 space-y-2 text-sm text-muted-foreground">
+						<li>Seamless aluminum, color matched to fascia (espresso brown).</li>
+						<li>Access via north side of house — client will move the camper trailer the day before.</li>
+						<li>One downspout needs to drain to the new dry well; materials on-site.</li>
+						<li>Watch for the dog — friendly, but the client asked us to keep the gate latched.</li>
+					</ul>
+				</div>
+				<div>
+					<h3 class="text-sm font-semibold text-foreground">Timeline</h3>
+					<ul class="mt-2 space-y-2 text-sm text-muted-foreground">
+						<li><span class="font-mono text-xs">4/15</span> — Estimate sent ($4,200)</li>
+						<li><span class="font-mono text-xs">4/16</span> — Client signed proposal</li>
+						<li><span class="font-mono text-xs">4/17</span> — 50% deposit received</li>
+						<li><span class="font-mono text-xs">4/18</span> — Material order confirmed</li>
+						<li><span class="font-mono text-xs">4/22</span> — Install (planned)</li>
+					</ul>
+				</div>
+				<div>
+					<h3 class="text-sm font-semibold text-foreground">Crew</h3>
+					<ul class="mt-2 space-y-2 text-sm text-muted-foreground">
+						<li>Jaden Sturgis — lead</li>
+						<li>Marcus Lee — installer</li>
+						<li>Devon Ray — installer</li>
+					</ul>
+				</div>
+				<div>
+					<h3 class="text-sm font-semibold text-foreground">Materials</h3>
+					<ul class="mt-2 space-y-2 text-sm text-muted-foreground">
+						<li>180 ft 6" K-style gutter (espresso)</li>
+						<li>6 downspouts (3x2, espresso)</li>
+						<li>Hidden hangers, end caps, outlets, elbows — full bag kit</li>
+						<li>Sealant and fasteners from shop stock</li>
+					</ul>
+				</div>
+			</div>
+		}
+		@slideover.Actions(slideover.SubProps{}) {
+			@button.Button(button.Props{
+				Plain: true,
+				Attrs: templ.Attributes{"x-on:click": "open = false"},
+			}) { Close }
+			@button.Button(button.Props{
+				Attrs: templ.Attributes{"x-on:click": "open = false"},
+			}) { Edit job }
+		}
+	}
+}
