@@ -52,6 +52,7 @@ var NavSections = []struct {
 			{Slug: "popovers", Title: "Popover", Phase: "4"},
 			{Slug: "paginations", Title: "Pagination", Phase: "4"},
 			{Slug: "breadcrumbs", Title: "Breadcrumbs", Phase: "4"},
+			{Slug: "comboboxes", Title: "Combobox", Phase: "4"},
 		},
 	},
 }

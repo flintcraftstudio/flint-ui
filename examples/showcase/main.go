@@ -49,6 +49,7 @@ func main() {
 	mux.Handle("GET /popovers", page("Popover", "popovers", templates.Popovers()))
 	mux.Handle("GET /paginations", page("Pagination", "paginations", templates.Paginations()))
 	mux.Handle("GET /breadcrumbs", page("Breadcrumbs", "breadcrumbs", templates.Breadcrumbs()))
+	mux.Handle("GET /comboboxes", page("Combobox", "comboboxes", templates.Comboboxes()))
 
 	mux.Handle("GET /tables/detail", http.HandlerFunc(tablesDetailHandler))
 

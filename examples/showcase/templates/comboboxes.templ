@@ -1,0 +1,123 @@
+package templates
+
+import (
+	"github.com/flintcraft/flint-ui/components/combobox"
+	"github.com/flintcraft/flint-ui/components/fieldset"
+)
+
+templ Comboboxes() {
+	<div class="space-y-12">
+		@pageHeader("Combobox", "Searchable select — a text input with a filterable dropdown of options. Alpine owns the query and selection state; filtering is client-side (v0.1 covers small-to-medium lists). A hidden input carries the selected value on form submission. Requires the Alpine Focus plugin for keyboard navigation.")
+
+		@section("Basic", "Type to filter, click or press Enter to pick. The selected label fills the input after selection; typing again replaces the filter.") {
+			<div class="max-w-sm">
+				@fieldset.Field(fieldset.Props{}) {
+					@fieldset.Label(fieldset.LabelProps{For: "combobox-client"}) { Client }
+					@combobox.Combobox(combobox.Props{
+						Name:        "client",
+						ID:          "combobox-client",
+						Placeholder: "Search clients…",
+					}) {
+						@combobox.Option(combobox.OptionProps{Value: "1", Label: "Henderson Ranch"})
+						@combobox.Option(combobox.OptionProps{Value: "2", Label: "Western Skies Contracting"})
+						@combobox.Option(combobox.OptionProps{Value: "3", Label: "Lo Mo Outfitting"})
+						@combobox.Option(combobox.OptionProps{Value: "4", Label: "A-Team Gutters"})
+						@combobox.Option(combobox.OptionProps{Value: "5", Label: "Bitterroot Co-op"})
+						@combobox.Option(combobox.OptionProps{Value: "6", Label: "Rockabilly Cafe"})
+					}
+				}
+			</div>
+		}
+
+		@section("With descriptions", "Secondary text under each option adds disambiguating context — addresses, emails, SKUs — without widening the trigger. Description doesn't appear in the input after selection; only the Label does.") {
+			<div class="max-w-sm">
+				@fieldset.Field(fieldset.Props{}) {
+					@fieldset.Label(fieldset.LabelProps{For: "combobox-crew"}) { Crew member }
+					@combobox.Combobox(combobox.Props{
+						Name:        "crew",
+						ID:          "combobox-crew",
+						Placeholder: "Pick a crew member…",
+					}) {
+						@combobox.Option(combobox.OptionProps{Value: "jaden", Label: "Jaden Sturgis", Description: "Lead · jaden@flintcraft.studio"})
+						@combobox.Option(combobox.OptionProps{Value: "marcus", Label: "Marcus Lee", Description: "Installer · marcus@flintcraft.studio"})
+						@combobox.Option(combobox.OptionProps{Value: "devon", Label: "Devon Ray", Description: "Installer · devon@flintcraft.studio"})
+						@combobox.Option(combobox.OptionProps{Value: "sam", Label: "Sam Ashton", Description: "Installer · sam@flintcraft.studio"})
+					}
+				}
+			</div>
+		}
+
+		@section("With disabled options", "Disabled options render dimmed and don't respond to click/keyboard. Filter still matches them visually — users see they exist but can't pick them.") {
+			<div class="max-w-sm">
+				@fieldset.Field(fieldset.Props{}) {
+					@fieldset.Label(fieldset.LabelProps{For: "combobox-plan"}) { Billing plan }
+					@combobox.Combobox(combobox.Props{
+						Name:        "plan",
+						ID:          "combobox-plan",
+						Placeholder: "Choose a plan…",
+					}) {
+						@combobox.Option(combobox.OptionProps{Value: "starter", Label: "Starter", Description: "Up to 10 jobs/month · $29/mo"})
+						@combobox.Option(combobox.OptionProps{Value: "pro", Label: "Pro", Description: "Unlimited jobs · $79/mo"})
+						@combobox.Option(combobox.OptionProps{Value: "scale", Label: "Scale", Description: "Pro + crew management · $149/mo"})
+						@combobox.Option(combobox.OptionProps{Value: "enterprise", Label: "Enterprise", Description: "Call for pricing", Disabled: true})
+					}
+				}
+			</div>
+		}
+
+		@section("Long list with scroll", "The listbox caps at max-h-64 and scrolls within itself — long option lists don't blow out the viewport. The filter still narrows the list, so typing quickly gets you to the right item.") {
+			<div class="max-w-sm">
+				@fieldset.Field(fieldset.Props{}) {
+					@fieldset.Label(fieldset.LabelProps{For: "combobox-state"}) { State }
+					@combobox.Combobox(combobox.Props{
+						Name:        "state",
+						ID:          "combobox-state",
+						Placeholder: "Search states…",
+					}) {
+						for _, s := range usStates {
+							@combobox.Option(combobox.OptionProps{Value: s.Code, Label: s.Name})
+						}
+					}
+				}
+			</div>
+		}
+
+		@section("Special characters", "Labels with apostrophes, backslashes, newlines, and angle brackets all work — the component JS-escapes them in filter expressions and keeps value/label pass-through clean via data attributes.") {
+			<div class="max-w-sm">
+				@fieldset.Field(fieldset.Props{}) {
+					@fieldset.Label(fieldset.LabelProps{For: "combobox-edge"}) { Client with edge-case name }
+					@combobox.Combobox(combobox.Props{
+						Name:        "edge",
+						ID:          "combobox-edge",
+						Placeholder: "Try typing an apostrophe…",
+					}) {
+						@combobox.Option(combobox.OptionProps{Value: "1", Label: "D'Angelo's Pizza"})
+						@combobox.Option(combobox.OptionProps{Value: "2", Label: "Smith & Sons \"The Originals\""})
+						@combobox.Option(combobox.OptionProps{Value: "3", Label: "Route 66 Diner"})
+					}
+				}
+			</div>
+		}
+	</div>
+}
+
+type usState struct {
+	Code string
+	Name string
+}
+
+var usStates = []usState{
+	{"AL", "Alabama"}, {"AK", "Alaska"}, {"AZ", "Arizona"}, {"AR", "Arkansas"},
+	{"CA", "California"}, {"CO", "Colorado"}, {"CT", "Connecticut"}, {"DE", "Delaware"},
+	{"FL", "Florida"}, {"GA", "Georgia"}, {"HI", "Hawaii"}, {"ID", "Idaho"},
+	{"IL", "Illinois"}, {"IN", "Indiana"}, {"IA", "Iowa"}, {"KS", "Kansas"},
+	{"KY", "Kentucky"}, {"LA", "Louisiana"}, {"ME", "Maine"}, {"MD", "Maryland"},
+	{"MA", "Massachusetts"}, {"MI", "Michigan"}, {"MN", "Minnesota"}, {"MS", "Mississippi"},
+	{"MO", "Missouri"}, {"MT", "Montana"}, {"NE", "Nebraska"}, {"NV", "Nevada"},
+	{"NH", "New Hampshire"}, {"NJ", "New Jersey"}, {"NM", "New Mexico"}, {"NY", "New York"},
+	{"NC", "North Carolina"}, {"ND", "North Dakota"}, {"OH", "Ohio"}, {"OK", "Oklahoma"},
+	{"OR", "Oregon"}, {"PA", "Pennsylvania"}, {"RI", "Rhode Island"}, {"SC", "South Carolina"},
+	{"SD", "South Dakota"}, {"TN", "Tennessee"}, {"TX", "Texas"}, {"UT", "Utah"},
+	{"VT", "Vermont"}, {"VA", "Virginia"}, {"WA", "Washington"}, {"WV", "West Virginia"},
+	{"WI", "Wisconsin"}, {"WY", "Wyoming"},
+}

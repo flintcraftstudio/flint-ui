@@ -1,0 +1,213 @@
+// Package combobox provides a searchable select — a text input with a
+// filterable dropdown of options. Converted from catalyst-ui-kit/typescript/
+// combobox.tsx; the API is reshaped because Catalyst's Headless UI runtime
+// (virtual rendering, async filter hooks, displayValue functions) doesn't
+// translate to server-side templ.
+//
+// Behavior: the caller lists all options up front; Alpine owns a `query`
+// string bound to the input and a `selected` value carried in a hidden
+// <input type="hidden"> for form submission. Filtering is client-side —
+// each Option's `x-show` checks its Label against the query. This covers
+// small-to-medium lists (up to a few hundred options) cleanly; a Mode-
+// Server variant for longer lists can follow the Tabs pattern when a
+// client needs it.
+//
+// State model:
+//
+//	{
+//	    open: false,             // dropdown visibility
+//	    query: '',               // what's in the input (also drives filter)
+//	    selected: '',            // chosen option's Value (for form)
+//	    selectedLabel: '',       // chosen option's Label (for input display)
+//	    matches(label),          // filter predicate used by each Option
+//	    select(value, label),    // set selection + close + sync display
+//	    ...
+//	}
+//
+// Option values are passed to select() via data-value / data-label
+// attributes on each Option element — the Alpine expression stays a
+// constant string and templ's HTML-attribute escaping handles special
+// characters in values/labels. Same pattern as clipboard.Copy.
+//
+// Keyboard (requires @alpinejs/focus, already loaded by the showcase):
+//
+//	ArrowDown from input → open + focus first visible option
+//	ArrowDown/Up within options → wrap to next/previous visible option
+//	Enter on input → select first visible option
+//	Enter on option → select it
+//	Escape → close + restore query to selectedLabel
+//	Tab → close + release focus
+//
+// Selected value is sticky — typing a query that doesn't match the
+// current selection does NOT clear `selected`; only picking a new
+// option changes it. This matches how most comboboxes behave (Slack
+// channel picker, Gmail label picker). If a client needs a clearable
+// combobox with explicit "reset" behavior, add a Clear button that
+// does `selected = ''; selectedLabel = ''; query = ''`.
+package combobox
+
+// Props controls the Combobox root.
+type Props struct {
+	// Name of the hidden input carrying the selected value on form
+	// submit. Empty means the component is display-only (no form
+	// value) — uncommon but valid for "just filter" UIs.
+	Name string
+
+	// ID on the visible text input. Use when the component is labeled
+	// by a separate <label for=…>.
+	ID string
+
+	// Placeholder text shown when the input is empty.
+	Placeholder string
+
+	// ListboxID is the id stamped on the floating options panel, used
+	// for aria-controls on the input. Auto-generated from Name if
+	// omitted; callers only need to set this when they render two
+	// comboboxes with the same Name on a single page (rare).
+	ListboxID string
+
+	Required bool
+	Disabled bool
+	Invalid  bool
+
+	Class string
+	Attrs templ.Attributes
+}
+
+// Combobox renders a text input with a toggle chevron and a floating
+// filterable options panel. Children should be a flat list of Option
+// elements; nesting breaks the data-label filter lookup.
+templ Combobox(p Props) {
+	<div data-slot="control" x-data={ alpineData() } class={ wrapperClasses(p) }>
+		<input
+			type="text"
+			role="combobox"
+			aria-autocomplete="list"
+			x-bind:aria-expanded="open"
+			aria-controls={ resolveListboxID(p) }
+			autocomplete="off"
+			if p.ID != "" {
+				id={ p.ID }
+			}
+			if p.Placeholder != "" {
+				placeholder={ p.Placeholder }
+			}
+			required?={ p.Required }
+			disabled?={ p.Disabled }
+			data-invalid?={ p.Invalid }
+			aria-invalid?={ p.Invalid }
+			x-model="query"
+			x-on:focus="open = true"
+			x-on:input="open = true"
+			x-on:keydown.escape.prevent="close()"
+			x-on:keydown.down.prevent="openAndFocusFirst()"
+			x-on:keydown.enter.prevent="selectFirstVisible()"
+			x-on:keydown.tab="open = false"
+			class={ inputClasses(p) }
+			{ p.Attrs... }
+		/>
+		if p.Name != "" {
+			<input type="hidden" name={ p.Name } x-bind:value="selected"/>
+		}
+		<button
+			type="button"
+			tabindex="-1"
+			aria-label="Toggle options"
+			x-on:click="toggle()"
+			disabled?={ p.Disabled }
+			class={ chevronButtonClasses() }
+		>
+			@chevronIcon()
+		</button>
+		<ul
+			x-show="open"
+			x-cloak
+			x-ref="listbox"
+			x-on:click.outside="close()"
+			x-transition:enter="transition ease-out duration-100"
+			x-transition:enter-start="opacity-0 scale-95"
+			x-transition:enter-end="opacity-100 scale-100"
+			x-transition:leave="transition ease-in duration-75"
+			x-transition:leave-start="opacity-100 scale-100"
+			x-transition:leave-end="opacity-0 scale-95"
+			role="listbox"
+			id={ resolveListboxID(p) }
+			class={ listboxClasses() }
+		>
+			{ children... }
+			<li x-show="!hasVisibleOptions()" x-cloak role="presentation" class={ emptyClasses() }>
+				No results
+			</li>
+		</ul>
+	</div>
+}
+
+// OptionProps controls a single option row.
+//
+// Value is the form value written to the hidden input on selection.
+// Label is the plain-text label — used for filter matching AND for
+// what appears in the input after selection. Description is optional
+// secondary text rendered below the label in the dropdown (not shown
+// in the input).
+type OptionProps struct {
+	Value       string
+	Label       string
+	Description string
+	Disabled    bool
+	Class       string
+	Attrs       templ.Attributes
+}
+
+// Option is a single row in the Combobox's listbox. Label drives both
+// the filter match and the input's display text on selection; children
+// are not supported — options are plain text-first rows. Use
+// Description for the secondary line Catalyst uses for location/email
+// under a name.
+templ Option(p OptionProps) {
+	<li
+		role="option"
+		tabindex="-1"
+		data-value={ p.Value }
+		data-label={ p.Label }
+		if p.Disabled {
+			data-disabled="true"
+			aria-disabled="true"
+		}
+		x-show={ alpineMatchExpr(p.Label) }
+		x-bind:aria-selected={ alpineSelectedExpr(p.Value) }
+		x-on:click={ alpineSelectExpr(p.Disabled) }
+		x-on:keydown.enter.prevent={ alpineSelectExpr(p.Disabled) }
+		x-on:keydown.down.prevent="$focus.within($refs.listbox).wrap().next()"
+		x-on:keydown.up.prevent="$focus.within($refs.listbox).wrap().previous()"
+		class={ optionClasses(p) }
+		{ p.Attrs... }
+	>
+		<span class="flex min-w-0 flex-1 flex-col">
+			<span class="truncate">{ p.Label }</span>
+			if p.Description != "" {
+				<span class={ descriptionClasses() }>{ p.Description }</span>
+			}
+		</span>
+		<span x-show={ alpineSelectedExpr(p.Value) } x-cloak class="ml-3 shrink-0">
+			@checkIcon()
+		</span>
+	</li>
+}
+
+// chevronIcon matches the selectbox chevron so Combobox and Select
+// share the same visual vocabulary — two components that look alike
+// behave alike from the caller's perspective.
+templ chevronIcon() {
+	<svg viewBox="0 0 16 16" fill="none" aria-hidden="true" class="size-5 stroke-muted-foreground sm:size-4">
+		<path d="M5.75 10.75L8 13L10.25 10.75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+		<path d="M10.25 5.25L8 3L5.75 5.25" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+	</svg>
+}
+
+// checkIcon is the selected-option indicator, shown via x-show on the
+// option's trailing span. Same stroke-based design as the chevron.
+templ checkIcon() {
+	<svg viewBox="0 0 16 16" fill="none" aria-hidden="true" class="size-5 stroke-current sm:size-4">
+		<path d="M4 8.5l3 3L12 4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+	</svg>
+}
