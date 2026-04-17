@@ -32,6 +32,7 @@ func main() {
 	mux.Handle("GET /textareas", page("Textarea", "textareas", templates.Textareas()))
 	mux.Handle("GET /checkboxes", page("Checkbox", "checkboxes", templates.Checkboxes()))
 	mux.Handle("GET /badges", page("Badge", "badges", templates.Badges()))
+	mux.Handle("GET /avatars", page("Avatar", "avatars", templates.Avatars()))
 	mux.Handle("GET /tables", page("Table", "tables", templates.Tables()))
 	mux.Handle("GET /headings", page("Heading", "headings", templates.Headings()))
 	mux.Handle("GET /cards", page("Card", "cards", templates.Cards()))

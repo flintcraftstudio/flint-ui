@@ -1,0 +1,149 @@
+package templates
+
+import (
+	"github.com/flintcraft/flint-ui/components/avatar"
+	"github.com/flintcraft/flint-ui/components/dropdown"
+)
+
+templ Avatars() {
+	<div class="space-y-12">
+		@pageHeader("Avatar", "User-identity avatars: image, initials, or both stacked so initials bridge the gap while the image loads or show through if it fails. No Size prop — caller sizes via Class (size-6 / size-10 / size-16). data-slot=\"avatar\" lets parent components (Dropdown, future Table rows) size avatars consistently.")
+
+		@section("Sizes", "Avatar doesn't ship its own sizing — pass size-* via Class. The same avatar component scales from inline-text to user-profile-hero.") {
+			<div class="flex items-center gap-4">
+				@avatar.Avatar(avatar.Props{Initials: "JS", Alt: "Jaden Sturgis", Class: "size-6"})
+				@avatar.Avatar(avatar.Props{Initials: "JS", Alt: "Jaden Sturgis", Class: "size-8"})
+				@avatar.Avatar(avatar.Props{Initials: "JS", Alt: "Jaden Sturgis", Class: "size-10"})
+				@avatar.Avatar(avatar.Props{Initials: "JS", Alt: "Jaden Sturgis", Class: "size-12"})
+				@avatar.Avatar(avatar.Props{Initials: "JS", Alt: "Jaden Sturgis", Class: "size-16"})
+				@avatar.Avatar(avatar.Props{Initials: "JS", Alt: "Jaden Sturgis", Class: "size-20"})
+			</div>
+		}
+
+		@section("Initials only", "No image — just a colored background with letters. The bg color comes from the surrounding context (currently bg-transparent; wrap in a div with bg-primary text-primary-foreground or similar for colored avatars).") {
+			<div class="flex items-center gap-4">
+				<div class="bg-primary text-primary-foreground inline-flex rounded-full">
+					@avatar.Avatar(avatar.Props{Initials: "JS", Alt: "Jaden Sturgis", Class: "size-10"})
+				</div>
+				<div class="bg-accent text-accent-foreground inline-flex rounded-full">
+					@avatar.Avatar(avatar.Props{Initials: "ML", Alt: "Marcus Lee", Class: "size-10"})
+				</div>
+				<div class="bg-success text-success-foreground inline-flex rounded-full">
+					@avatar.Avatar(avatar.Props{Initials: "DR", Alt: "Devon Ray", Class: "size-10"})
+				</div>
+				<div class="bg-warning text-warning-foreground inline-flex rounded-full">
+					@avatar.Avatar(avatar.Props{Initials: "SA", Alt: "Sam Ashton", Class: "size-10"})
+				</div>
+				<div class="bg-muted text-foreground inline-flex rounded-full">
+					@avatar.Avatar(avatar.Props{Initials: "+4", Alt: "4 more", Class: "size-10"})
+				</div>
+			</div>
+		}
+
+		@section("Image", "Src renders an img. If Initials are also set, they show through while the image loads or if it fails to resolve.") {
+			<div class="flex items-center gap-4">
+				@avatar.Avatar(avatar.Props{
+					Src:   "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?&w=96&h=96&q=60&fit=crop&crop=faces",
+					Alt:   "Jaden Sturgis",
+					Class: "size-12",
+				})
+				@avatar.Avatar(avatar.Props{
+					Src:      "https://this-will-404.example.com/nope.jpg",
+					Initials: "FB",
+					Alt:      "Fallback avatar",
+					Class:    "size-12",
+				})
+				<span class="text-sm text-muted-foreground">
+					Second avatar's src 404s — initials fallback visible through the broken img.
+				</span>
+			</div>
+		}
+
+		@section("Square", "Square: true swaps the full-round corners for a rounded-20% square. Tighter shape reads as \"organization\" rather than \"person\" — good for workspace switchers.") {
+			<div class="flex items-center gap-4">
+				<div class="bg-primary text-primary-foreground inline-flex rounded-[20%]">
+					@avatar.Avatar(avatar.Props{Initials: "FC", Alt: "FlintCraft Studio", Square: true, Class: "size-10"})
+				</div>
+				<div class="bg-accent text-accent-foreground inline-flex rounded-[20%]">
+					@avatar.Avatar(avatar.Props{Initials: "LM", Alt: "Lo Mo Outfitting", Square: true, Class: "size-10"})
+				</div>
+				<div class="bg-success text-success-foreground inline-flex rounded-[20%]">
+					@avatar.Avatar(avatar.Props{Initials: "WS", Alt: "Western Skies", Square: true, Class: "size-10"})
+				</div>
+			</div>
+		}
+
+		@section("Stacked group", "-space-x-* + ring on each avatar creates the overlapping stack pattern for \"5 people on this thread\" rows. Pure CSS — no special component support needed.") {
+			<div class="flex items-center -space-x-2">
+				<div class="bg-primary text-primary-foreground inline-flex rounded-full ring-2 ring-surface">
+					@avatar.Avatar(avatar.Props{Initials: "JS", Alt: "Jaden Sturgis", Class: "size-8"})
+				</div>
+				<div class="bg-accent text-accent-foreground inline-flex rounded-full ring-2 ring-surface">
+					@avatar.Avatar(avatar.Props{Initials: "ML", Alt: "Marcus Lee", Class: "size-8"})
+				</div>
+				<div class="bg-success text-success-foreground inline-flex rounded-full ring-2 ring-surface">
+					@avatar.Avatar(avatar.Props{Initials: "DR", Alt: "Devon Ray", Class: "size-8"})
+				</div>
+				<div class="bg-muted text-foreground inline-flex rounded-full ring-2 ring-surface">
+					@avatar.Avatar(avatar.Props{Initials: "+3", Alt: "3 more crew members", Class: "size-8"})
+				</div>
+			</div>
+		}
+
+		@section("AvatarButton", "AvatarButton wraps Avatar in a focusable <button> (or <a> when Href is set) with a focus ring and expanded touch target. Same shape + initials/image API as Avatar.") {
+			<div class="flex items-center gap-4">
+				@avatar.AvatarButton(avatar.ButtonProps{
+					Initials: "JS",
+					Alt:      "Open profile",
+					Href:     "#",
+					Class:    "size-10 bg-primary text-primary-foreground",
+				})
+				@avatar.AvatarButton(avatar.ButtonProps{
+					Src:   "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?&w=80&h=80&q=60&fit=crop&crop=faces",
+					Alt:   "Open profile",
+					Href:  "#",
+					Class: "size-10",
+				})
+				@avatar.AvatarButton(avatar.ButtonProps{
+					Initials: "FC",
+					Alt:      "Switch workspace",
+					Square:   true,
+					Href:     "#",
+					Class:    "size-10 bg-accent text-accent-foreground",
+				})
+				<span class="text-sm text-muted-foreground">Tab through — focus ring uses the ring token.</span>
+			</div>
+		}
+
+		@section("In a Dropdown trigger", "The user-menu pattern: tiny avatar + name + chevron as the trigger. data-slot=\"avatar\" keeps the avatar visually consistent with icons in menu items.") {
+			<div class="flex flex-wrap items-center gap-4">
+				@dropdown.Dropdown(dropdown.Props{}) {
+					@dropdown.Button(dropdown.ButtonProps{Plain: true}) {
+						<span class="bg-primary text-primary-foreground inline-flex rounded-full">
+							@avatar.Avatar(avatar.Props{Initials: "JS", Alt: "Jaden Sturgis", Class: "size-7"})
+						</span>
+						<span class="text-sm font-medium">Jaden Sturgis</span>
+						@avChevronDown()
+					}
+					@dropdown.Menu(dropdown.MenuProps{Anchor: dropdown.AnchorBottomEnd, Class: "min-w-[14rem]"}) {
+						@dropdown.Header(dropdown.SubProps{}) {
+							<div class="text-sm font-medium text-foreground">Jaden Sturgis</div>
+							<div class="text-xs text-muted-foreground">jaden@flintcraft.studio</div>
+						}
+						@dropdown.Divider(dropdown.SubProps{})
+						@dropdown.Item(dropdown.ItemProps{Href: "#"}) { Profile }
+						@dropdown.Item(dropdown.ItemProps{Href: "#"}) { Settings }
+						@dropdown.Divider(dropdown.SubProps{})
+						@dropdown.Item(dropdown.ItemProps{}) { Sign out }
+					}
+				}
+			</div>
+		}
+	</div>
+}
+
+templ avChevronDown() {
+	<svg data-slot="icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+		<path fill-rule="evenodd" d="M5.22 7.22a.75.75 0 0 1 1.06 0L10 10.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 8.28a.75.75 0 0 1 0-1.06z" clip-rule="evenodd"/>
+	</svg>
+}

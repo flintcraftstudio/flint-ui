@@ -1,0 +1,138 @@
+// Package avatar provides user-identity avatars (image, initials, or
+// both) and an interactive button/link wrapper. Converted from
+// catalyst-ui-kit/typescript/avatar.tsx.
+//
+// Sizing is caller-controlled — avatars don't ship a Size prop. Pass
+// size-8 / size-10 / size-12 via Class or let an ancestor's slot rule
+// pick it (Dropdown items style `*:data-[slot=avatar]:size-6` on
+// small viewports, for instance). This matches Catalyst's approach
+// and keeps the component API tiny.
+//
+// Display semantics: an avatar with both Src and Initials stacks both
+// in the same grid cell — the img sits above, initials below. If the
+// img fails to load the initials show through; if the img is still
+// loading the initials bridge the gap. Set only Initials for a static
+// initials-only avatar.
+//
+// data-slot="avatar" is stamped on the rendered element so upstream
+// components (Dropdown, eventually table rows, nav headers) can pick
+// out avatars for consistent sizing without fragile selectors.
+package avatar
+
+// Props controls an Avatar.
+type Props struct {
+	// Src is the image URL. Empty renders an initials-only avatar.
+	Src string
+
+	// Initials are the fallback text rendered as an SVG. Shown when
+	// Src is empty, still loading, or fails to load.
+	Initials string
+
+	// Alt is the accessible description. Applied to both the img and
+	// the SVG <title>, so screen readers announce the avatar whether
+	// the image loads or falls back to initials. Leave empty for
+	// decorative avatars (purely visual next to the user's name).
+	Alt string
+
+	// Square renders the avatar with slightly rounded corners instead
+	// of a full circle.
+	Square bool
+
+	Class string
+	Attrs templ.Attributes
+}
+
+// Avatar renders a static (non-interactive) avatar — display only.
+// Wrap in AvatarButton when the avatar should be clickable.
+templ Avatar(p Props) {
+	<span data-slot="avatar" class={ rootClasses(p) } { p.Attrs... }>
+		if p.Initials != "" {
+			<svg
+				viewBox="0 0 100 100"
+				aria-hidden?={ p.Alt == "" }
+				class="size-full fill-current p-[5%] text-[48px] font-medium uppercase select-none"
+			>
+				if p.Alt != "" {
+					<title>{ p.Alt }</title>
+				}
+				<text
+					x="50%"
+					y="50%"
+					alignment-baseline="middle"
+					dominant-baseline="middle"
+					text-anchor="middle"
+					dy=".125em"
+				>
+					{ p.Initials }
+				</text>
+			</svg>
+		}
+		if p.Src != "" {
+			<img src={ p.Src } alt={ p.Alt } class="size-full"/>
+		}
+	</span>
+}
+
+// ButtonProps controls an AvatarButton — an Avatar wrapped in a
+// focusable button or link. When Href is set the component renders
+// an <a>; otherwise a <button type="button">.
+type ButtonProps struct {
+	// Avatar content fields — passed through to the inner Avatar.
+	Src      string
+	Initials string
+	Alt      string
+	Square   bool
+
+	// Href makes the button render as a link to this URL. Empty
+	// leaves it as a <button> — caller wires the handler via Attrs.
+	Href string
+
+	// Disabled only applies to the button variant. Links can't be
+	// natively disabled; add aria-disabled via Attrs if needed.
+	Disabled bool
+
+	Class string
+	Attrs templ.Attributes
+}
+
+// AvatarButton wraps Avatar in a clickable button or link with a
+// focus ring and expanded touch-target hit area. Pattern matches the
+// Button component's TouchTarget treatment so avatar taps on mobile
+// are easy to hit regardless of the avatar's visual size.
+templ AvatarButton(p ButtonProps) {
+	if p.Href != "" {
+		<a href={ templ.SafeURL(p.Href) } class={ buttonClasses(p) } { p.Attrs... }>
+			@touchTarget() {
+				@Avatar(Props{
+					Src:      p.Src,
+					Initials: p.Initials,
+					Alt:      p.Alt,
+					Square:   p.Square,
+				})
+			}
+		</a>
+	} else {
+		<button type="button" disabled?={ p.Disabled } class={ buttonClasses(p) } { p.Attrs... }>
+			@touchTarget() {
+				@Avatar(Props{
+					Src:      p.Src,
+					Initials: p.Initials,
+					Alt:      p.Alt,
+					Square:   p.Square,
+				})
+			}
+		</button>
+	}
+}
+
+// touchTarget mirrors the button package's TouchTarget — an invisible
+// layer that expands the hit area to at least 44×44px on touch
+// devices. Inlined here so avatar doesn't depend on the button
+// package's internal helper.
+templ touchTarget() {
+	<span
+		class="absolute top-1/2 left-1/2 size-[max(100%,2.75rem)] -translate-x-1/2 -translate-y-1/2 pointer-fine:hidden"
+		aria-hidden="true"
+	></span>
+	{ children... }
+}

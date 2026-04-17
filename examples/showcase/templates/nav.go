@@ -22,6 +22,7 @@ var NavSections = []struct {
 			{Slug: "textareas", Title: "Textarea", Phase: "1"},
 			{Slug: "checkboxes", Title: "Checkbox", Phase: "1"},
 			{Slug: "badges", Title: "Badge", Phase: "1"},
+			{Slug: "avatars", Title: "Avatar", Phase: "1"},
 		},
 	},
 	{
