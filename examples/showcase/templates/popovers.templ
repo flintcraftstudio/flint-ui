@@ -1,0 +1,129 @@
+package templates
+
+import (
+	"github.com/flintcraft/flint-ui/components/badge"
+	"github.com/flintcraft/flint-ui/components/button"
+	"github.com/flintcraft/flint-ui/components/fieldset"
+	"github.com/flintcraft/flint-ui/components/input"
+	"github.com/flintcraft/flint-ui/components/popover"
+)
+
+templ Popovers() {
+	<div class="space-y-12">
+		@pageHeader("Popover", "Click-activated floating panel with arbitrary content — forms, rich info, buttons. Wrap a popover.Button trigger and a popover.Panel inside popover.Popover. Alpine holds the open state; click-outside and ESC close. Unlike Modal, Tab flows naturally through the content — use a popover when you need a focusable panel that isn't a full modal.")
+
+		@section("Rich info", "The simplest popover: a click reveals supplementary details without disrupting the page. Good for definitions, help text, feature explanations.") {
+			<div class="flex flex-wrap items-center gap-3">
+				@popover.Popover(popover.Props{}) {
+					@popover.Button(popover.ButtonProps{Plain: true}) {
+						What's a seamless gutter?
+					}
+					@popover.Panel(popover.PanelProps{}) {
+						<div class="space-y-2 text-sm">
+							<h3 class="font-semibold text-foreground">Seamless gutters</h3>
+							<p class="text-muted-foreground">
+								Formed on-site from a single aluminum coil. No joints means fewer leak points — most residential installs are warrantied for twenty years or more.
+							</p>
+						</div>
+					}
+				}
+			</div>
+		}
+
+		@section("Inline form", "Popover holds a short form. Because Tab flows naturally (no focus trap), the form's fields tab in order and Shift+Tab returns to the trigger. ESC cancels, backdrop click cancels, explicit Save button commits.") {
+			<div class="flex flex-wrap items-center gap-3">
+				@popover.Popover(popover.Props{}) {
+					@popover.Button(popover.ButtonProps{Outline: true}) {
+						Add tag
+					}
+					@popover.Panel(popover.PanelProps{Class: "min-w-[20rem]"}) {
+						<form class="space-y-3">
+							@fieldset.Field(fieldset.Props{}) {
+								@fieldset.Label(fieldset.LabelProps{For: "popover-tag-name"}) { Name }
+								@input.Input(input.Props{
+									Name:        "tag",
+									ID:          "popover-tag-name",
+									Placeholder: "e.g. VIP client",
+								})
+							}
+							@fieldset.Field(fieldset.Props{}) {
+								@fieldset.Label(fieldset.LabelProps{For: "popover-tag-color"}) { Color }
+								@input.Input(input.Props{
+									Name:  "color",
+									ID:    "popover-tag-color",
+									Type:  "color",
+									Value: "#0f766e",
+								})
+							}
+							<div class="flex items-center justify-end gap-2 pt-1">
+								@button.Button(button.Props{
+									Plain: true,
+									Attrs: templ.Attributes{"x-on:click": "open = false"},
+								}) { Cancel }
+								@button.Button(button.Props{
+									Attrs: templ.Attributes{"x-on:click": "open = false"},
+								}) { Save tag }
+							</div>
+						</form>
+					}
+				}
+				<span class="text-sm text-muted-foreground">Try Tab-ing through the form — focus stays inside naturally; Shift+Tab from Name returns to the trigger.</span>
+			</div>
+		}
+
+		@section("Anchor positioning", "Same four anchors as Dropdown: bottom-start / bottom-end / top-start / top-end. Pick the variant that keeps the panel inside the viewport — end alignment is right for triggers near the right edge.") {
+			<div class="flex flex-wrap items-end justify-between gap-4 py-10">
+				@popover.Popover(popover.Props{}) {
+					@popover.Button(popover.ButtonProps{Outline: true}) { Bottom-start }
+					@popover.Panel(popover.PanelProps{Anchor: popover.AnchorBottomStart}) {
+						<div class="text-sm text-foreground">Panel drops below the trigger, left edges aligned.</div>
+					}
+				}
+				@popover.Popover(popover.Props{}) {
+					@popover.Button(popover.ButtonProps{Outline: true}) { Bottom-end }
+					@popover.Panel(popover.PanelProps{Anchor: popover.AnchorBottomEnd}) {
+						<div class="text-sm text-foreground">Panel drops below the trigger, right edges aligned.</div>
+					}
+				}
+				@popover.Popover(popover.Props{}) {
+					@popover.Button(popover.ButtonProps{Outline: true}) { Top-start }
+					@popover.Panel(popover.PanelProps{Anchor: popover.AnchorTopStart}) {
+						<div class="text-sm text-foreground">Panel rises above the trigger, left edges aligned.</div>
+					}
+				}
+				@popover.Popover(popover.Props{}) {
+					@popover.Button(popover.ButtonProps{Outline: true}) { Top-end }
+					@popover.Panel(popover.PanelProps{Anchor: popover.AnchorTopEnd}) {
+						<div class="text-sm text-foreground">Panel rises above the trigger, right edges aligned.</div>
+					}
+				}
+			</div>
+		}
+
+		@section("Detail card", "Rich content that doesn't fit inline — a mini-card of context attached to a status badge or row action. Commonly used in tables where a full column is overkill.") {
+			<div class="flex flex-wrap items-center gap-3">
+				<span class="text-sm text-muted-foreground">Henderson Ranch · job #1834 ·</span>
+				@popover.Popover(popover.Props{}) {
+					@popover.Button(popover.ButtonProps{Plain: true}) {
+						@badge.Badge(badge.Props{Variant: badge.VariantWarning}) { Blocked }
+					}
+					@popover.Panel(popover.PanelProps{Class: "min-w-[18rem]"}) {
+						<div class="space-y-2 text-sm">
+							<div class="flex items-center justify-between">
+								<h3 class="font-semibold text-foreground">Blocked on client</h3>
+								@badge.Badge(badge.Props{Variant: badge.VariantWarning}) { 3 days }
+							</div>
+							<p class="text-muted-foreground">
+								Waiting on color selection. Client was emailed 4/14; followed up 4/15 and 4/17. Crew reassigned to a second job this week.
+							</p>
+							<div class="flex items-center gap-2 pt-1">
+								@button.Button(button.Props{Outline: true, Class: "w-full"}) { Resend }
+								@button.Button(button.Props{Plain: true, Class: "w-full"}) { Mark cancelled }
+							</div>
+						</div>
+					}
+				}
+			</div>
+		}
+	</div>
+}
