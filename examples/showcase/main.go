@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/a-h/templ"
 
@@ -28,10 +29,15 @@ func main() {
 	mux.Handle("GET /buttons", page("Button", "buttons", templates.Buttons()))
 	mux.Handle("GET /inputs", page("Input", "inputs", templates.Inputs()))
 	mux.Handle("GET /selects", page("Select", "selects", templates.Selects()))
+	mux.Handle("GET /textareas", page("Textarea", "textareas", templates.Textareas()))
+	mux.Handle("GET /checkboxes", page("Checkbox", "checkboxes", templates.Checkboxes()))
+	mux.Handle("GET /badges", page("Badge", "badges", templates.Badges()))
 
 	mux.Handle("POST /echo", http.HandlerFunc(echoHandler))
 	mux.Handle("POST /inputs/submit", http.HandlerFunc(inputsSubmitHandler))
 	mux.Handle("POST /selects/submit", http.HandlerFunc(selectsSubmitHandler))
+	mux.Handle("POST /textareas/submit", http.HandlerFunc(textareasSubmitHandler))
+	mux.Handle("POST /checkboxes/submit", http.HandlerFunc(checkboxesSubmitHandler))
 
 	slog.Info("flint-ui showcase listening", "addr", addr)
 	if err := http.ListenAndServe(addr, mux); err != nil {
@@ -79,5 +85,44 @@ func selectsSubmitHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	_, _ = w.Write([]byte(
 		`<span class="text-success">saved: ` + region + ` / ` + currency + `</span>`,
+	))
+}
+
+func textareasSubmitHandler(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		_, _ = w.Write([]byte(`<span class="text-danger">form parse error</span>`))
+		return
+	}
+	subject := html.EscapeString(r.FormValue("subject"))
+	body := r.FormValue("body")
+	chars := len(body)
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	_, _ = w.Write([]byte(
+		`<span class="text-success">sent: ` + subject + ` (` + strconv.Itoa(chars) + ` chars)</span>`,
+	))
+}
+
+func checkboxesSubmitHandler(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		_, _ = w.Write([]byte(`<span class="text-danger">form parse error</span>`))
+		return
+	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	sections := r.Form["sections"]
+	if len(sections) == 0 {
+		_, _ = w.Write([]byte(`<span class="text-muted-foreground">nothing selected</span>`))
+		return
+	}
+	joined := ""
+	for i, s := range sections {
+		if i > 0 {
+			joined += ", "
+		}
+		joined += html.EscapeString(s)
+	}
+	_, _ = w.Write([]byte(
+		`<span class="text-success">saved: ` + joined + `</span>`,
 	))
 }

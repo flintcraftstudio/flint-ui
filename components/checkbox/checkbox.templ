@@ -1,0 +1,82 @@
+// Package checkbox provides a native-input-backed checkbox styled to match
+// Catalyst's custom Headless UI control. Unlike Catalyst's version, the
+// underlying element is a real <input type="checkbox"> — form submission
+// and keyboard handling work with zero JS.
+package checkbox
+
+// Props is the input surface for Checkbox. Class is forwarded to the outer
+// <label data-slot="control">; Attrs are spread onto the inner <input> so
+// callers can layer on htmx, data-*, aria-*, and form-library attributes.
+type Props struct {
+	Name    string
+	ID      string
+	Value   string
+	Checked bool
+
+	Required bool
+	Disabled bool
+	Invalid  bool
+
+	Class string
+	Attrs templ.Attributes
+}
+
+// Checkbox renders a Catalyst-styled checkbox. The outer <label> carries
+// data-slot="control" so CheckboxField's grid positions it in the left column;
+// clicking the label toggles the nested <input>.
+//
+// Structure: the input is absolutely positioned on top with opacity-0 to
+// capture clicks, the box span sits underneath showing the border/fill, and
+// the check SVG sits above the box. All three are siblings of the input so
+// peer-* variants drive their state.
+templ Checkbox(p Props) {
+	<label data-slot="control" class={ labelClasses(p) }>
+		<input
+			type="checkbox"
+			class={ inputClasses }
+			if p.Name != "" {
+				name={ p.Name }
+			}
+			if p.ID != "" {
+				id={ p.ID }
+			}
+			if p.Value != "" {
+				value={ p.Value }
+			}
+			checked?={ p.Checked }
+			required?={ p.Required }
+			disabled?={ p.Disabled }
+			data-invalid?={ p.Invalid }
+			aria-invalid?={ p.Invalid }
+			{ p.Attrs... }
+		/>
+		<span aria-hidden="true" class={ boxClasses }></span>
+		<svg aria-hidden="true" class={ checkSvgClasses } viewBox="0 0 14 14" fill="none">
+			<path d="M3 8L6 11L11 3.5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+		</svg>
+	</label>
+}
+
+// GroupProps is the optional Class/Attrs pair for CheckboxGroup / CheckboxField.
+type GroupProps struct {
+	Class string
+	Attrs templ.Attributes
+}
+
+// CheckboxGroup vertically stacks multiple CheckboxFields. The space-y-6
+// variant kicks in automatically when any child carries data-slot="description".
+templ CheckboxGroup(p GroupProps) {
+	<div data-slot="control" class={ joinClasses(groupBase, p.Class) } { p.Attrs... }>
+		{ children... }
+	</div>
+}
+
+// CheckboxField lays out a single Checkbox + Label (+ optional Description)
+// in a two-column grid: control on the left, label/description on the right.
+// Place a fieldset.Label and fieldset.Description as siblings of the Checkbox;
+// data-slot sibling selectors handle positioning.
+templ CheckboxField(p GroupProps) {
+	<div class={ joinClasses(fieldBase, p.Class) } { p.Attrs... }>
+		{ children... }
+	</div>
+}

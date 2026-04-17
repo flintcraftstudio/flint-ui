@@ -1,0 +1,130 @@
+package templates
+
+import (
+	"github.com/flintcraft/flint-ui/components/button"
+	"github.com/flintcraft/flint-ui/components/fieldset"
+	"github.com/flintcraft/flint-ui/components/textarea"
+)
+
+templ Textareas() {
+	<div class="space-y-12">
+		@pageHeader("Textarea", "Multi-line text input sharing Input's wrapper visuals: border, focus ring, data-invalid / data-disabled behavior. Vertically resizable by default; flip NonResizable when the surrounding layout controls sizing.")
+
+		@section("Basic", "Zero-value Props renders a three-row-ish textarea (browser default) with vertical resize.") {
+			<div class="max-w-lg">
+				@textarea.Textarea(textarea.Props{Placeholder: "Notes for the dispatcher…"})
+			</div>
+		}
+
+		@section("With label and description", "Wrap in a Field for Catalyst's auto-spacing between Label, Description, control, and (if needed) ErrorMessage.") {
+			<div class="max-w-lg">
+				@fieldset.Field(fieldset.Props{}) {
+					@fieldset.Label(fieldset.LabelProps{For: "brief"}) {
+						Project brief
+					}
+					@fieldset.Description(fieldset.Props{}) {
+						Give the crew a quick rundown — site, scope, and any gotchas.
+					}
+					@textarea.Textarea(textarea.Props{
+						ID:          "brief",
+						Name:        "brief",
+						Rows:        5,
+						Placeholder: "Start typing…",
+					})
+				}
+			</div>
+		}
+
+		@section("Invalid with error", "Invalid flips on the data-invalid selector — border turns danger, ErrorMessage slots in with the right spacing.") {
+			<div class="max-w-lg">
+				@fieldset.Field(fieldset.Props{}) {
+					@fieldset.Label(fieldset.LabelProps{For: "scope"}) {
+						Scope of work
+					}
+					@textarea.Textarea(textarea.Props{
+						ID:      "scope",
+						Rows:    4,
+						Invalid: true,
+						Value:   "Too short.",
+					})
+					@fieldset.ErrorMessage(fieldset.Props{}) {
+						Scope must be at least 40 characters.
+					}
+				}
+			</div>
+		}
+
+		@section("Disabled", "Native disabled on the textarea; the wrapper picks it up via has-data-disabled: and fades to opacity-50.") {
+			<div class="max-w-lg">
+				@fieldset.Field(fieldset.Props{}) {
+					@fieldset.Label(fieldset.LabelProps{For: "contract"}) {
+						Contract terms
+					}
+					@textarea.Textarea(textarea.Props{
+						ID:       "contract",
+						Disabled: true,
+						Rows:     4,
+						Value:    "Locked during legal review.",
+					})
+				}
+			</div>
+		}
+
+		@section("Not resizable", "NonResizable drops the resize handle for layouts that need fixed-height textareas (inline editors, modal forms).") {
+			<div class="max-w-lg">
+				@textarea.Textarea(textarea.Props{
+					Rows:         3,
+					NonResizable: true,
+					Placeholder:  "Resize handle is off — height is fixed.",
+				})
+			</div>
+		}
+
+		@section("In an htmx form", "Fieldset + FieldGroup + a submit button posting via htmx. The submitted message comes back in the swap target.") {
+			<form
+				hx-post="/textareas/submit"
+				hx-target="#textareas-result"
+				hx-swap="innerHTML"
+				class="max-w-lg"
+			>
+				@fieldset.Fieldset(fieldset.Props{}) {
+					@fieldset.Legend(fieldset.Props{}) {
+						Leave a note
+					}
+					@fieldset.FieldGroup(fieldset.Props{}) {
+						@fieldset.Field(fieldset.Props{}) {
+							@fieldset.Label(fieldset.LabelProps{For: "subject"}) {
+								Subject
+							}
+							@textarea.Textarea(textarea.Props{
+								ID:          "subject",
+								Name:        "subject",
+								Rows:        2,
+								Placeholder: "One-line summary",
+								Required:    true,
+							})
+						}
+						@fieldset.Field(fieldset.Props{}) {
+							@fieldset.Label(fieldset.LabelProps{For: "body"}) {
+								Message
+							}
+							@textarea.Textarea(textarea.Props{
+								ID:          "body",
+								Name:        "body",
+								Rows:        6,
+								Placeholder: "Full message…",
+								Required:    true,
+							})
+						}
+					}
+				}
+				<div class="mt-8 flex items-center gap-3">
+					@button.Button(button.Props{Type: "submit", Variant: button.VariantPrimary}) {
+						Send note
+					}
+					<div id="textareas-result" class="text-sm text-muted-foreground"></div>
+				</div>
+			</form>
+		}
+	</div>
+}

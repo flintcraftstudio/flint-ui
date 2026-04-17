@@ -1,0 +1,134 @@
+package templates
+
+import (
+	"github.com/flintcraft/flint-ui/components/button"
+	"github.com/flintcraft/flint-ui/components/checkbox"
+	"github.com/flintcraft/flint-ui/components/fieldset"
+)
+
+templ Checkboxes() {
+	<div class="space-y-12">
+		@pageHeader("Checkbox", "Native <input type=\"checkbox\"> styled to match Catalyst's custom control — border, fill, focus ring, and invalid/disabled states all react to native pseudo-classes via peer-* variants. No JS required. Pair with CheckboxField for label+description layout, or CheckboxGroup for a vertical list.")
+
+		@section("Basic", "A bare Checkbox. Labelless — useful for table row selection or toolbars where the meaning is contextual.") {
+			<div class="flex items-center gap-4">
+				@checkbox.Checkbox(checkbox.Props{})
+				@checkbox.Checkbox(checkbox.Props{Checked: true})
+				@checkbox.Checkbox(checkbox.Props{Disabled: true})
+				@checkbox.Checkbox(checkbox.Props{Checked: true, Disabled: true})
+				@checkbox.Checkbox(checkbox.Props{Invalid: true})
+			</div>
+		}
+
+		@section("With label", "CheckboxField lays out the control and label in a two-column grid. Clicking either toggles the input.") {
+			@checkbox.CheckboxField(checkbox.GroupProps{}) {
+				@checkbox.Checkbox(checkbox.Props{ID: "terms", Name: "terms"})
+				@fieldset.Label(fieldset.LabelProps{For: "terms"}) {
+					I agree to the terms of service
+				}
+			}
+		}
+
+		@section("With label and description", "Add a Description as a sibling — the label auto-promotes to font-medium and the description slots in on row 2.") {
+			@checkbox.CheckboxField(checkbox.GroupProps{}) {
+				@checkbox.Checkbox(checkbox.Props{ID: "marketing", Name: "marketing", Checked: true})
+				@fieldset.Label(fieldset.LabelProps{For: "marketing"}) {
+					Send me product updates
+				}
+				@fieldset.Description(fieldset.Props{}) {
+					About one email a month. Unsubscribe anytime.
+				}
+			}
+		}
+
+		@section("Group", "CheckboxGroup stacks multiple CheckboxFields. Spacing bumps from space-y-3 to space-y-6 when any field has a description.") {
+			@checkbox.CheckboxGroup(checkbox.GroupProps{Class: "max-w-md"}) {
+				@checkbox.CheckboxField(checkbox.GroupProps{}) {
+					@checkbox.Checkbox(checkbox.Props{ID: "notify-leads", Name: "notifications", Value: "leads", Checked: true})
+					@fieldset.Label(fieldset.LabelProps{For: "notify-leads"}) {
+						New leads
+					}
+					@fieldset.Description(fieldset.Props{}) {
+						Someone submits the contact form.
+					}
+				}
+				@checkbox.CheckboxField(checkbox.GroupProps{}) {
+					@checkbox.Checkbox(checkbox.Props{ID: "notify-bookings", Name: "notifications", Value: "bookings"})
+					@fieldset.Label(fieldset.LabelProps{For: "notify-bookings"}) {
+						New bookings
+					}
+					@fieldset.Description(fieldset.Props{}) {
+						A job is confirmed on the calendar.
+					}
+				}
+				@checkbox.CheckboxField(checkbox.GroupProps{}) {
+					@checkbox.Checkbox(checkbox.Props{ID: "notify-reviews", Name: "notifications", Value: "reviews"})
+					@fieldset.Label(fieldset.LabelProps{For: "notify-reviews"}) {
+						New reviews
+					}
+					@fieldset.Description(fieldset.Props{}) {
+						A customer posts a Google review.
+					}
+				}
+			}
+		}
+
+		@section("Invalid with error", "Invalid flips data-invalid on the input; the peer-data-invalid: variant on the box turns the border danger.") {
+			@fieldset.Field(fieldset.Props{}) {
+				@checkbox.CheckboxField(checkbox.GroupProps{}) {
+					@checkbox.Checkbox(checkbox.Props{ID: "eula", Name: "eula", Invalid: true, Required: true})
+					@fieldset.Label(fieldset.LabelProps{For: "eula"}) {
+						I have read and understood the EULA
+					}
+				}
+				@fieldset.ErrorMessage(fieldset.Props{}) {
+					You must accept the EULA to continue.
+				}
+			}
+		}
+
+		@section("In an htmx form", "A CheckboxGroup inside a Fieldset, posted via htmx. Selected values come back in the swap target.") {
+			<form
+				hx-post="/checkboxes/submit"
+				hx-target="#checkboxes-result"
+				hx-swap="innerHTML"
+				class="max-w-lg"
+			>
+				@fieldset.Fieldset(fieldset.Props{}) {
+					@fieldset.Legend(fieldset.Props{}) {
+						Weekly digest sections
+					}
+					@fieldset.Description(fieldset.Props{}) {
+						Choose what lands in your Monday morning summary.
+					}
+					@checkbox.CheckboxGroup(checkbox.GroupProps{}) {
+						@checkbox.CheckboxField(checkbox.GroupProps{}) {
+							@checkbox.Checkbox(checkbox.Props{ID: "digest-pipeline", Name: "sections", Value: "pipeline", Checked: true})
+							@fieldset.Label(fieldset.LabelProps{For: "digest-pipeline"}) {
+								Pipeline movement
+							}
+						}
+						@checkbox.CheckboxField(checkbox.GroupProps{}) {
+							@checkbox.Checkbox(checkbox.Props{ID: "digest-revenue", Name: "sections", Value: "revenue", Checked: true})
+							@fieldset.Label(fieldset.LabelProps{For: "digest-revenue"}) {
+								Revenue trend
+							}
+						}
+						@checkbox.CheckboxField(checkbox.GroupProps{}) {
+							@checkbox.Checkbox(checkbox.Props{ID: "digest-team", Name: "sections", Value: "team"})
+							@fieldset.Label(fieldset.LabelProps{For: "digest-team"}) {
+								Team workload
+							}
+						}
+					}
+				}
+				<div class="mt-8 flex items-center gap-3">
+					@button.Button(button.Props{Type: "submit", Variant: button.VariantPrimary}) {
+						Save preferences
+					}
+					<div id="checkboxes-result" class="text-sm text-muted-foreground"></div>
+				</div>
+			</form>
+		}
+	</div>
+}

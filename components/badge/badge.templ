@@ -1,0 +1,33 @@
+// Package badge provides Catalyst-style status chips. Converted from
+// catalyst-ui-kit/typescript/badge.tsx. Catalyst ships 18 color variants;
+// flint-ui maps them down to the semantic token contract so badges re-theme
+// per client without component changes.
+package badge
+
+// Variant selects the badge color. The zero value (empty string) resolves
+// to VariantMuted — the neutral gray badge that matches Catalyst's zinc
+// default.
+type Variant string
+
+const (
+	VariantMuted   Variant = "muted"
+	VariantPrimary Variant = "primary"
+	VariantAccent  Variant = "accent"
+	VariantDanger  Variant = "danger"
+	VariantSuccess Variant = "success"
+	VariantWarning Variant = "warning"
+)
+
+// Props is the full input surface of Badge.
+type Props struct {
+	Variant Variant
+	Class   string
+	Attrs   templ.Attributes
+}
+
+// Badge renders an inline status chip.
+templ Badge(p Props) {
+	<span class={ Classes(p) } { p.Attrs... }>
+		{ children... }
+	</span>
+}

@@ -1,0 +1,73 @@
+package templates
+
+import "github.com/flintcraft/flint-ui/components/badge"
+
+templ Badges() {
+	<div class="space-y-12">
+		@pageHeader("Badge", "Inline status chips. Catalyst ships 18 color variants; flint-ui maps them to the six semantic tokens so badges re-theme per client. Use sparingly — a badge earns its pixels by communicating state (active, overdue, paid), not by decorating static text.")
+
+		@section("All variants", "The full set. Muted is the default when Variant is omitted.") {
+			<div class="flex flex-wrap items-center gap-2">
+				@badge.Badge(badge.Props{}) { Muted }
+				@badge.Badge(badge.Props{Variant: badge.VariantPrimary}) { Primary }
+				@badge.Badge(badge.Props{Variant: badge.VariantAccent}) { Accent }
+				@badge.Badge(badge.Props{Variant: badge.VariantDanger}) { Danger }
+				@badge.Badge(badge.Props{Variant: badge.VariantSuccess}) { Success }
+				@badge.Badge(badge.Props{Variant: badge.VariantWarning}) { Warning }
+			</div>
+		}
+
+		@section("Status chips", "Typical usage in a table or list — one badge per row conveying job state.") {
+			<div class="max-w-md divide-y divide-border rounded-lg border border-border bg-surface">
+				@statusRow("Gutter install — 218 Pine St", badge.VariantSuccess, "Complete")
+				@statusRow("Roof inspection — Henderson Ranch", badge.VariantPrimary, "In progress")
+				@statusRow("Deck staining — 14 Birch Ct", badge.VariantWarning, "Awaiting parts")
+				@statusRow("Fence repair — Glacier Peak HOA", badge.VariantDanger, "Overdue")
+				@statusRow("Pressure wash — Copper Creek 12", badge.VariantMuted, "Scheduled")
+			</div>
+		}
+
+		@section("With leading dot", "Compose a colored dot before the label via a child <span>. Useful when the badge doubles as a legend key.") {
+			<div class="flex flex-wrap items-center gap-2">
+				@badge.Badge(badge.Props{Variant: badge.VariantSuccess}) {
+					<span class="size-1.5 rounded-full bg-success"></span>
+					Paid
+				}
+				@badge.Badge(badge.Props{Variant: badge.VariantWarning}) {
+					<span class="size-1.5 rounded-full bg-warning"></span>
+					Awaiting approval
+				}
+				@badge.Badge(badge.Props{Variant: badge.VariantDanger}) {
+					<span class="size-1.5 rounded-full bg-danger"></span>
+					Past due
+				}
+			</div>
+		}
+
+		@section("Count badges", "Tight numeric badges for inbox-style counts. The gap-x-1.5 on Badge keeps icon+number spacing consistent.") {
+			<div class="flex flex-wrap items-center gap-4">
+				<div class="inline-flex items-center gap-2">
+					<span class="text-sm text-foreground">Open leads</span>
+					@badge.Badge(badge.Props{Variant: badge.VariantPrimary}) { 12 }
+				</div>
+				<div class="inline-flex items-center gap-2">
+					<span class="text-sm text-foreground">Follow-ups</span>
+					@badge.Badge(badge.Props{Variant: badge.VariantWarning}) { 4 }
+				</div>
+				<div class="inline-flex items-center gap-2">
+					<span class="text-sm text-foreground">Archived</span>
+					@badge.Badge(badge.Props{}) { 87 }
+				</div>
+			</div>
+		}
+	</div>
+}
+
+templ statusRow(label string, variant badge.Variant, status string) {
+	<div class="flex items-center justify-between gap-4 px-4 py-3 text-sm">
+		<span class="text-foreground">{ label }</span>
+		@badge.Badge(badge.Props{Variant: variant}) {
+			{ status }
+		}
+	</div>
+}
