@@ -1,0 +1,24 @@
+// Package divider provides a semantic horizontal rule. Converted from
+// catalyst-ui-kit/typescript/divider.tsx.
+//
+// Two variants: regular (border-foreground/10) and soft
+// (border-foreground/5). Both use token-derived opacities so each
+// client's foreground palette drives the line color.
+package divider
+
+// Props controls the Divider.
+//
+// Soft renders a lighter (5% opacity) divider — useful for subtle
+// section separation inside already-bordered cards.
+type Props struct {
+	Soft  bool
+	Class string
+	Attrs templ.Attributes
+}
+
+// Divider renders an <hr> with role="presentation" (since the
+// separation is stylistic rather than semantic — for section
+// boundaries use a heading + margin instead).
+templ Divider(p Props) {
+	<hr role="presentation" class={ classes(p) } { p.Attrs... }/>
+}

@@ -1,0 +1,100 @@
+// Package radio provides a native-input-backed radio button styled to
+// match Catalyst's custom Headless UI control. Converted from
+// catalyst-ui-kit/typescript/radio.tsx; the underlying element is a
+// real <input type="radio"> so browser-native exclusive selection
+// (via shared `name` attribute) and form submission work with zero JS.
+//
+// Structure mirrors Checkbox:
+//
+//   - Radio      single styled radio input
+//   - RadioGroup vertical stack wrapper (matches CheckboxGroup)
+//   - RadioField grid layout for Radio + Label + Description (matches
+//                CheckboxField)
+//
+// For a set of exclusive choices, all Radios share a Name. The browser
+// handles "only one checked at a time" without JS — same as any HTML
+// form from 1995.
+package radio
+
+// Props is the input surface for Radio. Class is forwarded to the
+// outer <label data-slot="control">; Attrs are spread onto the inner
+// <input> so callers can layer htmx, data-*, aria-*, and form-library
+// attributes without reaching around the component.
+//
+// Name is shared across all Radios in an exclusive-choice group.
+// Value is this specific radio's submitted value when it's the one
+// checked.
+type Props struct {
+	Name    string
+	ID      string
+	Value   string
+	Checked bool
+
+	Required bool
+	Disabled bool
+	Invalid  bool
+
+	Class string
+	Attrs templ.Attributes
+}
+
+// Radio renders a styled <input type="radio">. The outer <label> carries
+// data-slot="control" so RadioField's grid positions it in the left
+// column; clicking the label toggles the nested <input>.
+//
+// Structure: the input is absolutely positioned on top with opacity-0
+// to capture clicks; the circle span sits underneath showing the
+// border and background; a small inner-dot span fades in when
+// checked. All are siblings of the input so peer-* variants drive
+// their state.
+templ Radio(p Props) {
+	<label data-slot="control" class={ labelClasses(p) }>
+		<input
+			type="radio"
+			class={ inputClasses }
+			if p.Name != "" {
+				name={ p.Name }
+			}
+			if p.ID != "" {
+				id={ p.ID }
+			}
+			if p.Value != "" {
+				value={ p.Value }
+			}
+			checked?={ p.Checked }
+			required?={ p.Required }
+			disabled?={ p.Disabled }
+			data-invalid?={ p.Invalid }
+			aria-invalid?={ p.Invalid }
+			{ p.Attrs... }
+		/>
+		<span aria-hidden="true" class={ circleClasses }></span>
+		<span aria-hidden="true" class={ dotClasses }></span>
+	</label>
+}
+
+// GroupProps is the optional Class/Attrs pair for RadioGroup / RadioField.
+type GroupProps struct {
+	Class string
+	Attrs templ.Attributes
+}
+
+// RadioGroup vertically stacks multiple RadioFields. The space-y-6
+// variant kicks in automatically when any child carries
+// data-slot="description". Matches CheckboxGroup exactly.
+templ RadioGroup(p GroupProps) {
+	<div data-slot="control" class={ joinClasses(groupBase, p.Class) } role="radiogroup" { p.Attrs... }>
+		{ children... }
+	</div>
+}
+
+// RadioField lays out a single Radio + Label (+ optional Description)
+// in a two-column grid: control on the left, label/description on
+// the right. Place a fieldset.Label and fieldset.Description as
+// siblings of the Radio; data-slot sibling selectors handle
+// positioning.
+templ RadioField(p GroupProps) {
+	<div class={ joinClasses(fieldBase, p.Class) } { p.Attrs... }>
+		{ children... }
+	</div>
+}

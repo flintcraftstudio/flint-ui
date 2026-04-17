@@ -1,0 +1,86 @@
+package templates
+
+import (
+	"github.com/flintcraft/flint-ui/components/fieldset"
+	"github.com/flintcraft/flint-ui/components/toggle"
+)
+
+templ Switches() {
+	<div class="space-y-12">
+		@pageHeader("Switch", "Accessible on/off toggle for settings — email notifications, feature flags, visibility. Native <input type=\"checkbox\" role=\"switch\"> under the hood. SwitchField reverses Checkbox/Radio's column order: label on the left, switch pushed to the right. Package name is `toggle` because `switch` is a Go keyword.")
+
+		@section("Basic switches", "Each Switch is a label wrapping an sr-only checkbox + a visible track and thumb. Clicking anywhere on the label toggles. Tab + Space work natively.") {
+			<div class="flex flex-wrap items-center gap-8">
+				<label class="flex items-center gap-3">
+					@toggle.Switch(toggle.Props{Name: "demo-1"})
+					<span class="text-sm">Off</span>
+				</label>
+				<label class="flex items-center gap-3">
+					@toggle.Switch(toggle.Props{Name: "demo-2", Checked: true})
+					<span class="text-sm">On</span>
+				</label>
+				<label class="flex items-center gap-3">
+					@toggle.Switch(toggle.Props{Name: "demo-3", Disabled: true})
+					<span class="text-sm text-muted-foreground">Disabled</span>
+				</label>
+				<label class="flex items-center gap-3">
+					@toggle.Switch(toggle.Props{Name: "demo-4", Checked: true, Disabled: true})
+					<span class="text-sm text-muted-foreground">Checked + disabled</span>
+				</label>
+			</div>
+		}
+
+		@section("SwitchField layout", "Label on the left, switch pushed to the right. Matches the \"setting name: [toggle]\" pattern used in most iOS / dashboard settings panels.") {
+			<div class="max-w-lg">
+				@fieldset.Fieldset(fieldset.Props{}) {
+					@fieldset.Legend(fieldset.Props{}) { Notifications }
+					@toggle.SwitchGroup(toggle.GroupProps{}) {
+						@toggle.SwitchField(toggle.GroupProps{}) {
+							@fieldset.Label(fieldset.LabelProps{For: "notif-email"}) { Email }
+							@fieldset.Description(fieldset.Props{}) {
+								Send a daily summary of new leads and outstanding jobs.
+							}
+							@toggle.Switch(toggle.Props{ID: "notif-email", Name: "notif_email", Value: "1", Checked: true})
+						}
+						@toggle.SwitchField(toggle.GroupProps{}) {
+							@fieldset.Label(fieldset.LabelProps{For: "notif-sms"}) { Text messages }
+							@fieldset.Description(fieldset.Props{}) {
+								Urgent alerts only — job cancellations, failed payments, crew no-shows.
+							}
+							@toggle.Switch(toggle.Props{ID: "notif-sms", Name: "notif_sms", Value: "1"})
+						}
+						@toggle.SwitchField(toggle.GroupProps{}) {
+							@fieldset.Label(fieldset.LabelProps{For: "notif-push"}) { Push notifications }
+							@fieldset.Description(fieldset.Props{}) {
+								Real-time alerts on the mobile app. Requires the mobile app to be installed and signed in.
+							}
+							@toggle.Switch(toggle.Props{ID: "notif-push", Name: "notif_push", Value: "1", Checked: true})
+						}
+					}
+				}
+			</div>
+		}
+
+		@section("Feature flags", "Switches for toggling app-level features. Shorter fields without descriptions use the default tighter spacing.") {
+			<div class="max-w-md">
+				@fieldset.Fieldset(fieldset.Props{}) {
+					@fieldset.Legend(fieldset.Props{}) { Beta features }
+					@toggle.SwitchGroup(toggle.GroupProps{}) {
+						@toggle.SwitchField(toggle.GroupProps{}) {
+							@fieldset.Label(fieldset.LabelProps{For: "ff-dark"}) { Dark mode }
+							@toggle.Switch(toggle.Props{ID: "ff-dark", Name: "ff_dark", Value: "1"})
+						}
+						@toggle.SwitchField(toggle.GroupProps{}) {
+							@fieldset.Label(fieldset.LabelProps{For: "ff-sidebar"}) { New sidebar layout }
+							@toggle.Switch(toggle.Props{ID: "ff-sidebar", Name: "ff_sidebar", Value: "1", Checked: true})
+						}
+						@toggle.SwitchField(toggle.GroupProps{}) {
+							@fieldset.Label(fieldset.LabelProps{For: "ff-ai"}) { AI job suggestions }
+							@toggle.Switch(toggle.Props{ID: "ff-ai", Name: "ff_ai", Value: "1"})
+						}
+					}
+				}
+			</div>
+		}
+	</div>
+}

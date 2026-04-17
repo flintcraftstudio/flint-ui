@@ -1,0 +1,90 @@
+package templates
+
+import (
+	"github.com/flintcraft/flint-ui/components/fieldset"
+	"github.com/flintcraft/flint-ui/components/radio"
+)
+
+templ Radios() {
+	<div class="space-y-12">
+		@pageHeader("Radio", "Exclusive-choice form control. Native <input type=\"radio\"> under the hood — browser handles one-of-N selection via shared Name attribute. RadioField mirrors CheckboxField's grid layout.")
+
+		@section("Basic radio group", "RadioGroup stacks RadioFields vertically. Each Radio shares the same Name; browser enforces exclusive selection with zero JS.") {
+			@fieldset.Fieldset(fieldset.Props{}) {
+				@fieldset.Legend(fieldset.Props{}) { Notification frequency }
+				@radio.RadioGroup(radio.GroupProps{}) {
+					@radio.RadioField(radio.GroupProps{}) {
+						@radio.Radio(radio.Props{ID: "freq-realtime", Name: "frequency", Value: "realtime"})
+						@fieldset.Label(fieldset.LabelProps{For: "freq-realtime"}) { Real-time }
+					}
+					@radio.RadioField(radio.GroupProps{}) {
+						@radio.Radio(radio.Props{ID: "freq-hourly", Name: "frequency", Value: "hourly", Checked: true})
+						@fieldset.Label(fieldset.LabelProps{For: "freq-hourly"}) { Hourly digest }
+					}
+					@radio.RadioField(radio.GroupProps{}) {
+						@radio.Radio(radio.Props{ID: "freq-daily", Name: "frequency", Value: "daily"})
+						@fieldset.Label(fieldset.LabelProps{For: "freq-daily"}) { Daily summary }
+					}
+					@radio.RadioField(radio.GroupProps{}) {
+						@radio.Radio(radio.Props{ID: "freq-never", Name: "frequency", Value: "never"})
+						@fieldset.Label(fieldset.LabelProps{For: "freq-never"}) { Never }
+					}
+				}
+			}
+		}
+
+		@section("With descriptions", "Descriptions stack under each Label — Group spacing auto-bumps from space-y-3 to space-y-6 and labels go semibold when any Description is present.") {
+			@fieldset.Fieldset(fieldset.Props{}) {
+				@fieldset.Legend(fieldset.Props{}) { Billing plan }
+				@radio.RadioGroup(radio.GroupProps{}) {
+					@radio.RadioField(radio.GroupProps{}) {
+						@radio.Radio(radio.Props{ID: "plan-starter", Name: "plan", Value: "starter", Checked: true})
+						@fieldset.Label(fieldset.LabelProps{For: "plan-starter"}) { Starter }
+						@fieldset.Description(fieldset.Props{}) {
+							Up to 10 jobs per month. $29/month billed annually.
+						}
+					}
+					@radio.RadioField(radio.GroupProps{}) {
+						@radio.Radio(radio.Props{ID: "plan-pro", Name: "plan", Value: "pro"})
+						@fieldset.Label(fieldset.LabelProps{For: "plan-pro"}) { Pro }
+						@fieldset.Description(fieldset.Props{}) {
+							Unlimited jobs, crew management, detailed reporting. $79/month billed annually.
+						}
+					}
+					@radio.RadioField(radio.GroupProps{}) {
+						@radio.Radio(radio.Props{ID: "plan-scale", Name: "plan", Value: "scale"})
+						@fieldset.Label(fieldset.LabelProps{For: "plan-scale"}) { Scale }
+						@fieldset.Description(fieldset.Props{}) {
+							Pro features plus API access, custom branding, and a dedicated account manager. $149/month.
+						}
+					}
+				}
+			}
+		}
+
+		@section("States", "Disabled, invalid, and required. Invalid applies to the field-level layer — useful for form validation errors.") {
+			<div class="flex flex-wrap items-center gap-6">
+				<label class="flex items-center gap-2">
+					@radio.Radio(radio.Props{Name: "state-1", Value: "a"})
+					<span class="text-sm">Unchecked</span>
+				</label>
+				<label class="flex items-center gap-2">
+					@radio.Radio(radio.Props{Name: "state-2", Value: "a", Checked: true})
+					<span class="text-sm">Checked</span>
+				</label>
+				<label class="flex items-center gap-2">
+					@radio.Radio(radio.Props{Name: "state-3", Value: "a", Disabled: true})
+					<span class="text-sm text-muted-foreground">Disabled</span>
+				</label>
+				<label class="flex items-center gap-2">
+					@radio.Radio(radio.Props{Name: "state-4", Value: "a", Checked: true, Disabled: true})
+					<span class="text-sm text-muted-foreground">Checked + disabled</span>
+				</label>
+				<label class="flex items-center gap-2">
+					@radio.Radio(radio.Props{Name: "state-5", Value: "a", Invalid: true})
+					<span class="text-sm text-danger">Invalid</span>
+				</label>
+			</div>
+		}
+	</div>
+}

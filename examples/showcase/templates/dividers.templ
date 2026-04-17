@@ -1,0 +1,45 @@
+package templates
+
+import (
+	"github.com/flintcraft/flint-ui/components/divider"
+)
+
+templ Dividers() {
+	<div class="space-y-12">
+		@pageHeader("Divider", "Semantic horizontal rule (role=\"presentation\") with regular and soft variants. Tiny component — just a tokenized <hr> — but standardizes the inline pattern we were writing by hand in five showcases.")
+
+		@section("Regular", "Default divider — border-foreground/10. Use between section boundaries inside a page or card body.") {
+			<div class="space-y-4">
+				<p class="text-sm text-muted-foreground">Above the divider</p>
+				@divider.Divider(divider.Props{})
+				<p class="text-sm text-muted-foreground">Below the divider</p>
+			</div>
+		}
+
+		@section("Soft", "Soft: true halves the opacity — border-foreground/5. Use when the container already has its own borders and you need a whisper-weight subdivision.") {
+			<div class="rounded-xl border border-border bg-surface p-6 space-y-4">
+				<p class="text-sm">Card content above</p>
+				@divider.Divider(divider.Props{Soft: true})
+				<p class="text-sm">Card content below</p>
+			</div>
+		}
+
+		@section("Between inline content", "Dividers fill their container's width. Combine with flex layouts for inline separators.") {
+			<div class="rounded-xl border border-border bg-surface p-6">
+				<h3 class="text-base font-semibold text-foreground">Invoice #1028</h3>
+				<p class="mt-1 text-sm text-muted-foreground">Henderson Ranch · due Apr 28</p>
+				@divider.Divider(divider.Props{Class: "my-4"})
+				<div class="grid gap-3 sm:grid-cols-2 text-sm">
+					<div>
+						<div class="text-muted-foreground">Subtotal</div>
+						<div class="mt-0.5">$7,800.00</div>
+					</div>
+					<div>
+						<div class="text-muted-foreground">Total</div>
+						<div class="mt-0.5 font-semibold">$8,200.00</div>
+					</div>
+				</div>
+			</div>
+		}
+	</div>
+}

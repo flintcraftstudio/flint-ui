@@ -21,6 +21,8 @@ var NavSections = []struct {
 			{Slug: "selects", Title: "Select", Phase: "1"},
 			{Slug: "textareas", Title: "Textarea", Phase: "1"},
 			{Slug: "checkboxes", Title: "Checkbox", Phase: "1"},
+			{Slug: "radios", Title: "Radio", Phase: "1"},
+			{Slug: "switches", Title: "Switch", Phase: "1"},
 			{Slug: "badges", Title: "Badge", Phase: "1"},
 			{Slug: "avatars", Title: "Avatar", Phase: "1"},
 		},
@@ -32,6 +34,8 @@ var NavSections = []struct {
 			{Slug: "headings", Title: "Heading", Phase: "2"},
 			{Slug: "cards", Title: "Card", Phase: "2"},
 			{Slug: "alerts", Title: "Alert", Phase: "2"},
+			{Slug: "dividers", Title: "Divider", Phase: "2"},
+			{Slug: "description-lists", Title: "Description List", Phase: "2"},
 		},
 	},
 	{

@@ -1,0 +1,91 @@
+package templates
+
+import (
+	"github.com/flintcraft/flint-ui/components/badge"
+	"github.com/flintcraft/flint-ui/components/card"
+	"github.com/flintcraft/flint-ui/components/descriptionlist"
+)
+
+templ DescriptionLists() {
+	<div class="space-y-12">
+		@pageHeader("Description List", "Semantic key-value display — native <dl>/<dt>/<dd> with Catalyst's two-column layout. Single-column on mobile, label | value on sm+. Row separators appear as top borders; the first row omits its border so the list sits cleanly at the top of a container.")
+
+		@section("Client profile", "Typical detail-pane use — client metadata laid out as term/details pairs. On desktop the labels cap at ~20rem so long values wrap naturally in column 2.") {
+			<div class="max-w-2xl">
+				@descriptionlist.DescriptionList(descriptionlist.Props{}) {
+					@descriptionlist.Term(descriptionlist.SubProps{}) { Client }
+					@descriptionlist.Details(descriptionlist.SubProps{}) { Henderson Ranch }
+					@descriptionlist.Term(descriptionlist.SubProps{}) { Primary contact }
+					@descriptionlist.Details(descriptionlist.SubProps{}) { Evie Henderson · evie@hendersonranch.com · (406) 555-0147 }
+					@descriptionlist.Term(descriptionlist.SubProps{}) { Service address }
+					@descriptionlist.Details(descriptionlist.SubProps{}) { 1482 North Valley Road, Corvallis MT 59828 }
+					@descriptionlist.Term(descriptionlist.SubProps{}) { Billing preferences }
+					@descriptionlist.Details(descriptionlist.SubProps{}) { Check by mail; net 30 terms; no emailed invoices per client request }
+					@descriptionlist.Term(descriptionlist.SubProps{}) { Notes }
+					@descriptionlist.Details(descriptionlist.SubProps{}) { Dog on premises — friendly but the gate must stay latched. Access via north side; camper trailer will be moved day-of. }
+				}
+			</div>
+		}
+
+		@section("Inside a Card", "Common pattern — the Card wraps a titled section and the Description List renders the data rows.") {
+			<div class="max-w-2xl">
+				@card.Card(card.Props{}) {
+					@card.Header(card.SubProps{}) {
+						<div class="flex items-center justify-between gap-3">
+							<div>
+								<h3 class="text-base font-semibold text-foreground">Invoice #1028</h3>
+								<p class="mt-1 text-sm text-muted-foreground">Henderson Ranch</p>
+							</div>
+							@badge.Badge(badge.Props{Variant: badge.VariantWarning}) { 14 days overdue }
+						</div>
+					}
+					@card.Body(card.SubProps{}) {
+						@descriptionlist.DescriptionList(descriptionlist.Props{}) {
+							@descriptionlist.Term(descriptionlist.SubProps{}) { Issue date }
+							@descriptionlist.Details(descriptionlist.SubProps{}) { April 8, 2026 }
+							@descriptionlist.Term(descriptionlist.SubProps{}) { Due date }
+							@descriptionlist.Details(descriptionlist.SubProps{}) { April 28, 2026 }
+							@descriptionlist.Term(descriptionlist.SubProps{}) { Subtotal }
+							@descriptionlist.Details(descriptionlist.SubProps{}) { $7,800.00 }
+							@descriptionlist.Term(descriptionlist.SubProps{}) { Tax }
+							@descriptionlist.Details(descriptionlist.SubProps{}) { $400.00 }
+							@descriptionlist.Term(descriptionlist.SubProps{}) { Total }
+							@descriptionlist.Details(descriptionlist.SubProps{Class: "font-semibold"}) { $8,200.00 }
+						}
+					}
+				}
+			</div>
+		}
+
+		@section("Rich value content", "Details accepts any templ content — badges, buttons, links, formatted text.") {
+			<div class="max-w-2xl">
+				@descriptionlist.DescriptionList(descriptionlist.Props{}) {
+					@descriptionlist.Term(descriptionlist.SubProps{}) { Job }
+					@descriptionlist.Details(descriptionlist.SubProps{}) {
+						<div class="flex items-center gap-3">
+							<span class="font-mono text-xs">#1834</span>
+							<span>Gutters install — Henderson Ranch</span>
+							@badge.Badge(badge.Props{Variant: badge.VariantSuccess}) { Scheduled }
+						</div>
+					}
+					@descriptionlist.Term(descriptionlist.SubProps{}) { Assigned crew }
+					@descriptionlist.Details(descriptionlist.SubProps{}) {
+						<div class="flex flex-wrap gap-2">
+							@badge.Badge(badge.Props{Variant: badge.VariantMuted}) { Jaden Sturgis }
+							@badge.Badge(badge.Props{Variant: badge.VariantMuted}) { Marcus Lee }
+							@badge.Badge(badge.Props{Variant: badge.VariantMuted}) { Devon Ray }
+						</div>
+					}
+					@descriptionlist.Term(descriptionlist.SubProps{}) { Documents }
+					@descriptionlist.Details(descriptionlist.SubProps{}) {
+						<ul class="space-y-1">
+							<li><a href="#" class="text-primary hover:underline">Signed estimate (PDF)</a></li>
+							<li><a href="#" class="text-primary hover:underline">Deposit receipt</a></li>
+							<li><a href="#" class="text-primary hover:underline">Material order confirmation</a></li>
+						</ul>
+					}
+				}
+			</div>
+		}
+	</div>
+}

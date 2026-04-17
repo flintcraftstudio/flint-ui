@@ -1,0 +1,53 @@
+// Package descriptionlist provides semantic key-value pair display —
+// dl / dt / dd with Catalyst's two-column layout. Converted from
+// catalyst-ui-kit/typescript/description-list.tsx.
+//
+// The layout is single-column on mobile, two-column (label | value)
+// on sm+ where the label column caps at min(50%, 20rem). Rows are
+// visually separated by a subtle border-top on each row, with the
+// first row's border suppressed so the list sits cleanly inside a
+// Card body.
+//
+// Use for client profiles, invoice metadata, settings summaries —
+// anywhere a form-like "field: value" display helps without the
+// interactivity of a form.
+//
+// Package name is singular-word (no hyphen) because Go doesn't allow
+// hyphens in package names; the exported types keep "Description"
+// as the prefix for clarity.
+package descriptionlist
+
+// Props controls the outer <dl>.
+type Props struct {
+	Class string
+	Attrs templ.Attributes
+}
+
+// SubProps is the shared shape for Term and Details.
+type SubProps struct {
+	Class string
+	Attrs templ.Attributes
+}
+
+// DescriptionList renders the outer <dl>. Grid layout with a narrow
+// label column on sm+ so long values wrap naturally in column 2.
+templ DescriptionList(p Props) {
+	<dl class={ rootClasses(p) } { p.Attrs... }>
+		{ children... }
+	</dl>
+}
+
+// Term renders a <dt> — the label side of a pair. Small caps-style
+// muted text; a top border separates it from the previous row.
+templ Term(p SubProps) {
+	<dt class={ termClasses(p) } { p.Attrs... }>
+		{ children... }
+	</dt>
+}
+
+// Details renders a <dd> — the value side of a pair.
+templ Details(p SubProps) {
+	<dd class={ detailsClasses(p) } { p.Attrs... }>
+		{ children... }
+	</dd>
+}

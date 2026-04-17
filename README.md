@@ -112,8 +112,7 @@ See [`flintcraft-ui-conversion-guide.md`](./flintcraft-ui-conversion-guide.md) f
 - [x] Modal, Dropdown, Tabs, Toast
 - [x] Tooltip, Accordion, Slide-over, Copy-to-Clipboard, Popover, Pagination, Breadcrumbs
 - [x] Combobox, Command Palette
-- [x] Avatar (+ AvatarButton)
-- [ ] Radio, Switch, Divider, Description List (pre-1.0 Catalyst port)
+- [x] Avatar (+ AvatarButton), Radio, Switch, Divider, Description List
 - [ ] DatePicker (deferred; native `<input type="date">` covers most cases)
 
 ## License
