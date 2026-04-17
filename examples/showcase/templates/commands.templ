@@ -1,0 +1,93 @@
+package templates
+
+import (
+	"github.com/flintcraft/flint-ui/components/button"
+	"github.com/flintcraft/flint-ui/components/command"
+)
+
+templ Commands() {
+	<div class="space-y-12">
+		@pageHeader("Command Palette", "Cmd+K / Ctrl+K overlay for searching and invoking actions across the app. Opens via global event or the built-in keyboard shortcut. Items are native buttons or links — Enter activates, clicking closes the palette first then follows the native behavior. Groups hide when no children match the query.")
+
+		@section("Try it", "Press Cmd+K (or Ctrl+K on Linux/Windows) to open the palette. Or use the trigger button.") {
+			<div class="flex flex-wrap items-center gap-3">
+				@button.Button(button.Props{
+					Outline: true,
+					Attrs:   templ.Attributes{"x-on:click": "$dispatch('flint:command-open')"},
+				}) {
+					<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" aria-hidden="true" data-slot="icon" class="size-5">
+						<path d="M8.5 14a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11zM13 13l4 4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+					</svg>
+					Open palette
+					<kbd class="ml-2 rounded border border-border bg-muted px-1.5 py-0.5 text-xs font-mono">⌘K</kbd>
+				}
+				<span class="text-sm text-muted-foreground">Type to filter. Arrow keys navigate. Enter activates. Esc closes.</span>
+			</div>
+		}
+
+		@section("Features", "The palette supports grouping, shortcuts, disabled items, and both link + button items. Type a few characters to watch groups hide when nothing inside them matches.") {
+			<ul class="list-disc space-y-2 pl-5 text-sm text-muted-foreground">
+				<li>Command.Group wraps related items with a heading; the heading disappears when no children match the query.</li>
+				<li>Command.Item renders as <code class="rounded bg-muted px-1 py-0.5 text-xs">&lt;a&gt;</code> when Href is set, otherwise <code class="rounded bg-muted px-1 py-0.5 text-xs">&lt;button&gt;</code>.</li>
+				<li>Shortcut prop shows a keyboard hint on the right. Purely visual — wire your own global keydown listener if you want the shortcut to actually trigger the action.</li>
+				<li>Disabled items dim and skip arrow-key focus.</li>
+				<li>Activation closes the palette via hide() first, then runs the native link/button behavior.</li>
+			</ul>
+		}
+
+		@paletteDemo()
+	</div>
+}
+
+templ paletteDemo() {
+	@command.Palette(command.Props{}) {
+		@command.Group(command.GroupProps{Heading: "Navigation"}) {
+			@command.Item(command.ItemProps{Label: "Go to dashboard", Href: "/", Shortcut: "G D"})
+			@command.Item(command.ItemProps{Label: "Go to jobs", Href: "/tables", Shortcut: "G J"})
+			@command.Item(command.ItemProps{Label: "Go to clients", Href: "/dropdowns", Shortcut: "G C"})
+			@command.Item(command.ItemProps{Label: "Go to invoices", Href: "/cards", Shortcut: "G I"})
+			@command.Item(command.ItemProps{Label: "Go to settings", Href: "/checkboxes", Shortcut: "G S"})
+		}
+		@command.Group(command.GroupProps{Heading: "Create"}) {
+			@command.Item(command.ItemProps{
+				Label:    "New job",
+				Shortcut: "⌘ J",
+				Attrs:    templ.Attributes{"x-on:click": "$dispatch('flint:toast', { variant: 'success', title: 'New job flow (demo)' })"},
+			})
+			@command.Item(command.ItemProps{
+				Label:    "New invoice",
+				Shortcut: "⌘ I",
+				Attrs:    templ.Attributes{"x-on:click": "$dispatch('flint:toast', { variant: 'success', title: 'New invoice flow (demo)' })"},
+			})
+			@command.Item(command.ItemProps{
+				Label:    "New client",
+				Shortcut: "⌘ K ⌘ C",
+				Attrs:    templ.Attributes{"x-on:click": "$dispatch('flint:toast', { variant: 'success', title: 'New client flow (demo)' })"},
+			})
+		}
+		@command.Group(command.GroupProps{Heading: "Actions"}) {
+			@command.Item(command.ItemProps{
+				Label: "Send reminder emails",
+				Attrs: templ.Attributes{"x-on:click": "$dispatch('flint:toast', { variant: 'success', title: 'Sending reminders (demo)' })"},
+			})
+			@command.Item(command.ItemProps{
+				Label: "Export this week's jobs to CSV",
+				Attrs: templ.Attributes{"x-on:click": "$dispatch('flint:toast', { variant: 'success', title: 'Exporting CSV (demo)' })"},
+			})
+			@command.Item(command.ItemProps{
+				Label: "Archive completed jobs",
+				Attrs: templ.Attributes{"x-on:click": "$dispatch('flint:toast', { variant: 'info', title: 'Archive flow (demo)' })"},
+			})
+			@command.Item(command.ItemProps{
+				Label:    "Reset database",
+				Shortcut: "admin only",
+				Disabled: true,
+			})
+		}
+		@command.Group(command.GroupProps{Heading: "Help"}) {
+			@command.Item(command.ItemProps{Label: "Documentation", Href: "/"})
+			@command.Item(command.ItemProps{Label: "Keyboard shortcuts", Href: "/"})
+			@command.Item(command.ItemProps{Label: "Contact support", Href: "/"})
+		}
+	}
+}

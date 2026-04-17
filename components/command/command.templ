@@ -1,0 +1,258 @@
+// Package command provides a Cmd+K command palette — the centered
+// overlay modern dashboards use for searching and invoking actions
+// across the app. From-scratch design (Catalyst has no command.tsx).
+//
+// The component sits at the intersection of Modal and Combobox:
+//
+//   - Modal's plumbing: teleport to <body>, backdrop, x-trap.noscroll
+//     focus trap, ESC-to-close, event-driven open/close.
+//   - Combobox's plumbing: text input that filters a list of items
+//     by substring, arrow-key nav through visible items, Enter to
+//     activate the first match.
+//
+// Opening:
+//
+//   - Dispatch the global event:
+//       $dispatch('flint:command-open')
+//   - Or press the built-in shortcut (default Cmd+K on mac, Ctrl+K
+//     elsewhere). The palette installs a window-level keydown listener
+//     that toggles open/closed. Disable via Props.DisableShortcut if
+//     your app uses Cmd+K for something else.
+//
+// Architecture:
+//
+//   - Single palette per page. No `Name` prop (unlike Modal/Slideover)
+//     — cross-page convention is one palette.
+//   - Items are native <button> or <a>. No fake role="option" on a div
+//     — native elements handle keyboard / click / screen-reader
+//     semantics correctly.
+//   - Groups hide when none of their items match the query — keeps
+//     empty section headings from cluttering a filtered view.
+//
+// Keyboard (requires @alpinejs/focus):
+//
+//   Cmd/Ctrl+K       Toggle open
+//   Type in input    Filter items
+//   ArrowDown        Move focus from input → first visible item;
+//                    cycle through items (wraps)
+//   ArrowUp          Cycle backward through items (wraps)
+//   Enter on input   Activate first visible item
+//   Enter on item    Activate that item (native click)
+//   Escape           Close palette
+package command
+
+// Props controls the Command palette root.
+type Props struct {
+	// Placeholder in the search input. Default: "Type a command or search…".
+	Placeholder string
+
+	// FooterHint is the small helper text rendered at the bottom of
+	// the palette. Default: "↑↓ Navigate · ↵ Select · Esc Close".
+	// Hide entirely via Class="[&>:last-child]:hidden" or similar if
+	// your design wants no footer.
+	FooterHint string
+
+	// DisableShortcut turns off the built-in Cmd/Ctrl+K toggle.
+	// Useful when your app already binds Cmd+K for something else;
+	// callers are still free to open the palette via the
+	// flint:command-open event.
+	DisableShortcut bool
+
+	Class string
+	Attrs templ.Attributes
+}
+
+// Palette renders the outer overlay. Children are typically Groups
+// wrapping Items, but you can drop bare Items in without Group
+// wrappers for an ungrouped palette.
+templ Palette(p Props) {
+	<template x-teleport="body">
+		<div
+			x-data={ alpineData(p) }
+			x-on:flint:command-open.window="show()"
+			x-on:flint:command-close.window="hide()"
+			x-on:keydown.escape.window="open && hide()"
+			if !p.DisableShortcut {
+				x-on:keydown.window={ shortcutHandler() }
+			}
+			x-show="open"
+			x-cloak
+			class="fixed inset-0 z-50"
+		>
+			<!-- Backdrop -->
+			<div
+				x-show="open"
+				x-transition:enter="transition-opacity duration-150 ease-out"
+				x-transition:enter-start="opacity-0"
+				x-transition:enter-end="opacity-100"
+				x-transition:leave="transition-opacity duration-100 ease-in"
+				x-transition:leave-start="opacity-100"
+				x-transition:leave-end="opacity-0"
+				x-on:click="hide()"
+				class={ backdropClasses() }
+				aria-hidden="true"
+			></div>
+			<!-- Panel container — positioned top-center with a viewport-padding margin -->
+			<div class={ panelWrapperClasses() } role="dialog" aria-modal="true" aria-label="Command palette">
+				<div
+					x-show="open"
+					x-trap.noscroll="open"
+					x-transition:enter="transition ease-out duration-150"
+					x-transition:enter-start="opacity-0 scale-95 translate-y-2"
+					x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+					x-transition:leave="transition ease-in duration-100"
+					x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+					x-transition:leave-end="opacity-0 scale-95 translate-y-2"
+					class={ panelClasses(p) }
+					{ p.Attrs... }
+				>
+					<!-- Search row -->
+					<div class={ searchRowClasses() }>
+						@searchIcon()
+						<input
+							type="text"
+							x-ref="input"
+							x-model="query"
+							x-on:keydown.down.prevent="focusFirst()"
+							x-on:keydown.enter.prevent="activateFirst()"
+							x-on:keydown.tab="hide()"
+							role="combobox"
+							aria-autocomplete="list"
+							aria-expanded="true"
+							aria-controls="flint-command-list"
+							autocomplete="off"
+							placeholder={ resolvePlaceholder(p.Placeholder) }
+							class={ inputClasses() }
+						/>
+					</div>
+					<!-- List -->
+					<div
+						x-ref="list"
+						id="flint-command-list"
+						role="listbox"
+						class={ listClasses() }
+					>
+						{ children... }
+						<div x-show="!hasAnyMatch()" x-cloak class={ emptyClasses() }>
+							No results
+						</div>
+					</div>
+					<!-- Footer hint -->
+					<div class={ footerClasses() }>
+						{ resolveFooterHint(p.FooterHint) }
+					</div>
+				</div>
+			</div>
+		</div>
+	</template>
+}
+
+// GroupProps controls a single section of related commands.
+type GroupProps struct {
+	// Heading is the visible section label. Required.
+	Heading string
+	Class   string
+	Attrs   templ.Attributes
+}
+
+// Group wraps a set of related Items under a heading. Hides itself
+// when none of its children match the query — the heading never
+// sits alone above an empty list.
+templ Group(p GroupProps) {
+	<div
+		role="group"
+		x-show="groupHasMatch($el)"
+		x-cloak
+		class={ groupClasses(p) }
+		{ p.Attrs... }
+	>
+		<div aria-hidden="true" class={ groupHeadingClasses() }>
+			{ p.Heading }
+		</div>
+		<div role="presentation">
+			{ children... }
+		</div>
+	</div>
+}
+
+// ItemProps controls a single command row.
+type ItemProps struct {
+	// Label is the visible text and the filter match source.
+	Label string
+
+	// Shortcut is the optional keyboard hint rendered at the right
+	// edge ("G J", "⌘ S"). Purely visual — clicking/executing the
+	// item doesn't bind the shortcut; if you want that behavior,
+	// add your own global keydown listener.
+	Shortcut string
+
+	// Href renders the item as <a href>. Leave empty for a <button>.
+	Href string
+
+	// Disabled dims the item and blocks click / keyboard activation.
+	Disabled bool
+
+	Class string
+	Attrs templ.Attributes
+}
+
+// Item is a single command row. Renders as a link when Href is set,
+// otherwise a button — callers add x-on:click (or hx-post, etc.) via
+// Attrs to wire the action. Clicking or pressing Enter on an item
+// closes the palette first (via hide()) and then runs the native
+// link/button behavior.
+templ Item(p ItemProps) {
+	if p.Href != "" {
+		<a
+			href={ templ.SafeURL(p.Href) }
+			tabindex="-1"
+			data-label={ p.Label }
+			if p.Disabled {
+				data-disabled="true"
+				aria-disabled="true"
+				tabindex="-1"
+			}
+			x-show={ matchExpr(p.Label) }
+			x-on:click={ itemClickHandler(p.Disabled) }
+			x-on:keydown.down.prevent="$focus.within($refs.list).wrap().next()"
+			x-on:keydown.up.prevent="$focus.within($refs.list).wrap().previous()"
+			class={ itemClasses(p) }
+			{ p.Attrs... }
+		>
+			@itemContent(p)
+		</a>
+	} else {
+		<button
+			type="button"
+			tabindex="-1"
+			data-label={ p.Label }
+			disabled?={ p.Disabled }
+			x-show={ matchExpr(p.Label) }
+			x-on:click={ itemClickHandler(p.Disabled) }
+			x-on:keydown.down.prevent="$focus.within($refs.list).wrap().next()"
+			x-on:keydown.up.prevent="$focus.within($refs.list).wrap().previous()"
+			class={ itemClasses(p) }
+			{ p.Attrs... }
+		>
+			@itemContent(p)
+		</button>
+	}
+}
+
+// itemContent is the shared row layout for both link and button
+// variants. Label on the left, Shortcut on the right.
+templ itemContent(p ItemProps) {
+	<span class="flex-1 truncate text-left">{ p.Label }</span>
+	if p.Shortcut != "" {
+		<span class={ shortcutClasses() } aria-hidden="true">
+			{ p.Shortcut }
+		</span>
+	}
+}
+
+// searchIcon is the leading magnifying-glass in the search row.
+templ searchIcon() {
+	<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" aria-hidden="true" class="size-5 shrink-0 text-muted-foreground">
+		<path d="M8.5 14a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11zM13 13l4 4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+	</svg>
+}
