@@ -1,0 +1,76 @@
+package templates
+
+import (
+	"github.com/flintcraft/flint-ui/components/alert"
+	"github.com/flintcraft/flint-ui/components/button"
+)
+
+templ Alerts() {
+	<div class="space-y-12">
+		@pageHeader("Alert", "Inline banner for status messages inside a page. Four variants (info/success/warning/danger) matching Badge's palette. The variant icon renders automatically; Title + Description + optional Actions compose the body.")
+
+		@section("Variants", "Each variant maps to a semantic token — info is primary, danger is danger, etc. Client rebranding flows through automatically.") {
+			<div class="space-y-4">
+				@alert.Alert(alert.Props{Variant: alert.VariantInfo}) {
+					@alert.Title(alert.SubProps{}) { Dark mode arrives next release }
+					@alert.Description(alert.SubProps{}) {
+						The semantic token contract was designed with a dark theme in mind from day one.
+					}
+				}
+				@alert.Alert(alert.Props{Variant: alert.VariantSuccess}) {
+					@alert.Title(alert.SubProps{}) { Invoice sent }
+					@alert.Description(alert.SubProps{}) {
+						Henderson Ranch will receive invoice #1031 at accounts@hendersonranch.com.
+					}
+				}
+				@alert.Alert(alert.Props{Variant: alert.VariantWarning}) {
+					@alert.Title(alert.SubProps{}) { Montana contractor license renews in 30 days }
+					@alert.Description(alert.SubProps{}) {
+						Renewal takes roughly a week to process. Start the filing before April 28 to avoid a lapse.
+					}
+				}
+				@alert.Alert(alert.Props{Variant: alert.VariantDanger}) {
+					@alert.Title(alert.SubProps{}) { Payment failed }
+					@alert.Description(alert.SubProps{}) {
+						The card on file was declined. Update billing details to avoid service interruption.
+					}
+				}
+			</div>
+		}
+
+		@section("With actions", "Drop an Actions row under Description for inline CTAs — a Primary button for the main action and a plain button for dismissal or secondary paths.") {
+			<div class="space-y-4">
+				@alert.Alert(alert.Props{Variant: alert.VariantWarning}) {
+					@alert.Title(alert.SubProps{}) { Crew B has no jobs scheduled this week }
+					@alert.Description(alert.SubProps{}) {
+						Two slots are still open. Schedule now or mark as off to clear the queue.
+					}
+					@alert.Actions(alert.SubProps{}) {
+						@button.Button(button.Props{}) { Schedule }
+						@button.Button(button.Props{Plain: true}) { Mark off }
+					}
+				}
+				@alert.Alert(alert.Props{Variant: alert.VariantInfo}) {
+					@alert.Title(alert.SubProps{}) { New tooltip component is ready to try }
+					@alert.Description(alert.SubProps{}) {
+						Hover- and focus-activated hint bubbles with four anchor positions.
+					}
+					@alert.Actions(alert.SubProps{}) {
+						@button.Button(button.Props{Outline: true, Href: "/tooltips"}) { See the demo }
+					}
+				}
+			</div>
+		}
+
+		@section("Title only", "Drop the Description for a compact single-line alert. Useful inside narrow cards or table headers where a full banner would be overkill.") {
+			<div class="space-y-3">
+				@alert.Alert(alert.Props{Variant: alert.VariantSuccess}) {
+					@alert.Title(alert.SubProps{}) { All changes saved }
+				}
+				@alert.Alert(alert.Props{Variant: alert.VariantDanger}) {
+					@alert.Title(alert.SubProps{}) { Failed to reach the server — retry in a moment }
+				}
+			</div>
+		}
+	</div>
+}

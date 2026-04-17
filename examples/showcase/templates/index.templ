@@ -14,15 +14,15 @@ templ Index() {
 		</div>
 
 		<div class="grid gap-6 sm:grid-cols-2">
-			@card("Phase 1 — Foundation", "Button, Input, Select, Textarea, Checkbox, Badge.")
-			@card("Phase 2 — Layout", "Table, Heading. Card deferred; dialog-style Alert folded into phase 3 near Modal.")
-			@card("Phase 3 — Interactive", "Modal, Dropdown, Tabs, Toast (Alpine-powered).")
-			@card("Phase 4 — Specialized", "DatePicker, Combobox, Pagination, Breadcrumbs.")
+			@phaseCard("Phase 1 — Foundation", "Button, Input, Select, Textarea, Checkbox, Badge.")
+			@phaseCard("Phase 2 — Layout", "Table, Heading, Card, Alert. (Modal inherits Catalyst's dialog-style alert via modal.Props.Alert.)")
+			@phaseCard("Phase 3 — Interactive", "Modal, Dropdown, Tabs, Toast (Alpine-powered).")
+			@phaseCard("Phase 4 — Utility & Specialized", "Tooltip, Accordion, Slide-over. Upcoming: Copy-to-Clipboard, Popover, Pagination, Breadcrumbs, Combobox, Command, DatePicker.")
 		</div>
 	</div>
 }
 
-templ card(title, body string) {
+templ phaseCard(title, body string) {
 	<div class="rounded-xl border border-border bg-surface p-5">
 		<h2 class="text-sm font-semibold text-foreground">{ title }</h2>
 		<p class="mt-1 text-sm text-muted-foreground">{ body }</p>

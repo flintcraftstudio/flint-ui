@@ -1,0 +1,121 @@
+package templates
+
+import (
+	"github.com/flintcraft/flint-ui/components/badge"
+	"github.com/flintcraft/flint-ui/components/button"
+	"github.com/flintcraft/flint-ui/components/card"
+)
+
+templ Cards() {
+	<div class="space-y-12">
+		@pageHeader("Card", "Surface container for grouping related content. No variants — the single styling is intentional. Compose with Header / Body / Footer; Header carries a bottom border and Footer a top border so dividers appear naturally when sections are stacked.")
+
+		@section("Body only", "A card with just a Body is the simplest stat tile. Useful for metrics, single-figure summaries, and quick callouts.") {
+			<div class="grid gap-4 sm:grid-cols-3">
+				@card.Card(card.Props{}) {
+					@card.Body(card.SubProps{}) {
+						<div class="text-sm text-muted-foreground">Active jobs</div>
+						<div class="mt-1 text-3xl font-semibold text-foreground">14</div>
+					}
+				}
+				@card.Card(card.Props{}) {
+					@card.Body(card.SubProps{}) {
+						<div class="text-sm text-muted-foreground">Pending approvals</div>
+						<div class="mt-1 text-3xl font-semibold text-foreground">3</div>
+					}
+				}
+				@card.Card(card.Props{}) {
+					@card.Body(card.SubProps{}) {
+						<div class="text-sm text-muted-foreground">Outstanding invoices</div>
+						<div class="mt-1 text-3xl font-semibold text-foreground">$12,400</div>
+					}
+				}
+			</div>
+		}
+
+		@section("Header + body", "Header adds a padded top section with a bottom border. The typical shape is title + description, but any content works.") {
+			<div class="max-w-2xl">
+				@card.Card(card.Props{}) {
+					@card.Header(card.SubProps{}) {
+						<h3 class="text-base font-semibold text-foreground">Henderson Ranch — gutters install</h3>
+						<p class="mt-1 text-sm text-muted-foreground">Job #1834 · scheduled Tue 4/22 · Crew A</p>
+					}
+					@card.Body(card.SubProps{}) {
+						<ul class="space-y-2 text-sm text-muted-foreground">
+							<li>Seamless aluminum, espresso brown, 180 ft of 6" K-style.</li>
+							<li>Access via north side — camper trailer will be moved the day before.</li>
+							<li>Dog on premises; keep the gate latched.</li>
+						</ul>
+					}
+				}
+			</div>
+		}
+
+		@section("Header + body + footer", "Footer adds a padded bottom section with a top border. Commonly an actions row for the card's primary operations.") {
+			<div class="max-w-2xl">
+				@card.Card(card.Props{}) {
+					@card.Header(card.SubProps{}) {
+						<div class="flex items-center justify-between gap-3">
+							<div>
+								<h3 class="text-base font-semibold text-foreground">Invoice #1028</h3>
+								<p class="mt-1 text-sm text-muted-foreground">Henderson Ranch · due Apr 28</p>
+							</div>
+							@badge.Badge(badge.Props{Variant: badge.VariantWarning}) { 14 days overdue }
+						</div>
+					}
+					@card.Body(card.SubProps{}) {
+						<div class="grid gap-3 text-sm sm:grid-cols-2">
+							<div>
+								<div class="text-muted-foreground">Subtotal</div>
+								<div class="mt-0.5 text-foreground">$7,800.00</div>
+							</div>
+							<div>
+								<div class="text-muted-foreground">Tax</div>
+								<div class="mt-0.5 text-foreground">$400.00</div>
+							</div>
+							<div class="sm:col-span-2">
+								<div class="text-muted-foreground">Total</div>
+								<div class="mt-0.5 text-lg font-semibold text-foreground">$8,200.00</div>
+							</div>
+						</div>
+					}
+					@card.Footer(card.SubProps{}) {
+						<div class="flex items-center justify-end gap-3">
+							@button.Button(button.Props{Plain: true}) { Send reminder }
+							@button.Button(button.Props{Outline: true}) { Mark paid }
+						</div>
+					}
+				}
+			</div>
+		}
+
+		@section("Grid of cards", "Cards compose cleanly into dashboard grids. Use Tailwind's grid utilities on the container — Card doesn't enforce any layout on itself.") {
+			<div class="grid gap-4 sm:grid-cols-2">
+				@card.Card(card.Props{}) {
+					@card.Header(card.SubProps{}) {
+						<h3 class="text-base font-semibold text-foreground">This week</h3>
+					}
+					@card.Body(card.SubProps{}) {
+						<ul class="space-y-2 text-sm text-muted-foreground">
+							<li>Tue 4/22 — Crew A — gutters install (4hr)</li>
+							<li>Wed 4/23 — Crew B — siding repair (full day)</li>
+							<li>Fri 4/25 — Crew A — followup walkthrough (1hr)</li>
+						</ul>
+					}
+				}
+				@card.Card(card.Props{}) {
+					@card.Header(card.SubProps{}) {
+						<h3 class="text-base font-semibold text-foreground">Recently quoted</h3>
+					}
+					@card.Body(card.SubProps{}) {
+						<ul class="space-y-2 text-sm text-muted-foreground">
+							<li>Western Skies — fascia repair — $1,800</li>
+							<li>Bitterroot Co-op — full re-roof — $28,400</li>
+							<li>Lo Mo Cabin — seasonal cleanout — $340</li>
+						</ul>
+					}
+				}
+			</div>
+		}
+	</div>
+}

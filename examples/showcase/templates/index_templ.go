@@ -33,19 +33,19 @@ func Index() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = card("Phase 1 — Foundation", "Button, Input, Select, Textarea, Checkbox, Badge.").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = phaseCard("Phase 1 — Foundation", "Button, Input, Select, Textarea, Checkbox, Badge.").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = card("Phase 2 — Layout", "Table, Heading. Card deferred; dialog-style Alert folded into phase 3 near Modal.").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = phaseCard("Phase 2 — Layout", "Table, Heading, Card, Alert. (Modal inherits Catalyst's dialog-style alert via modal.Props.Alert.)").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = card("Phase 3 — Interactive", "Modal, Dropdown, Tabs, Toast (Alpine-powered).").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = phaseCard("Phase 3 — Interactive", "Modal, Dropdown, Tabs, Toast (Alpine-powered).").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = card("Phase 4 — Specialized", "DatePicker, Combobox, Pagination, Breadcrumbs.").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = phaseCard("Phase 4 — Utility & Specialized", "Tooltip, Accordion, Slide-over. Upcoming: Copy-to-Clipboard, Popover, Pagination, Breadcrumbs, Combobox, Command, DatePicker.").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -57,7 +57,7 @@ func Index() templ.Component {
 	})
 }
 
-func card(title, body string) templ.Component {
+func phaseCard(title, body string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

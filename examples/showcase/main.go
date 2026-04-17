@@ -34,6 +34,8 @@ func main() {
 	mux.Handle("GET /badges", page("Badge", "badges", templates.Badges()))
 	mux.Handle("GET /tables", page("Table", "tables", templates.Tables()))
 	mux.Handle("GET /headings", page("Heading", "headings", templates.Headings()))
+	mux.Handle("GET /cards", page("Card", "cards", templates.Cards()))
+	mux.Handle("GET /alerts", page("Alert", "alerts", templates.Alerts()))
 	mux.Handle("GET /modals", page("Modal", "modals", templates.Modals()))
 	mux.Handle("GET /dropdowns", page("Dropdown", "dropdowns", templates.Dropdowns()))
 	mux.Handle("GET /tabs", page("Tabs", "tabs", templates.Tabs()))

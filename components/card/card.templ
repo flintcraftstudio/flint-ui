@@ -1,0 +1,78 @@
+// Package card provides a surface container for grouping related content.
+// From-scratch design — Catalyst has no card.tsx.
+//
+// A Card is structural chrome only: background surface, border, rounded
+// corners, and a subtle shadow. Content sits in Header / Body / Footer
+// sub-components, each with its own padding. Header carries a bottom
+// border and Footer a top border, so composing sections naturally
+// produces dividers between them without a separate Divider component.
+//
+// Typical shapes:
+//
+//	// Stat tile: body only
+//	@card.Card(card.Props{}) {
+//	    @card.Body(card.SubProps{}) {
+//	        <div class="text-sm text-muted-foreground">Active jobs</div>
+//	        <div class="mt-1 text-3xl font-semibold text-foreground">14</div>
+//	    }
+//	}
+//
+//	// Report: header + body + footer
+//	@card.Card(card.Props{}) {
+//	    @card.Header(card.SubProps{}) { ... }
+//	    @card.Body(card.SubProps{}) { ... }
+//	    @card.Footer(card.SubProps{}) { ... }
+//	}
+//
+// Cards have no variants — padding, typography, and background are set
+// once. If a client wants something different (a dashed outline variant,
+// a heavier shadow), override per-instance via Class rather than adding
+// a variant enum.
+package card
+
+// Props controls the outer Card container. No variants in v0.1 — the
+// single surface is intentional. Class is the override hatch.
+type Props struct {
+	Class string
+	Attrs templ.Attributes
+}
+
+// SubProps is the shared shape for Header / Body / Footer. Every section
+// takes the same two knobs — a class append and an attrs spread.
+type SubProps struct {
+	Class string
+	Attrs templ.Attributes
+}
+
+// Card renders the outer container. Holds only chrome classes; children
+// (typically Header / Body / Footer) bring their own padding.
+templ Card(p Props) {
+	<div class={ rootClasses(p) } { p.Attrs... }>
+		{ children... }
+	</div>
+}
+
+// Header is the top section. Padded, carries a bottom border so a
+// following Body is visually separated without a standalone divider.
+templ Header(p SubProps) {
+	<div class={ headerClasses(p) } { p.Attrs... }>
+		{ children... }
+	</div>
+}
+
+// Body is the middle section. Padded, no borders — dividers come from
+// the adjacent Header / Footer.
+templ Body(p SubProps) {
+	<div class={ bodyClasses(p) } { p.Attrs... }>
+		{ children... }
+	</div>
+}
+
+// Footer is the bottom section. Padded, carries a top border. A common
+// shape is an actions row with mt-auto pushing it to the card's bottom
+// if the card has a fixed height.
+templ Footer(p SubProps) {
+	<div class={ footerClasses(p) } { p.Attrs... }>
+		{ children... }
+	</div>
+}

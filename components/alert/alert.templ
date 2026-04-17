@@ -1,0 +1,134 @@
+// Package alert provides inline banner notices — tinted blocks inside a
+// page that convey a status to the reader without interrupting their
+// flow. From-scratch design.
+//
+// This is NOT the modal confirmation dialog Catalyst calls "alert". That
+// one shipped as modal.Props.Alert and keeps Catalyst's centered-on-
+// mobile dialog layout. What lives here is the *inline banner* — the
+// thing at the top of a page saying "Your license expires in 30 days"
+// or "Saved successfully." It's a peer of Badge, not Modal.
+//
+// Variants mirror Badge: info / success / warning / danger. Colors
+// follow the same `bg-{token}/15 text-{token}` recipe so badges and
+// alerts share a palette — a success badge inside a success alert reads
+// as the same concept at different scales.
+//
+// A variant icon is rendered automatically on the left. Callers don't
+// need to supply one; if they want a different icon, override via the
+// Icon slot (children marked `data-slot="icon"` replace the default).
+// This matches Toast's pattern.
+//
+// Dismissable alerts aren't shipped in v0.1 — most inline alerts are
+// informative, not transient. Add if a client needs them; the pattern
+// would be an optional Alpine `{ open: true }` + a close button.
+package alert
+
+// Variant picks the color family. Defaults to info if unset.
+type Variant string
+
+const (
+	VariantInfo    Variant = "info"
+	VariantSuccess Variant = "success"
+	VariantWarning Variant = "warning"
+	VariantDanger  Variant = "danger"
+)
+
+// Props controls the outer Alert.
+type Props struct {
+	Variant Variant
+	Class   string
+	Attrs   templ.Attributes
+}
+
+// SubProps is the shared shape for Title / Description / Actions.
+type SubProps struct {
+	Class string
+	Attrs templ.Attributes
+}
+
+// Alert renders the banner container. Layout is a two-column flex row:
+// icon column (shrink-0), content column (flex-1) holding Title /
+// Description / Actions. The variant's default icon renders automatically
+// and is hidden if children include any element with data-slot="icon"
+// (using CSS has()/sibling logic isn't reliable cross-browser yet, so
+// callers who want a custom icon should Class-override the default).
+templ Alert(p Props) {
+	<div
+		role="alert"
+		class={ rootClasses(p) }
+		{ p.Attrs... }
+	>
+		<div class="shrink-0 pt-0.5">
+			@variantIcon(p.Variant)
+		</div>
+		<div class="min-w-0 flex-1">
+			{ children... }
+		</div>
+	</div>
+}
+
+// Title is the short bold heading at the top of the content column.
+// Semantic heading level is up to the caller — set it via SubProps.Attrs
+// ("role": "heading", "aria-level": "2") if you need to slot into the
+// document outline.
+templ Title(p SubProps) {
+	<div class={ titleClasses(p) } { p.Attrs... }>
+		{ children... }
+	</div>
+}
+
+// Description is the body text under the Title.
+templ Description(p SubProps) {
+	<div class={ descriptionClasses(p) } { p.Attrs... }>
+		{ children... }
+	</div>
+}
+
+// Actions is the optional row of buttons or links under Description.
+// Catalyst's Button and Link components fit naturally here; for inline
+// textual actions use plain <a> with Class="font-medium underline".
+templ Actions(p SubProps) {
+	<div class={ actionsClasses(p) } { p.Attrs... }>
+		{ children... }
+	</div>
+}
+
+// variantIcon renders the default glyph for a variant. Same icon set as
+// Toast so the two components share symbology — a success alert and a
+// success toast use the same checkmark.
+templ variantIcon(v Variant) {
+	switch v {
+		case VariantSuccess:
+			@iconSuccess()
+		case VariantWarning:
+			@iconWarning()
+		case VariantDanger:
+			@iconDanger()
+		default:
+			@iconInfo()
+	}
+}
+
+templ iconInfo() {
+	<svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" class="size-5" aria-hidden="true">
+		<path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm.75-11.5a.75.75 0 0 0-1.5 0v.5a.75.75 0 0 0 1.5 0v-.5zM10 8.75a.75.75 0 0 1 .75.75v4a.75.75 0 0 1-1.5 0v-4a.75.75 0 0 1 .75-.75z" clip-rule="evenodd"/>
+	</svg>
+}
+
+templ iconSuccess() {
+	<svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" class="size-5" aria-hidden="true">
+		<path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm3.7-9.7a.75.75 0 0 0-1.04-1.08l-3.49 3.36-1.57-1.51a.75.75 0 1 0-1.04 1.08l2.09 2.02a.75.75 0 0 0 1.04 0l4-3.86z" clip-rule="evenodd"/>
+	</svg>
+}
+
+templ iconWarning() {
+	<svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" class="size-5" aria-hidden="true">
+		<path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.672 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.188-1.458-1.515-2.625l6.28-10.875zM10 6a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 10 6zm0 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2z" clip-rule="evenodd"/>
+	</svg>
+}
+
+templ iconDanger() {
+	<svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" class="size-5" aria-hidden="true">
+		<path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM8.28 7.22a.75.75 0 0 0-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 1 0 1.06 1.06L10 11.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L11.06 10l1.72-1.72a.75.75 0 0 0-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd"/>
+	</svg>
+}

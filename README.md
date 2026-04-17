@@ -108,8 +108,7 @@ See [`flintcraft-ui-conversion-guide.md`](./flintcraft-ui-conversion-guide.md) f
 - [x] Textarea
 - [x] Checkbox
 - [x] Badge
-- [x] Table, Heading
-- [ ] Card, Alert
+- [x] Table, Heading, Card, Alert
 - [x] Modal, Dropdown, Tabs, Toast
 - [x] Tooltip, Accordion, Slide-over
 - [ ] Copy-to-Clipboard
