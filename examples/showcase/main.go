@@ -38,6 +38,8 @@ func main() {
 	mux.Handle("GET /dropdowns", page("Dropdown", "dropdowns", templates.Dropdowns()))
 	mux.Handle("GET /tabs", page("Tabs", "tabs", templates.Tabs()))
 	mux.Handle("GET /tabs/job", http.HandlerFunc(tabsJobHandler))
+	mux.Handle("GET /toasts", page("Toast", "toasts", templates.Toasts()))
+	mux.Handle("POST /toasts/echo", http.HandlerFunc(toastsEchoHandler))
 
 	mux.Handle("GET /tables/detail", http.HandlerFunc(tablesDetailHandler))
 
@@ -121,6 +123,17 @@ func tablesDetailHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(
 		`<span class="text-success">loaded detail for: ` + name + `</span>`,
 	))
+}
+
+// toastsEchoHandler demonstrates HX-Trigger-driven toasts. The server
+// returns a JSON header naming the flint:toast event with the payload
+// inline; htmx dispatches it client-side and the page-level toast
+// Container picks it up. The response body itself is just a small
+// confirmation that gets swapped into #toast-result.
+func toastsEchoHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("HX-Trigger", `{"flint:toast":{"variant":"success","title":"Saved on the server","body":"HX-Trigger fired — no client-side dispatch code."}}`)
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	_, _ = w.Write([]byte(`<span class="text-success">server responded — toast fired via HX-Trigger</span>`))
 }
 
 // tabsJobHandler re-renders the server-mode tabs section for the htmx

@@ -1,0 +1,142 @@
+// Package toast provides ephemeral notifications. From-scratch design;
+// Catalyst has no toast.tsx.
+//
+// Architecture: a single Container is rendered once per page (typically
+// in the base layout). Any code on the page can fire a toast by
+// dispatching the `flint:toast` window event with a detail payload:
+//
+//	$dispatch('flint:toast', { variant: 'success', title: 'Saved' })
+//
+// or via htmx response header (server-driven, no client code):
+//
+//	HX-Trigger: {"flint:toast":{"variant":"success","title":"Saved"}}
+//
+// The Container listens for the event, builds a toast from the payload,
+// adds it to its reactive list, and schedules auto-dismiss. Hovering
+// (or focusing) pauses the timer; mouse-leave / blur resumes. ESC
+// dismisses the most recent. The X button dismisses immediately.
+//
+// Variants — info / success / warning / danger — map to the semantic
+// token contract via a colored left border and an icon tinted to the
+// matching token (text-primary / text-success / text-warning / text-danger).
+//
+// Toasts are content-driven, not declarative — there's no per-toast
+// templ. Just one Container, dispatched many times. This trades the
+// per-modal name pattern for a simpler API: anything that can dispatch
+// a custom event can show a toast (htmx HX-Trigger headers, inline
+// onclick, third-party scripts, etc.) with no flint-ui binding code.
+package toast
+
+// Placement picks which corner of the viewport the toast stack lives in.
+// PlacementBottomRight is the default and the conventional dashboard
+// choice. Stacks always grow toward the bottom of the visual area —
+// new toasts appear after older ones in DOM order.
+type Placement string
+
+const (
+	PlacementBottomRight Placement = "bottom-right"
+	PlacementBottomLeft  Placement = "bottom-left"
+	PlacementTopRight    Placement = "top-right"
+	PlacementTopLeft     Placement = "top-left"
+)
+
+// ContainerProps controls the toast Container.
+type ContainerProps struct {
+	Placement Placement
+	Class     string
+	Attrs     templ.Attributes
+}
+
+// Container renders the fixed-positioned wrapper that holds active toasts.
+// Render this exactly once per page — usually in the base layout, after
+// (or before) the main content. Multiple Containers on the same page will
+// each react to every dispatch and show duplicates.
+//
+// The wrapper is `pointer-events-none` so it doesn't intercept clicks on
+// the underlying page; individual toasts re-enable pointer events so the
+// X button and hover-to-pause work.
+templ Container(p ContainerProps) {
+	<div
+		x-data={ alpineData() }
+		x-on:flint:toast.window="add($event.detail)"
+		x-on:keydown.escape.window="toasts.length && dismiss(toasts[toasts.length-1].id)"
+		aria-live="polite"
+		aria-atomic="false"
+		class={ containerClasses(p) }
+		{ p.Attrs... }
+	>
+		<template x-for="t in toasts" x-bind:key="t.id">
+			<div
+				role="status"
+				x-bind:data-variant="t.variant"
+				x-on:mouseenter="pause(t)"
+				x-on:mouseleave="resume(t)"
+				x-on:focusin="pause(t)"
+				x-on:focusout="resume(t)"
+				x-bind:class={ leavingBindExpr(p.Placement) }
+				class={ toastClasses(p.Placement) }
+			>
+				<div class="flex items-start gap-3">
+					<div class="shrink-0 pt-0.5">
+						@iconInfo()
+						@iconSuccess()
+						@iconWarning()
+						@iconDanger()
+					</div>
+					<div class="min-w-0 flex-1">
+						<div x-text="t.title" class="text-sm font-semibold text-foreground"></div>
+						<div x-show="t.body" x-text="t.body" class="mt-1 text-sm text-muted-foreground"></div>
+					</div>
+					<button
+						type="button"
+						x-on:click="dismiss(t.id)"
+						class={ dismissClasses() }
+						aria-label="Dismiss notification"
+					>
+						<svg viewBox="0 0 20 20" class="size-4" fill="currentColor" aria-hidden="true">
+							<path fill-rule="evenodd" d="M4.28 3.22a.75.75 0 0 0-1.06 1.06L8.94 10l-5.72 5.72a.75.75 0 1 0 1.06 1.06L10 11.06l5.72 5.72a.75.75 0 1 0 1.06-1.06L11.06 10l5.72-5.72a.75.75 0 0 0-1.06-1.06L10 8.94 4.28 3.22z" clip-rule="evenodd"/>
+						</svg>
+					</button>
+				</div>
+				<div
+					x-show="t.duration > 0"
+					class={ progressBarClasses() }
+					x-bind:style="{
+						animation: 'flint-toast-progress ' + t.duration + 'ms linear forwards',
+						animationPlayState: t.paused ? 'paused' : 'running'
+					}"
+					aria-hidden="true"
+				></div>
+			</div>
+		</template>
+	</div>
+}
+
+// iconInfo / iconSuccess / iconWarning / iconDanger render the variant
+// glyph. All four are emitted inside the toast and `x-show` picks the
+// matching one based on `t.variant`. Same data-slot="icon" convention
+// flint-ui uses elsewhere for consistent sizing and tinting overrides.
+
+templ iconInfo() {
+	<svg x-show="t.variant === 'info'" viewBox="0 0 20 20" fill="currentColor" data-slot="icon" class="size-5 text-primary" aria-hidden="true">
+		<path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm.75-11.5a.75.75 0 0 0-1.5 0v.5a.75.75 0 0 0 1.5 0v-.5zM10 8.75a.75.75 0 0 1 .75.75v4a.75.75 0 0 1-1.5 0v-4a.75.75 0 0 1 .75-.75z" clip-rule="evenodd"/>
+	</svg>
+}
+
+templ iconSuccess() {
+	<svg x-show="t.variant === 'success'" viewBox="0 0 20 20" fill="currentColor" data-slot="icon" class="size-5 text-success" aria-hidden="true">
+		<path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm3.7-9.7a.75.75 0 0 0-1.04-1.08l-3.49 3.36-1.57-1.51a.75.75 0 1 0-1.04 1.08l2.09 2.02a.75.75 0 0 0 1.04 0l4-3.86z" clip-rule="evenodd"/>
+	</svg>
+}
+
+templ iconWarning() {
+	<svg x-show="t.variant === 'warning'" viewBox="0 0 20 20" fill="currentColor" data-slot="icon" class="size-5 text-warning" aria-hidden="true">
+		<path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.672 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.188-1.458-1.515-2.625l6.28-10.875zM10 6a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 10 6zm0 9a1 1 0 1 0 0-2 1 1 0 0 0 0 2z" clip-rule="evenodd"/>
+	</svg>
+}
+
+templ iconDanger() {
+	<svg x-show="t.variant === 'danger'" viewBox="0 0 20 20" fill="currentColor" data-slot="icon" class="size-5 text-danger" aria-hidden="true">
+		<path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM8.28 7.22a.75.75 0 0 0-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 1 0 1.06 1.06L10 11.06l1.72 1.72a.75.75 0 1 0 1.06-1.06L11.06 10l1.72-1.72a.75.75 0 0 0-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd"/>
+	</svg>
+}

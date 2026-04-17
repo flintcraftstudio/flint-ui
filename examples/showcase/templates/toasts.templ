@@ -1,0 +1,68 @@
+package templates
+
+import "github.com/flintcraft/flint-ui/components/button"
+
+templ Toasts() {
+	<div class="space-y-12">
+		@pageHeader("Toast", "Ephemeral notifications fired by dispatching a window event. One Container per page (already rendered by the showcase layout) listens for `flint:toast`, builds a toast from the payload, auto-dismisses after the duration, and stacks new ones in. Hover to pause the timer; ESC dismisses the most recent.")
+
+		@section("Variants", "Four variants tinted via the semantic token contract. Each gets a colored left border and matching icon.") {
+			<div class="flex flex-wrap items-center gap-3">
+				@button.Button(button.Props{Outline: true, Attrs: templ.Attributes{
+					"x-on:click": `$dispatch('flint:toast', { variant: 'info', title: 'Heads up', body: 'New estimate request from Henderson Ranch.' })`,
+				}}) { Info }
+				@button.Button(button.Props{Variant: button.VariantSuccess, Attrs: templ.Attributes{
+					"x-on:click": `$dispatch('flint:toast', { variant: 'success', title: 'Saved', body: 'Job #1834 scheduled for Apr 22.' })`,
+				}}) { Success }
+				@button.Button(button.Props{Variant: button.VariantWarning, Attrs: templ.Attributes{
+					"x-on:click": `$dispatch('flint:toast', { variant: 'warning', title: 'Crew at capacity', body: 'Crew B is booked solid this week — pick a different week or crew.' })`,
+				}}) { Warning }
+				@button.Button(button.Props{Variant: button.VariantDanger, Attrs: templ.Attributes{
+					"x-on:click": `$dispatch('flint:toast', { variant: 'danger', title: 'Failed to send', body: 'Invoice #1028 could not be emailed — check the client address.' })`,
+				}}) { Danger }
+			</div>
+		}
+
+		@section("Title only", "Body is optional. Pass just a title for short, momentary confirmations.") {
+			<div class="flex flex-wrap items-center gap-3">
+				@button.Button(button.Props{Plain: true, Attrs: templ.Attributes{
+					"x-on:click": `$dispatch('flint:toast', { variant: 'success', title: 'Copied to clipboard' })`,
+				}}) { Fire title-only }
+			</div>
+		}
+
+		@section("Persist (no auto-dismiss)", "Pass duration: 0 to keep the toast on screen until the user dismisses it. Use sparingly — for things the user really should acknowledge.") {
+			<div class="flex flex-wrap items-center gap-3">
+				@button.Button(button.Props{Outline: true, Attrs: templ.Attributes{
+					"x-on:click": `$dispatch('flint:toast', { variant: 'warning', title: 'Sync paused', body: 'Reconnect to resume syncing — this notice will stay until dismissed.', duration: 0 })`,
+				}}) { Fire persistent }
+			</div>
+		}
+
+		@section("Stacking", "Fire a few in quick succession. New toasts append below; hovering any pauses its individual timer.") {
+			<div class="flex flex-wrap items-center gap-3">
+				@button.Button(button.Props{Outline: true, Attrs: templ.Attributes{
+					"x-on:click": `[
+						{ variant: 'info',    title: 'Job #1834 created' },
+						{ variant: 'success', title: 'Crew assigned',  body: 'Marcus L. — lead' },
+						{ variant: 'warning', title: 'Conflict detected', body: 'Overlaps with #1829 (resolved by 30 min buffer).' },
+					].forEach((d, i) => setTimeout(() => $dispatch('flint:toast', d), i * 250))`,
+				}}) { Fire three }
+			</div>
+		}
+
+		@section("From the server (htmx HX-Trigger)", "The killer pattern. Server returns an HX-Trigger header naming flint:toast with the toast payload as JSON; htmx dispatches it client-side and the toast appears — no caller-side JS, no Alpine handler. Click below to POST /toasts/echo and the server response will fire a success toast.") {
+			<div class="flex flex-wrap items-center gap-3">
+				@button.Button(button.Props{
+					Variant: button.VariantPrimary,
+					Attrs: templ.Attributes{
+						"hx-post":   "/toasts/echo",
+						"hx-target": "#toast-result",
+						"hx-swap":   "innerHTML",
+					},
+				}) { POST and toast }
+				<span id="toast-result" class="text-sm text-muted-foreground"></span>
+			</div>
+		}
+	</div>
+}

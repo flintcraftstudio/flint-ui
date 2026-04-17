@@ -64,3 +64,63 @@
   x-show / x-if.
 */
 [x-cloak] { display: none !important; }
+
+/*
+  Toast progress-bar countdown. The bar sits at the bottom of each toast
+  and drains from full width down to zero over the toast's duration.
+  Paused via animation-play-state when the user hovers or focuses the
+  toast (set by Alpine in components/toast). transform-origin: left
+  keeps the remaining bar anchored to the left edge as it shrinks.
+*/
+@keyframes flint-toast-progress {
+  from { transform: scaleX(1); }
+  to   { transform: scaleX(0); }
+}
+
+/*
+  Toast slide transitions. Plain CSS rather than Tailwind translate-x
+  utilities because Tailwind v4 routes translate through the registered
+  `--tw-translate-x` CSS property (syntax: "*"), which doesn't interpolate
+  smoothly. Using `transform: translateX(...)` directly transitions cleanly.
+  The 1.5rem buffer matches the container's `sm:p-6` padding so toasts
+  start fully off the visible edge regardless of viewport.
+
+  Enter is a CSS @keyframes animation (not a transition). The animation
+  runs unconditionally when the keyframes are first applied to a freshly
+  mounted element — which is exactly what we need for x-for-inserted
+  toasts, since CSS transitions only fire on property changes to elements
+  that already exist. The toast template stamps `flint-toast-in-right`
+  or `flint-toast-in-left` onto each toast based on the Container's
+  Placement, so the right animation runs on mount.
+
+  Leave is a CSS transition triggered by Alpine adding the leave-end
+  class. By that point the element exists and has a stable opacity/
+  transform state, so the property change interpolates properly.
+*/
+@keyframes flint-toast-in-right {
+  from { opacity: 0; transform: translateX(calc(100% + 1.5rem)); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes flint-toast-in-left {
+  from { opacity: 0; transform: translateX(calc(-100% - 1.5rem)); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.flint-toast-in-right { animation: flint-toast-in-right 300ms ease-out; }
+.flint-toast-in-left  { animation: flint-toast-in-left  300ms ease-out; }
+
+/*
+  Leave is handled manually rather than via x-transition because Alpine's
+  x-transition is unreliable on x-for-mounted elements (matches what the
+  Pines UI toast component does — see burnToast() pattern). Mechanism:
+    1. Toast has .flint-toast-base on it from mount, providing the
+       transition rule.
+    2. dismiss() sets t.leaving = true; x-bind:class adds the variant
+       leave class which changes opacity + transform.
+    3. The transition fires on the property change.
+    4. dismiss() also setTimeout(200ms)s the actual array splice so the
+       element stays in the DOM long enough for the animation to play.
+*/
+.flint-toast-base      { transition: opacity 200ms ease-in, transform 200ms ease-in; }
+.flint-toast-out-right { opacity: 0; transform: translateX(calc(100% + 1.5rem)); }
+.flint-toast-out-left  { opacity: 0; transform: translateX(calc(-100% - 1.5rem)); }
