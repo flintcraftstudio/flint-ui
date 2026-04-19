@@ -9,9 +9,9 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/flintcraft/flint-ui/components/button"
-	"github.com/flintcraft/flint-ui/components/fieldset"
-	"github.com/flintcraft/flint-ui/components/input"
+	"github.com/flintcraftstudio/flint-ui/components/button"
+	"github.com/flintcraftstudio/flint-ui/components/fieldset"
+	"github.com/flintcraftstudio/flint-ui/components/input"
 )
 
 func Inputs() templ.Component {

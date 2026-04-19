@@ -5,7 +5,7 @@ Numbered page navigation for long tables and lists. Converted from `catalyst-ui-
 ## Import
 
 ```go
-import "github.com/flintcraft/flint-ui/components/pagination"
+import "github.com/flintcraftstudio/flint-ui/components/pagination"
 ```
 
 ## Components

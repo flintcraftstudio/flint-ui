@@ -5,7 +5,7 @@ Tiny Alpine primitive for copying a value to the system clipboard — API keys, 
 ## Import
 
 ```go
-import "github.com/flintcraft/flint-ui/components/clipboard"
+import "github.com/flintcraftstudio/flint-ui/components/clipboard"
 ```
 
 ## Quick example

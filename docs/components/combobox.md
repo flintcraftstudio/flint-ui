@@ -5,7 +5,7 @@ Searchable select — a text input with a filterable dropdown of options. Reshap
 ## Import
 
 ```go
-import "github.com/flintcraft/flint-ui/components/combobox"
+import "github.com/flintcraftstudio/flint-ui/components/combobox"
 ```
 
 ## Components

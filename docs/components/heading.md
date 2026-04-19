@@ -5,7 +5,7 @@ Converted from `catalyst-ui-kit/typescript/heading.tsx`. Two components: `Headin
 ## Import
 
 ```go
-import "github.com/flintcraft/flint-ui/components/heading"
+import "github.com/flintcraftstudio/flint-ui/components/heading"
 ```
 
 ## Usage

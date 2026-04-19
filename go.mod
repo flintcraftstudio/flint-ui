@@ -1,4 +1,4 @@
-module github.com/flintcraft/flint-ui
+module github.com/flintcraftstudio/flint-ui
 
 go 1.25.8
 

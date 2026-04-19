@@ -5,7 +5,7 @@ Converted from `catalyst-ui-kit/typescript/textarea.tsx`. Renders a Catalyst-sty
 ## Import
 
 ```go
-import "github.com/flintcraft/flint-ui/components/textarea"
+import "github.com/flintcraftstudio/flint-ui/components/textarea"
 ```
 
 ## Usage

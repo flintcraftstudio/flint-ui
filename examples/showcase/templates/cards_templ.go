@@ -9,9 +9,9 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/flintcraft/flint-ui/components/badge"
-	"github.com/flintcraft/flint-ui/components/button"
-	"github.com/flintcraft/flint-ui/components/card"
+	"github.com/flintcraftstudio/flint-ui/components/badge"
+	"github.com/flintcraftstudio/flint-ui/components/button"
+	"github.com/flintcraftstudio/flint-ui/components/card"
 )
 
 func Cards() templ.Component {

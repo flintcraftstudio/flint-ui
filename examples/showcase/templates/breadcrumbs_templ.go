@@ -9,8 +9,8 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/flintcraft/flint-ui/components/badge"
-	"github.com/flintcraft/flint-ui/components/breadcrumbs"
+	"github.com/flintcraftstudio/flint-ui/components/badge"
+	"github.com/flintcraftstudio/flint-ui/components/breadcrumbs"
 )
 
 func Breadcrumbs() templ.Component {

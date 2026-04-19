@@ -5,7 +5,7 @@ User-identity avatar: image, initials, or both stacked so initials bridge the im
 ## Import
 
 ```go
-import "github.com/flintcraft/flint-ui/components/avatar"
+import "github.com/flintcraftstudio/flint-ui/components/avatar"
 ```
 
 ## Components

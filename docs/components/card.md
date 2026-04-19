@@ -5,7 +5,7 @@ Surface container for grouping related content. From-scratch design — Catalyst
 ## Import
 
 ```go
-import "github.com/flintcraft/flint-ui/components/card"
+import "github.com/flintcraftstudio/flint-ui/components/card"
 ```
 
 ## Components

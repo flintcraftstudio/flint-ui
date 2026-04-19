@@ -7,7 +7,7 @@ Inline banner for status messages inside a page. From-scratch design — a peer 
 ## Import
 
 ```go
-import "github.com/flintcraft/flint-ui/components/alert"
+import "github.com/flintcraftstudio/flint-ui/components/alert"
 ```
 
 ## Components

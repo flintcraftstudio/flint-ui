@@ -7,7 +7,7 @@ A single `toast.Container` renders once per page (typically in your base layout)
 ## Import
 
 ```go
-import "github.com/flintcraft/flint-ui/components/toast"
+import "github.com/flintcraftstudio/flint-ui/components/toast"
 ```
 
 ## Setup — render Container once

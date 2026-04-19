@@ -10,7 +10,7 @@ The component sits at the intersection of [Modal](./modal.md) and [Combobox](./c
 ## Import
 
 ```go
-import "github.com/flintcraft/flint-ui/components/command"
+import "github.com/flintcraftstudio/flint-ui/components/command"
 ```
 
 ## Components

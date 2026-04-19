@@ -9,8 +9,8 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/flintcraft/flint-ui/components/alert"
-	"github.com/flintcraft/flint-ui/components/button"
+	"github.com/flintcraftstudio/flint-ui/components/alert"
+	"github.com/flintcraftstudio/flint-ui/components/button"
 )
 
 func Alerts() templ.Component {

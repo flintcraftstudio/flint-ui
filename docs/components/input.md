@@ -5,7 +5,7 @@ Converted from `catalyst-ui-kit/typescript/input.tsx`. Renders a Catalyst-styled
 ## Import
 
 ```go
-import "github.com/flintcraft/flint-ui/components/input"
+import "github.com/flintcraftstudio/flint-ui/components/input"
 ```
 
 ## Usage

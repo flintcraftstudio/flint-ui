@@ -9,8 +9,8 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/flintcraft/flint-ui/components/fieldset"
-	"github.com/flintcraft/flint-ui/components/toggle"
+	"github.com/flintcraftstudio/flint-ui/components/fieldset"
+	"github.com/flintcraftstudio/flint-ui/components/toggle"
 )
 
 func Switches() templ.Component {

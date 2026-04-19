@@ -5,7 +5,7 @@ Converted from `catalyst-ui-kit/typescript/checkbox.tsx`. Catalyst uses Headless
 ## Import
 
 ```go
-import "github.com/flintcraft/flint-ui/components/checkbox"
+import "github.com/flintcraftstudio/flint-ui/components/checkbox"
 ```
 
 ## Usage

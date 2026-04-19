@@ -9,8 +9,8 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/flintcraft/flint-ui/components/avatar"
-	"github.com/flintcraft/flint-ui/components/dropdown"
+	"github.com/flintcraftstudio/flint-ui/components/avatar"
+	"github.com/flintcraftstudio/flint-ui/components/dropdown"
 )
 
 func Avatars() templ.Component {

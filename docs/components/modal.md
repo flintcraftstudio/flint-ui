@@ -5,7 +5,7 @@ Converted from `catalyst-ui-kit/typescript/dialog.tsx` and `alert.tsx`. Both Cat
 ## Import
 
 ```go
-import "github.com/flintcraft/flint-ui/components/modal"
+import "github.com/flintcraftstudio/flint-ui/components/modal"
 ```
 
 ## Components

@@ -17,7 +17,7 @@ Pick Popover when you need a floating panel with *content* that isn't a menu —
 ## Import
 
 ```go
-import "github.com/flintcraft/flint-ui/components/popover"
+import "github.com/flintcraftstudio/flint-ui/components/popover"
 ```
 
 ## Components

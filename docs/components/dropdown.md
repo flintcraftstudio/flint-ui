@@ -5,7 +5,7 @@ Converted from `catalyst-ui-kit/typescript/dropdown.tsx` (Catalyst's wrapper aro
 ## Import
 
 ```go
-import "github.com/flintcraft/flint-ui/components/dropdown"
+import "github.com/flintcraftstudio/flint-ui/components/dropdown"
 ```
 
 ## Components

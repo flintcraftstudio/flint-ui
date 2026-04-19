@@ -18,16 +18,16 @@ flint-ui exists to speed up internal dashboard development. The component catalo
 ## Install
 
 ```sh
-go get github.com/flintcraft/flint-ui@latest
+go get github.com/flintcraftstudio/flint-ui@latest
 ```
 
 Import components one family at a time:
 
 ```go
 import (
-    "github.com/flintcraft/flint-ui/components/button"
-    "github.com/flintcraft/flint-ui/components/input"
-    "github.com/flintcraft/flint-ui/components/fieldset"
+    "github.com/flintcraftstudio/flint-ui/components/button"
+    "github.com/flintcraftstudio/flint-ui/components/input"
+    "github.com/flintcraftstudio/flint-ui/components/fieldset"
 )
 ```
 
@@ -41,7 +41,7 @@ In your `templ` files:
 
 ## Component catalog
 
-All components live under `github.com/flintcraft/flint-ui/components/<package>`. `Main templ functions` lists the exported entry points you invoke with `@package.Func(...)`. Click through to the doc for the full prop surface.
+All components live under `github.com/flintcraftstudio/flint-ui/components/<package>`. `Main templ functions` lists the exported entry points you invoke with `@package.Func(...)`. Click through to the doc for the full prop surface.
 
 | Component | Package | Main templ functions | Purpose | Docs |
 | --- | --- | --- | --- | --- |
@@ -86,7 +86,7 @@ Client projects must:
 1. Use Tailwind CSS v4.
 2. Scan flint-ui templates as content sources:
    ```css
-   @source "../vendor/github.com/flintcraft/flint-ui/components/**/*.templ";
+   @source "../vendor/github.com/flintcraftstudio/flint-ui/components/**/*.templ";
    ```
 3. Include the `@custom-variant` declarations that alias Headless UI's `data-hover`, `data-focus`, `data-active`, `data-disabled`, `data-invalid` state attributes to native pseudo-classes. Copy the block from [`styles/flint.css`](./styles/flint.css).
 4. **Rebrand by overriding CSS variables**, not by editing components:

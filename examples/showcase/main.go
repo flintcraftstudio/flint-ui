@@ -9,7 +9,7 @@ import (
 
 	"github.com/a-h/templ"
 
-	"github.com/flintcraft/flint-ui/examples/showcase/templates"
+	"github.com/flintcraftstudio/flint-ui/examples/showcase/templates"
 )
 
 func main() {

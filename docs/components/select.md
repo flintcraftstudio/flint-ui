@@ -7,7 +7,7 @@ Converted from `catalyst-ui-kit/typescript/select.tsx`. Renders a native `<selec
 The Go package name is `selectbox` (not `select` — that's a Go reserved keyword):
 
 ```go
-import "github.com/flintcraft/flint-ui/components/selectbox"
+import "github.com/flintcraftstudio/flint-ui/components/selectbox"
 ```
 
 ## Usage

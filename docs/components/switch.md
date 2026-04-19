@@ -7,7 +7,7 @@ Accessible on/off toggle for settings. Native `<input type="checkbox" role="swit
 ## Import
 
 ```go
-import "github.com/flintcraft/flint-ui/components/toggle"
+import "github.com/flintcraftstudio/flint-ui/components/toggle"
 ```
 
 ## Components

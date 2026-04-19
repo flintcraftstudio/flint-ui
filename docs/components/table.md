@@ -7,7 +7,7 @@ Callers typically factor a project-specific row helper (`@invoiceRow(inv)`) so t
 ## Import
 
 ```go
-import "github.com/flintcraft/flint-ui/components/table"
+import "github.com/flintcraftstudio/flint-ui/components/table"
 ```
 
 ## Components

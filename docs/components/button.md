@@ -5,7 +5,7 @@ Converted from `catalyst-ui-kit/typescript/button.tsx`. Solid, outline, and plai
 ## Import
 
 ```go
-import "github.com/flintcraft/flint-ui/components/button"
+import "github.com/flintcraftstudio/flint-ui/components/button"
 ```
 
 ## Usage

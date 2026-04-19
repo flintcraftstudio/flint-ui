@@ -5,7 +5,7 @@ Side drawers — full-height panels that slide in from the left or right edge. F
 ## Import
 
 ```go
-import "github.com/flintcraft/flint-ui/components/slideover"
+import "github.com/flintcraftstudio/flint-ui/components/slideover"
 ```
 
 ## Components

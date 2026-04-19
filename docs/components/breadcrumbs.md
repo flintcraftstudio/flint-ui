@@ -5,7 +5,7 @@ Navigation trail — the row of links showing where the user is in a nested hier
 ## Import
 
 ```go
-import "github.com/flintcraft/flint-ui/components/breadcrumbs"
+import "github.com/flintcraftstudio/flint-ui/components/breadcrumbs"
 ```
 
 ## Components

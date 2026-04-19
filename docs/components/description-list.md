@@ -7,7 +7,7 @@ Use for client profiles, invoice metadata, settings summaries — anywhere a "fi
 ## Import
 
 ```go
-import "github.com/flintcraft/flint-ui/components/descriptionlist"
+import "github.com/flintcraftstudio/flint-ui/components/descriptionlist"
 ```
 
 (Package name is one word — Go doesn't allow hyphens in package names.)

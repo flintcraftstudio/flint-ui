@@ -5,7 +5,7 @@ Converted from `catalyst-ui-kit/typescript/fieldset.tsx`. The `fieldset` package
 ## Import
 
 ```go
-import "github.com/flintcraft/flint-ui/components/fieldset"
+import "github.com/flintcraftstudio/flint-ui/components/fieldset"
 ```
 
 ## Layout model

@@ -8,7 +8,7 @@ From-scratch design (Catalyst has no `tabs.tsx`). Two interaction modes share th
 ## Import
 
 ```go
-import "github.com/flintcraft/flint-ui/components/tabs"
+import "github.com/flintcraftstudio/flint-ui/components/tabs"
 ```
 
 ## Components

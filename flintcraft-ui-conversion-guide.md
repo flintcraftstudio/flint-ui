@@ -2,7 +2,7 @@
 
 ## Objective
 
-Convert Tailwind Catalyst UI Kit components into idiomatic templ components for use across FlintCraft Studio client projects. The resulting package (`github.com/flintcraft/flint-ui`) provides production-ready, server-rendered UI components for service business dashboards built on Go + templ + htmx + Alpine.js + Tailwind CSS.
+Convert Tailwind Catalyst UI Kit components into idiomatic templ components for use across FlintCraft Studio client projects. The resulting package (`github.com/flintcraftstudio/flint-ui`) provides production-ready, server-rendered UI components for service business dashboards built on Go + templ + htmx + Alpine.js + Tailwind CSS.
 
 ## Context
 
@@ -43,7 +43,7 @@ Components never use raw Tailwind color classes (`bg-zinc-900`, `text-red-600`, 
 ## Go Module Structure
 
 ```
-github.com/flintcraft/flint-ui/
+github.com/flintcraftstudio/flint-ui/
 ├── go.mod
 ├── go.sum
 ├── README.md
@@ -465,7 +465,7 @@ module.exports = {
     "./templates/**/*.templ",
     "./internal/**/*.templ",
     // Include flint-ui so Tailwind scans its classes
-    "./vendor/github.com/flintcraft/flint-ui/**/*.templ",
+    "./vendor/github.com/flintcraftstudio/flint-ui/**/*.templ",
   ],
   theme: {
     extend: {
@@ -584,7 +584,7 @@ Non-color classes (`rounded-md`, `px-4`, `py-2`, `text-sm`, `font-medium`, `tran
 - **v0.x.x**: Pre-1.0, expect breaking changes between minors. Use during active development.
 - **v1.0.0**: Stable API. Breaking changes require a major version bump.
 - **Tag releases on GitHub**: `git tag v0.1.0 && git push --tags`
-- **Pin in client projects**: `go get github.com/flintcraft/flint-ui@v0.1.0`
+- **Pin in client projects**: `go get github.com/flintcraftstudio/flint-ui@v0.1.0`
 
 When updating flint-ui across multiple client projects, bump the version in each client's `go.mod` deliberately. Do not auto-update.
 
@@ -638,7 +638,7 @@ The conversion project is successful when:
 
 For the coding agent starting this project:
 
-1. Initialize the Go module: `go mod init github.com/flintcraft/flint-ui`
+1. Initialize the Go module: `go mod init github.com/flintcraftstudio/flint-ui`
 2. Install templ: `go install github.com/a-h/templ/cmd/templ@latest`
 3. Create the directory structure from the "Go Module Structure" section above
 4. Start with `components/button/` following the conversion pattern

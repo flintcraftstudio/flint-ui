@@ -5,7 +5,7 @@ Disclosure panels — clickable header reveals/hides its paired content. From-sc
 ## Import
 
 ```go
-import "github.com/flintcraft/flint-ui/components/accordion"
+import "github.com/flintcraftstudio/flint-ui/components/accordion"
 ```
 
 ## Components

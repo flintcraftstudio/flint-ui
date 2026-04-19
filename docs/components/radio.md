@@ -5,7 +5,7 @@ Exclusive-choice form control — pick one of a set. Native `<input type="radio"
 ## Import
 
 ```go
-import "github.com/flintcraft/flint-ui/components/radio"
+import "github.com/flintcraftstudio/flint-ui/components/radio"
 ```
 
 ## Components

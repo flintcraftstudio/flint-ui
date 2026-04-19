@@ -72,7 +72,7 @@ package popover
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/flintcraft/flint-ui/components/button"
+import "github.com/flintcraftstudio/flint-ui/components/button"
 
 // Anchor controls where the panel appears relative to the trigger.
 // Same four anchors Dropdown exposes — popovers share the same

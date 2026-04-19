@@ -5,7 +5,7 @@ Semantic horizontal rule — `<hr role="presentation">` with regular or soft var
 ## Import
 
 ```go
-import "github.com/flintcraft/flint-ui/components/divider"
+import "github.com/flintcraftstudio/flint-ui/components/divider"
 ```
 
 ## Quick example

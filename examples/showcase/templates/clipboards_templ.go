@@ -9,8 +9,8 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/flintcraft/flint-ui/components/button"
-	"github.com/flintcraft/flint-ui/components/clipboard"
+	"github.com/flintcraftstudio/flint-ui/components/button"
+	"github.com/flintcraftstudio/flint-ui/components/clipboard"
 )
 
 func Clipboards() templ.Component {

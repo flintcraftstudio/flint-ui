@@ -5,7 +5,7 @@ Converted from `catalyst-ui-kit/typescript/badge.tsx`. Catalyst ships 18 color v
 ## Import
 
 ```go
-import "github.com/flintcraft/flint-ui/components/badge"
+import "github.com/flintcraftstudio/flint-ui/components/badge"
 ```
 
 ## Usage

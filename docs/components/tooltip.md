@@ -5,7 +5,7 @@ Hover- and focus-activated hint bubble over a trigger. From-scratch design (Cata
 ## Import
 
 ```go
-import "github.com/flintcraft/flint-ui/components/tooltip"
+import "github.com/flintcraftstudio/flint-ui/components/tooltip"
 ```
 
 ## Quick example
