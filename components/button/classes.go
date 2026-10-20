@@ -15,11 +15,14 @@ const baseClasses = "relative isolate inline-flex items-baseline justify-center 
 // solidClasses implement Catalyst's two-layer "optical border + hover overlay"
 // button look. The per-variant map below sets --btn-bg / --btn-border /
 // --btn-hover-overlay / --btn-icon, which this structural template references.
+// The after: layer's 1px top highlight is white for every variant, as in
+// Catalyst: it's a lighting effect, not a brand color. Deriving it from
+// primary-foreground drew a dark line across light buttons in dark mode.
 const solidClasses = "border-transparent bg-(--btn-border) " +
 	"before:absolute before:inset-0 before:-z-10 before:rounded-[calc(var(--radius-lg)-1px)] before:bg-(--btn-bg) " +
 	"before:shadow-sm " +
 	"after:absolute after:inset-0 after:-z-10 after:rounded-[calc(var(--radius-lg)-1px)] " +
-	"after:shadow-[inset_0_1px_--theme(--color-primary-foreground/15%)] " +
+	"after:shadow-[inset_0_1px_--theme(--color-white/15%)] " +
 	"data-active:after:bg-(--btn-hover-overlay) data-hover:after:bg-(--btn-hover-overlay) " +
 	"data-disabled:before:shadow-none data-disabled:after:shadow-none"
 

@@ -30,7 +30,7 @@ func shortcutHandler() string {
 
 // backdropClasses: full-viewport dim same as Modal's dialog variant.
 func backdropClasses() string {
-	return "fixed inset-0 bg-foreground/25 focus:outline-0"
+	return "fixed inset-0 bg-scrim focus:outline-0"
 }
 
 // panelWrapperClasses positions the panel top-center, reserving

@@ -17,9 +17,12 @@ const inputClasses = "peer absolute inset-0 z-20 m-0 cursor-pointer appearance-n
 
 // boxClasses is the visible box span. Sits under the input and SVG and
 // handles background, border, focus ring, disabled fade, invalid border.
+// The before: layer's white 1px top highlight applies only when checked:
+// on an unchecked box it was invisible in light and a stray line in dark
+// (Catalyst hides it there too).
 const boxClasses = "absolute inset-0 z-0 rounded-[0.3125rem] " +
 	"bg-input shadow-sm " +
-	"before:absolute before:inset-0 before:rounded-[calc(0.3125rem-1px)] before:shadow-[inset_0_1px_--theme(--color-white/15%)] " +
+	"before:absolute before:inset-0 before:rounded-[calc(0.3125rem-1px)] peer-checked:before:shadow-[inset_0_1px_--theme(--color-white/15%)] peer-indeterminate:before:shadow-[inset_0_1px_--theme(--color-white/15%)] " +
 	"border border-border " +
 	"peer-hover:border-foreground/30 " +
 	"peer-checked:bg-primary peer-checked:border-transparent peer-checked:shadow-none " +

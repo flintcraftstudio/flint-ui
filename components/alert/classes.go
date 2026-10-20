@@ -2,17 +2,17 @@ package alert
 
 import "strings"
 
-// Variant colors follow the same `bg-{token}/15 text-{token}` recipe as
-// Badge so the two components share a palette. Warning is the exception:
-// the warning token is a yellow that can't be read against a yellow
-// tint, so it uses bg-warning/25 and text-warning-foreground — same
-// adjustment Badge makes for the same reason.
+// Variant colors follow the same tint recipe as Badge so the two
+// components share a palette: bg-{token}/10 under text-{token}-text, the
+// hue pulled toward foreground so it stays AA on its tint in both themes.
+// Info uses primary, which needs no -text token. Warning keeps a stronger
+// /25 tint because yellow is so light — same as Badge.
 
 var variantClasses = map[Variant]string{
 	VariantInfo:    "bg-primary/10 text-primary",
-	VariantSuccess: "bg-success/10 text-success",
-	VariantWarning: "bg-warning/25 text-warning-foreground",
-	VariantDanger:  "bg-danger/10 text-danger",
+	VariantSuccess: "bg-success/10 text-success-text",
+	VariantWarning: "bg-warning/25 text-warning-text",
+	VariantDanger:  "bg-danger/10 text-danger-text",
 }
 
 func resolveVariant(v Variant) string {

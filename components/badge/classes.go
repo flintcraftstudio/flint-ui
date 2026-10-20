@@ -10,17 +10,19 @@ const baseClasses = "inline-flex items-center gap-x-1.5 rounded-md px-1.5 py-0.5
 
 // variantClasses maps each variant to a tinted background + readable text.
 // Muted uses the muted token pair (no alpha needed since it's already subtle).
-// The colored variants use bg-{token}/15 with text-{token} — the same recipe
-// Catalyst uses for its tinted badges, just routed through semantic tokens.
-// Warning is the exception: the warning token is yellow, which can't be read
-// against a yellow tint, so the text falls back to warning-foreground (dark).
+// The colored variants use bg-{token}/15 with text-{token}-text — the same
+// recipe Catalyst uses for its tinted badges (a -500 tint under -700 text in
+// light, -400 text in dark), routed through semantic tokens. The -text tokens
+// pull the hue toward foreground so it stays AA on its own tint in both
+// themes. Primary is dark enough (light enough, in dark) to need no -text
+// token. Warning keeps a stronger /25 tint because yellow is so light.
 var variantClasses = map[Variant]string{
 	VariantMuted:   "bg-muted text-muted-foreground",
 	VariantPrimary: "bg-primary/15 text-primary",
-	VariantAccent:  "bg-accent/15 text-accent",
-	VariantDanger:  "bg-danger/15 text-danger",
-	VariantSuccess: "bg-success/15 text-success",
-	VariantWarning: "bg-warning/25 text-warning-foreground",
+	VariantAccent:  "bg-accent/15 text-accent-text",
+	VariantDanger:  "bg-danger/15 text-danger-text",
+	VariantSuccess: "bg-success/15 text-success-text",
+	VariantWarning: "bg-warning/25 text-warning-text",
 }
 
 // Classes returns the full class string for a badge.

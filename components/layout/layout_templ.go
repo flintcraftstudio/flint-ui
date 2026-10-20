@@ -373,7 +373,7 @@ func Stacked(p StackedProps) templ.Component {
 
 // Auth renders a full-height page with its children centered in a
 // panel — for login, sign-up, and password-reset forms. Give the page
-// background a muted tone (e.g. lg:bg-muted on <html>) so the panel
+// background the canvas tone (lg:bg-canvas on <html>) so the panel
 // reads as a card at lg+.
 func Auth(p AuthProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -485,7 +485,7 @@ func mobileSidebar(content templ.Component) templ.Component {
 			templ_7745c5c3_Var20 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "<div x-show=\"mobileNav\" x-cloak x-on:keydown.escape.window=\"mobileNav && (mobileNav = false)\" class=\"fixed inset-0 z-40 lg:hidden\" role=\"dialog\" aria-modal=\"true\" aria-label=\"Navigation\"><div x-show=\"mobileNav\" x-transition:enter=\"transition-opacity duration-300 ease-out\" x-transition:enter-start=\"opacity-0\" x-transition:enter-end=\"opacity-100\" x-transition:leave=\"transition-opacity duration-200 ease-in\" x-transition:leave-start=\"opacity-100\" x-transition:leave-end=\"opacity-0\" x-on:click=\"mobileNav = false\" class=\"fixed inset-0 bg-foreground/30\" aria-hidden=\"true\"></div><div x-show=\"mobileNav\" x-trap.inert.noscroll=\"mobileNav\" x-transition:enter=\"transition duration-300 ease-in-out\" x-transition:enter-start=\"-translate-x-full\" x-transition:enter-end=\"translate-x-0\" x-transition:leave=\"transition duration-300 ease-in-out\" x-transition:leave-start=\"translate-x-0\" x-transition:leave-end=\"-translate-x-full\" x-on:click=\"$event.target.closest('a[href]') && (mobileNav = false)\" class=\"fixed inset-y-0 w-full max-w-80 p-2\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "<div x-show=\"mobileNav\" x-cloak x-on:keydown.escape.window=\"mobileNav && (mobileNav = false)\" class=\"fixed inset-0 z-40 lg:hidden\" role=\"dialog\" aria-modal=\"true\" aria-label=\"Navigation\"><div x-show=\"mobileNav\" x-transition:enter=\"transition-opacity duration-300 ease-out\" x-transition:enter-start=\"opacity-0\" x-transition:enter-end=\"opacity-100\" x-transition:leave=\"transition-opacity duration-200 ease-in\" x-transition:leave-start=\"opacity-100\" x-transition:leave-end=\"opacity-0\" x-on:click=\"mobileNav = false\" class=\"fixed inset-0 bg-scrim\" aria-hidden=\"true\"></div><div x-show=\"mobileNav\" x-trap.inert.noscroll=\"mobileNav\" x-transition:enter=\"transition duration-300 ease-in-out\" x-transition:enter-start=\"-translate-x-full\" x-transition:enter-end=\"translate-x-0\" x-transition:leave=\"transition duration-300 ease-in-out\" x-transition:leave-start=\"translate-x-0\" x-transition:leave-end=\"-translate-x-full\" x-on:click=\"$event.target.closest('a[href]') && (mobileNav = false)\" class=\"fixed inset-y-0 w-full max-w-80 p-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

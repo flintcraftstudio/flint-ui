@@ -29,8 +29,11 @@ const labelBase = "group relative inline-flex h-6 w-10 shrink-0 cursor-pointer i
 // at rest, translate-x-4 (sm:-3) when the input is checked — group-
 // has-checked targets :has(:checked) on the ancestor `.group`. Size
 // leaves a 3px margin inside the track so the thumb sits flush.
+// In dark mode the unchecked thumb is muted-foreground: surface on a muted
+// track is near-black on near-black there. Catalyst also lightens the
+// off-state thumb in dark; checked keeps surface on the light primary track.
 const thumbClasses = "pointer-events-none inline-block size-[18px] sm:size-3.5 rounded-full " +
-	"bg-surface shadow-sm ring-1 ring-border " +
+	"bg-surface shadow-sm ring-1 ring-border dark:bg-muted-foreground dark:group-has-checked:bg-surface " +
 	"translate-x-0 group-has-checked:translate-x-4 sm:group-has-checked:translate-x-3 " +
 	"transition duration-200 ease-in-out " +
 	"border border-transparent"

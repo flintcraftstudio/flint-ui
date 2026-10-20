@@ -36,11 +36,10 @@ func resolveSide(s Side) Side {
 	return SideRight
 }
 
-// backdropClasses dims the page behind the panel. Same opacity as
-// Modal's dialog variant (25%) so the two components feel like part of
-// the same system.
+// backdropClasses dims the page behind the panel. Same scrim as Modal's
+// dialog variant so the two components feel like part of the same system.
 func backdropClasses(_ Props) string {
-	return "fixed inset-0 bg-foreground/25 focus:outline-0"
+	return "fixed inset-0 bg-scrim focus:outline-0"
 }
 
 // anchorClasses positions the panel-holder flush to the chosen edge,

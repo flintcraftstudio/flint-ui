@@ -2,9 +2,10 @@
   flint-ui — importable Tailwind v4 partial.
 
   Client projects import this file from their own Tailwind entry point,
-  after `@import "tailwindcss"`. It brings the semantic token defaults,
-  the Headless UI data-* variant aliases, and the small amount of plain
-  CSS the components rely on (x-cloak, toast animations).
+  after `@import "tailwindcss"`. It brings the semantic token defaults
+  and their dark-mode values, the dark: variant, the Headless UI data-*
+  variant aliases, and the small amount of plain CSS the components rely
+  on (x-cloak, toast animations).
 
   @source paths resolve relative to this file, so importing it is enough
   for Tailwind to scan every flint-ui component template.
@@ -18,7 +19,14 @@
   Every flint-ui component draws only from these tokens. Clients redeclare
   any tokens they want to override at :root (plain CSS colors — hex, rgb(),
   oklch(), ...); the rest fall through to the defaults here (roughly
-  Catalyst's zinc palette).
+  Catalyst's zinc palette). These are the light values; the dark values
+  live in the dark-mode block further down.
+
+  Each hue (primary, accent, danger, success, warning) does two jobs: it is
+  a fill with its -foreground pair on top, and it is text on a surface.
+  Pick values that pass WCAG AA (4.5:1) for both — in light that means
+  roughly a Tailwind -700 shade with a white foreground.
+  styles/contrast_test.go checks every pair the components render.
 */
 @theme {
   /* Typography */
@@ -31,26 +39,133 @@
   --color-surface: #ffffff;
   --color-surface-foreground: #18181b;
   --color-muted: #f4f4f5;
-  --color-muted-foreground: #71717a;
+  --color-muted-foreground: #6b6b74;
+  /* The page behind the raised content panel in layout shells. Follows
+     muted in light; dark mode points it at background instead, so the
+     panel stays lighter than the page while muted hovers stay lighter
+     than the panel. */
+  --color-canvas: var(--color-muted);
 
   /* Brand — clients customize these */
   --color-primary: #18181b;
   --color-primary-foreground: #ffffff;
-  --color-accent: #d97706;
+  --color-accent: #b45309;
   --color-accent-foreground: #ffffff;
 
   /* Semantic state */
   --color-danger: #dc2626;
   --color-danger-foreground: #ffffff;
-  --color-success: #16a34a;
+  --color-success: #15803d;
   --color-success-foreground: #ffffff;
   --color-warning: #eab308;
   --color-warning-foreground: #18181b;
+
+  /*
+    Tinted text — the hue pulled toward foreground so it stays readable on
+    its own tint (badges and alerts render text-X-text on bg-X/15). Derived,
+    so a rebranded hue gets a matching text color for free, in both themes.
+    Warning is a light yellow, so it needs a bigger pull.
+  */
+  --color-accent-text: color-mix(in oklab, var(--color-accent) 70%, var(--color-foreground));
+  --color-danger-text: color-mix(in oklab, var(--color-danger) 70%, var(--color-foreground));
+  --color-success-text: color-mix(in oklab, var(--color-success) 70%, var(--color-foreground));
+  --color-warning-text: color-mix(in oklab, var(--color-warning) 40%, var(--color-foreground));
 
   /* Structural */
   --color-border: #e4e4e7;
   --color-input: #ffffff;
   --color-ring: #3b82f6;
+  /* Backdrop behind modals, slide-overs, the command palette and the
+     layout's mobile drawer. Carries its own alpha; bg-scrim/60 lightens it. */
+  --color-scrim: rgb(9 9 11 / 25%);
+}
+
+/*
+  Dark mode — opt-in.
+
+  With no data-theme attribute, flint-ui renders light only, so existing
+  client sites are unaffected. The attribute on <html> picks the mode:
+
+    <html data-theme="system">   follow the OS (prefers-color-scheme)
+    <html data-theme="dark">     always dark
+    <html data-theme="light">    always light (same as no attribute)
+
+  A site that offers a toggle writes the attribute from a small inline
+  <head> script so the page never flashes the wrong theme — see the
+  showcase's layout.templ and the README's "Dark mode" section.
+
+  The dark: variant matches the same rules, for the rare markup that needs
+  a dark-only class. It uses :where(), so like Tailwind's built-in dark
+  variant it adds no specificity.
+*/
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where([data-theme="system"], [data-theme="system"] *) {
+      @slot;
+    }
+  }
+}
+
+/* Native controls (scrollbars, date pickers, <select> menus, the file
+   input button) follow color-scheme. */
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+:root[data-theme="system"] {
+  color-scheme: light dark;
+}
+
+/*
+  Dark token values, derived from Catalyst's dark palette: zinc-950 page,
+  zinc-900 panels, white/10 borders, white/5 inputs. Hues flip to roughly
+  Tailwind -400 shades with a dark foreground, which is the only way one
+  value can pass AA both as a fill and as text on a dark surface.
+
+  The selector is :root[data-theme] (0,2,0) and the block sits outside any
+  @layer on purpose: it beats a client's light overrides on plain :root,
+  layered or not, so a dark-navy brand primary can't end up as dark text
+  on a dark page. Clients set dark brand values with the same selector,
+  after this import and also outside any @layer:
+
+    :root[data-theme] {
+      @variant dark {
+        --color-primary: #93c5fd;
+        --color-primary-foreground: #172554;
+      }
+    }
+*/
+:root[data-theme] {
+  @variant dark {
+    color-scheme: dark;
+
+    --color-background: #09090b;
+    --color-foreground: #ffffff;
+    --color-surface: #18181b;
+    --color-surface-foreground: #ffffff;
+    --color-muted: #27272a;
+    --color-muted-foreground: #a1a1aa;
+    --color-canvas: var(--color-background);
+
+    --color-primary: #f4f4f5;
+    --color-primary-foreground: #18181b;
+    --color-accent: #f59e0b;
+    --color-accent-foreground: #09090b;
+
+    --color-danger: #f87171;
+    --color-danger-foreground: #09090b;
+    --color-success: #4ade80;
+    --color-success-foreground: #09090b;
+    --color-warning: #facc15;
+    --color-warning-foreground: #09090b;
+
+    --color-border: rgb(255 255 255 / 10%);
+    --color-input: rgb(255 255 255 / 5%);
+    --color-ring: #3b82f6;
+    --color-scrim: rgb(0 0 0 / 50%);
+  }
 }
 
 /*

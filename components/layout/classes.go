@@ -2,12 +2,14 @@ package layout
 
 // Non-color class strings preserved verbatim from catalyst-ui-kit/
 // typescript/sidebar-layout.tsx, stacked-layout.tsx, and auth-layout.tsx.
-// white → surface, zinc-100 → muted, zinc-950/5 → foreground/5, black/30
-// → foreground/30. The dark: variants collapse into the token contract.
+// white → surface, zinc-100 → canvas, zinc-950/5 → foreground/5, black/30
+// → scrim. The dark: variants collapse into the token contract; canvas
+// exists because Catalyst's dark page (zinc-950) is darker than the panel
+// while its hovers are lighter, which one muted token can't express.
 
-const sidebarRootClasses = "relative isolate flex min-h-svh w-full bg-surface max-lg:flex-col lg:bg-muted"
+const sidebarRootClasses = "relative isolate flex min-h-svh w-full bg-surface max-lg:flex-col lg:bg-canvas"
 
-const stackedRootClasses = "relative isolate flex min-h-svh w-full flex-col bg-surface lg:bg-muted"
+const stackedRootClasses = "relative isolate flex min-h-svh w-full flex-col bg-surface lg:bg-canvas"
 
 const sidebarMainClasses = "flex flex-1 flex-col pb-2 lg:min-w-0 lg:pt-2 lg:pr-2 lg:pl-64"
 

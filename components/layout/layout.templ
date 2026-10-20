@@ -122,7 +122,7 @@ templ Stacked(p StackedProps) {
 
 // Auth renders a full-height page with its children centered in a
 // panel — for login, sign-up, and password-reset forms. Give the page
-// background a muted tone (e.g. lg:bg-muted on <html>) so the panel
+// background the canvas tone (lg:bg-canvas on <html>) so the panel
 // reads as a card at lg+.
 templ Auth(p AuthProps) {
 	<main class={ join("flex min-h-dvh flex-col p-2", p.Class) } { p.Attrs... }>
@@ -155,7 +155,7 @@ templ mobileSidebar(content templ.Component) {
 			x-transition:leave-start="opacity-100"
 			x-transition:leave-end="opacity-0"
 			x-on:click="mobileNav = false"
-			class="fixed inset-0 bg-foreground/30"
+			class="fixed inset-0 bg-scrim"
 			aria-hidden="true"
 		></div>
 		<div

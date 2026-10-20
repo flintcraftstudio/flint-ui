@@ -43,13 +43,15 @@ func resolveSize(p Props) string {
 	return sizeClasses[SizeLG]
 }
 
-// backdropClasses covers the full viewport behind the panel. Alert uses a
-// lighter wash (15%) than Dialog (25%) — Catalyst's visual distinction
+// backdropClasses covers the full viewport behind the panel with the
+// scrim token (zinc-950/25 in light, black/50 in dark — foreground would
+// turn into a white wash in dark mode). Alert takes 60% of it (15% in
+// light) for a lighter wash than Dialog — Catalyst's visual distinction
 // between an attention-grabbing modal and a softer confirm.
 func backdropClasses(p Props) string {
-	opacity := "bg-foreground/25"
+	opacity := "bg-scrim"
 	if p.Alert {
-		opacity = "bg-foreground/15"
+		opacity = "bg-scrim/60"
 	}
 	return "fixed inset-0 " + opacity + " focus:outline-0"
 }

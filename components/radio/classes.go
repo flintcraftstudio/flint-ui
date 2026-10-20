@@ -22,10 +22,11 @@ const inputClasses = "peer absolute inset-0 z-20 m-0 cursor-pointer appearance-n
 
 // circleClasses: the visible outer ring. Gets the background, border,
 // focus ring, and disabled fade. peer-checked swaps bg to primary and
-// hides the border so the checked radio reads as a filled disc.
+// hides the border so the checked radio reads as a filled disc. The
+// before: highlight is checked-only, same as Checkbox's box.
 const circleClasses = "absolute inset-0 z-0 rounded-full " +
 	"bg-input shadow-sm " +
-	"before:absolute before:inset-0 before:rounded-full before:shadow-[inset_0_1px_--theme(--color-white/15%)] " +
+	"before:absolute before:inset-0 before:rounded-full peer-checked:before:shadow-[inset_0_1px_--theme(--color-white/15%)] " +
 	"border border-border " +
 	"peer-hover:border-foreground/30 " +
 	"peer-checked:bg-primary peer-checked:border-transparent peer-checked:shadow-none " +
