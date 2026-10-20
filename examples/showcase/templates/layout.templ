@@ -4,7 +4,7 @@ import "github.com/flintcraftstudio/flint-ui/components/toast"
 
 templ Layout(title, current string, body templ.Component) {
 	<!DOCTYPE html>
-	<html lang="en" class="bg-background text-foreground antialiased lg:bg-muted">
+	<html lang="en" data-theme="system" class="bg-background text-foreground antialiased lg:bg-canvas">
 		@documentHead(title)
 		<body x-data class="min-h-screen">
 			<div class="flex min-h-screen">
@@ -13,8 +13,16 @@ templ Layout(title, current string, body templ.Component) {
 					<div class="mx-auto w-full max-w-5xl flex-1">
 						@body
 					</div>
-					<footer class="mx-auto mt-16 flex w-full max-w-5xl items-center justify-center border-t border-border/60 pt-8">
-						@FlintCraftSignature("light")
+					<footer class="mx-auto mt-16 flex w-full max-w-5xl flex-col items-center gap-6 border-t border-border/60 pt-8">
+						<div class="lg:hidden">
+							@themeToggle()
+						</div>
+						<span class="dark:hidden">
+							@FlintCraftSignature("light")
+						</span>
+						<span class="hidden dark:inline">
+							@FlintCraftSignature("dark")
+						</span>
 					</footer>
 				</main>
 			</div>
@@ -27,7 +35,7 @@ templ Layout(title, current string, body templ.Component) {
 // app-shell demos (/demo/*), which bring their own layout.
 templ Bare(title string, body templ.Component) {
 	<!DOCTYPE html>
-	<html lang="en" class="bg-background text-foreground antialiased lg:bg-muted">
+	<html lang="en" data-theme="system" class="bg-background text-foreground antialiased lg:bg-canvas">
 		@documentHead(title)
 		<body x-data>
 			@body
@@ -36,12 +44,13 @@ templ Bare(title string, body templ.Component) {
 	</html>
 }
 
-// documentHead is the shared <head>: Inter, the compiled showcase CSS,
-// htmx 4, and Alpine with the Focus and Collapse plugins.
+// documentHead is the shared <head>: the theme script, Inter, the compiled
+// showcase CSS, htmx 4, and Alpine with the Focus and Collapse plugins.
 templ documentHead(title string) {
 	<head>
 		<meta charset="UTF-8"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		@themeScript()
 		<title>{ title } — flint-ui</title>
 		<link rel="preconnect" href="https://rsms.me/"/>
 		<link rel="stylesheet" href="https://rsms.me/inter/inter.css"/>
@@ -55,6 +64,61 @@ templ documentHead(title string) {
 	</head>
 }
 
+// themeScript applies the saved theme before first paint. It runs
+// synchronously in <head>, ahead of the stylesheet, so a dark-mode visitor
+// never sees a light frame. <html data-theme="system"> is the no-JS
+// fallback; anything other than the three known values is ignored.
+templ themeScript() {
+	<script>
+		(function () {
+			var t = null;
+			try { t = localStorage.getItem("flint-theme"); } catch (e) {}
+			if (t === "light" || t === "dark" || t === "system") {
+				document.documentElement.dataset.theme = t;
+			}
+		})();
+	</script>
+}
+
+// themeToggle is a three-way Light / Dark / System switch. It writes
+// data-theme on <html> and remembers the choice in localStorage, which
+// themeScript reads on the next page load (the /demo/* pages included).
+// The switch crossfades via the View Transitions API (duration set in
+// styles/flint.css); browsers without it, and reduced-motion visitors,
+// switch instantly.
+templ themeToggle() {
+	<div
+		x-data="{
+			theme: document.documentElement.dataset.theme || 'system',
+			set(t) {
+				this.theme = t
+				const apply = () => { document.documentElement.dataset.theme = t }
+				if (document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+					document.startViewTransition(apply)
+				} else {
+					apply()
+				}
+				try { localStorage.setItem('flint-theme', t) } catch (e) {}
+			},
+		}"
+		role="group"
+		aria-label="Color theme"
+		class="inline-flex rounded-lg bg-muted p-0.5 text-xs font-medium"
+	>
+		for _, opt := range []string{"light", "dark", "system"} {
+			<button
+				type="button"
+				x-on:click={ "set('" + opt + "')" }
+				x-bind:aria-pressed={ "(theme === '" + opt + "').toString()" }
+				x-bind:class={ "theme === '" + opt + "' ? 'bg-surface text-foreground shadow-xs ring-1 ring-border' : 'text-muted-foreground hover:text-foreground'" }
+				class="rounded-md px-2.5 py-1 capitalize focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+			>
+				{ opt }
+			</button>
+		}
+	</div>
+}
+
 templ showcaseSidebar(current string) {
 	<aside class="hidden w-72 shrink-0 border-r border-border bg-surface px-6 py-8 lg:block">
 		<a href="/" class="flex items-center gap-2">
@@ -62,6 +126,9 @@ templ showcaseSidebar(current string) {
 			<span class="font-semibold tracking-tight">flint-ui</span>
 		</a>
 		<p class="mt-1 text-xs text-muted-foreground">Component reference · FlintCraft Studio</p>
+		<div class="mt-4">
+			@themeToggle()
+		</div>
 		<nav class="mt-8 flex flex-col gap-6">
 			for _, section := range NavSections {
 				<div>

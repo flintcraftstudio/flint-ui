@@ -6,3 +6,13 @@
 @import "./flint-ui.css";
 
 @source "../examples/showcase/templates/**/*.templ";
+
+/*
+  Theme switch crossfade. The showcase toggle wraps the data-theme change
+  in document.startViewTransition(); this sets how long the root
+  snapshot fade takes (the browser default is 250ms ease).
+*/
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 300ms;
+}
