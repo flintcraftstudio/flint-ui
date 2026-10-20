@@ -2,9 +2,13 @@ package templates
 
 import "github.com/flintcraftstudio/flint-ui/components/table"
 
-templ Tables() {
+templ Tables(q JobsQuery) {
 	<div class="space-y-12">
 		@pageHeader("Table", "Dashboard tables for job queues, invoice lists, and scheduling grids. Catalyst's React context is replaced with explicit per-element Props — callers typically factor the flags into a small render helper so the duplication doesn't creep into row loops.")
+
+		@section("Admin list", "Sortable headers, search, row selection with bulk actions, per-row action menus, and an empty state for no matches — all server-rendered. Sort links work without JS (they reload /tables) and swap just the table via hx-get with it. Archive and Delete post the checked rows and answer with an HX-Trigger toast that also clears the selection.") {
+			@AdminList(q)
+		}
 
 		@section("Default", "Baseline table: header row, body rows, bottom borders between cells.") {
 			@basicTable()

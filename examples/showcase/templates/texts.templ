@@ -1,0 +1,31 @@
+package templates
+
+import "github.com/flintcraftstudio/flint-ui/components/text"
+
+templ Texts() {
+	<div class="space-y-12">
+		@pageHeader("Text", "Body-copy primitives converted from Catalyst: a muted paragraph, an underlined inline link, strong emphasis, and inline code. Use them for running copy so it stays consistent and rebrands with the token contract.")
+		@section("Paragraph with inline elements", "Text is muted; Strong and Link bring words back to the foreground color. templ trims whitespace around component calls, so spell out spaces with { \" \" } and keep inline children on their own lines.") {
+			<div class="max-w-xl space-y-4">
+				@text.Text(text.Props{}) {
+					Invoices are sent from{ " " }
+					@text.Strong(text.Props{}) {
+						billing@ridgeline.com
+					}
+					{ " " }on the first business day of each month. You can change the sender in{ " " }
+					@text.Link(text.LinkProps{Href: "/texts"}) {
+						billing settings
+					}
+					{ "." }
+				}
+				@text.Text(text.Props{}) {
+					Reference this job in support requests as{ " " }
+					@text.Code(text.Props{}) {
+						JOB-1834
+					}
+					{ "." }
+				}
+			</div>
+		}
+	</div>
+}

@@ -75,7 +75,15 @@ Both accept a `GroupProps{Class, Attrs}`.
 
 ## Indeterminate state
 
-Not yet exposed. Native `<input type="checkbox">` only supports indeterminate via JS (`input.indeterminate = true`). If you need it, set it via `Attrs` with an `x-init` or `onload` hook, or add Alpine state. A native `Indeterminate` prop may land when a client need forces the decision.
+The box shows a dash when the native `indeterminate` property is set: filled like a checked box, dash in place of the check. HTML has no attribute for it, so set it from JS. With Alpine:
+
+```go
+@checkbox.Checkbox(checkbox.Props{Attrs: templ.Attributes{
+    "x-effect": "$el.indeterminate = count > 0 && count < total",
+}})
+```
+
+`table.SelectAll` uses this for its "some rows selected" state.
 
 ## Accessibility
 

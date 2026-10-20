@@ -1,0 +1,270 @@
+package templates
+
+import (
+	"net/url"
+	"sort"
+	"strconv"
+	"strings"
+
+	"github.com/flintcraftstudio/flint-ui/components/badge"
+	"github.com/flintcraftstudio/flint-ui/components/button"
+	"github.com/flintcraftstudio/flint-ui/components/dropdown"
+	"github.com/flintcraftstudio/flint-ui/components/emptystate"
+	"github.com/flintcraftstudio/flint-ui/components/input"
+	"github.com/flintcraftstudio/flint-ui/components/table"
+)
+
+// DemoJob is one row of the admin-list demo.
+type DemoJob struct {
+	ID     string
+	Client string
+	Crew   string
+	Amount int // whole dollars
+	Status string
+}
+
+var demoJobs = []DemoJob{
+	{"1834", "Henderson residence", "Crew A", 18400, "Scheduled"},
+	{"1833", "Glacier Peak Dental", "Crew B", 6250, "In progress"},
+	{"1831", "Mill Street Bakery", "Crew A", 22900, "Complete"},
+	{"1829", "Lakeside HOA — building C", "Crew B", 41300, "Scheduled"},
+	{"1826", "Ostrom farmhouse", "Crew A", 9800, "Complete"},
+	{"1822", "Western Skies Realty", "Crew B", 3150, "In progress"},
+}
+
+// JobsQuery is the admin-list state carried in the URL.
+type JobsQuery struct {
+	Q    string
+	Sort string
+	Dir  table.SortDirection
+}
+
+// ParseJobsQuery reads and normalizes the list state from a request URL.
+func ParseJobsQuery(v url.Values) JobsQuery {
+	q := JobsQuery{Q: strings.TrimSpace(v.Get("q")), Sort: v.Get("sort"), Dir: table.ParseSortDirection(v.Get("dir"))}
+	switch q.Sort {
+	case "id", "client", "amount":
+	default:
+		q.Sort, q.Dir = "id", table.SortDesc
+	}
+	if q.Dir == table.SortNone {
+		q.Dir = table.SortAsc
+	}
+	return q
+}
+
+func (q JobsQuery) rows() []DemoJob {
+	var out []DemoJob
+	for _, j := range demoJobs {
+		if q.Q == "" || strings.Contains(strings.ToLower(j.Client), strings.ToLower(q.Q)) || strings.Contains(j.ID, q.Q) {
+			out = append(out, j)
+		}
+	}
+	less := func(x, y DemoJob) bool {
+		switch q.Sort {
+		case "client":
+			return x.Client < y.Client
+		case "amount":
+			return x.Amount < y.Amount
+		}
+		return x.ID < y.ID
+	}
+	sort.SliceStable(out, func(a, b int) bool {
+		if q.Dir == table.SortDesc {
+			return less(out[b], out[a])
+		}
+		return less(out[a], out[b])
+	})
+	return out
+}
+
+// direction is a column's current sort, SortNone if another column is
+// active.
+func (q JobsQuery) direction(col string) table.SortDirection {
+	if q.Sort == col {
+		return q.Dir
+	}
+	return table.SortNone
+}
+
+// sortQuery is the query string that applies col's next sort, keeping
+// the search.
+func (q JobsQuery) sortQuery(col string) string {
+	v := url.Values{"sort": {col}, "dir": {string(q.direction(col).Next())}}
+	if q.Q != "" {
+		v.Set("q", q.Q)
+	}
+	return v.Encode()
+}
+
+func dollars(n int) string {
+	s := strconv.Itoa(n)
+	for i := len(s) - 3; i > 0; i -= 3 {
+		s = s[:i] + "," + s[i:]
+	}
+	return "$" + s
+}
+
+func statusVariant(s string) badge.Variant {
+	switch s {
+	case "Complete":
+		return badge.VariantSuccess
+	case "In progress":
+		return badge.VariantWarning
+	}
+	return badge.VariantMuted
+}
+
+// AdminList is the full list block: search, bulk actions, and the
+// sortable, selectable table. The search box stays outside #jobs-table
+// so it keeps focus while results swap.
+templ AdminList(q JobsQuery) {
+	@table.Selectable(table.SelectableProps{}) {
+		<div class="mb-4 max-w-sm">
+			@input.InputGroup(input.GroupProps{}) {
+				@iconSearch()
+				@input.Input(input.Props{
+					Type:        "search",
+					Name:        "q",
+					Placeholder: "Search jobs…",
+					Value:       q.Q,
+					Attrs: templ.Attributes{
+						"aria-label": "Search jobs",
+						"hx-get":     "/tables/jobs",
+						"hx-trigger": "input changed delay:300ms, search",
+						"hx-target":  "#jobs-table",
+						"hx-swap":    "outerHTML",
+					},
+				})
+			}
+		</div>
+		@table.BulkActions(table.BulkActionsProps{}) {
+			@button.Button(button.Props{Outline: true, Indicator: true, Attrs: table.BulkAttrs(templ.Attributes{
+				"hx-post": "/tables/jobs/archive",
+				"hx-swap": "none",
+			})}) {
+				Archive 
+			}
+			@button.Button(button.Props{Variant: button.VariantDanger, Indicator: true, Attrs: table.BulkAttrs(templ.Attributes{
+				"hx-post":    "/tables/jobs/delete",
+				"hx-swap":    "none",
+				"hx-confirm": "Delete the selected jobs?",
+			})}) {
+				Delete 
+			}
+		}
+		@JobsTable(q)
+	}
+}
+
+// JobsTable is the swappable fragment: sort links, search results, and
+// the empty state all re-render it.
+templ JobsTable(q JobsQuery) {
+	<div id="jobs-table">
+		@table.Table(table.Props{}) {
+			@table.Head(table.HeadProps{}) {
+				@table.Row(table.RowProps{}) {
+					@table.SelectAll(table.SelectAllProps{Label: "Select all jobs"})
+					@jobsSortHeader(q, "id") {
+						Job 
+					}
+					@jobsSortHeader(q, "client") {
+						Client 
+					}
+					@table.Header(table.HeaderProps{}) {
+						Crew 
+					}
+					@jobsSortHeader(q, "amount") {
+						Amount 
+					}
+					@table.Header(table.HeaderProps{}) {
+						Status 
+					}
+					@table.Header(table.HeaderProps{}) {
+						<span class="sr-only">Actions</span>
+					}
+				}
+			}
+			@table.Body(table.BodyProps{}) {
+				for _, j := range q.rows() {
+					@table.Row(table.RowProps{}) {
+						@table.SelectCell(table.SelectCellProps{Value: j.ID, Label: "Select job #" + j.ID})
+						@table.Cell(table.CellProps{Class: "font-medium"}) {
+							#{ j.ID }
+						}
+						@table.Cell(table.CellProps{}) {
+							{ j.Client }
+						}
+						@table.Cell(table.CellProps{Class: "text-muted-foreground"}) {
+							{ j.Crew }
+						}
+						@table.Cell(table.CellProps{Class: "tabular-nums"}) {
+							{ dollars(j.Amount) }
+						}
+						@table.Cell(table.CellProps{}) {
+							@badge.Badge(badge.Props{Variant: statusVariant(j.Status)}) {
+								{ j.Status }
+							}
+						}
+						@table.Cell(table.CellProps{Class: "text-right"}) {
+							@jobRowActions(j)
+						}
+					}
+				}
+				if len(q.rows()) == 0 {
+					@table.Row(table.RowProps{}) {
+						@table.Cell(table.CellProps{Attrs: templ.Attributes{"colspan": "7"}}) {
+							@emptystate.EmptyState(emptystate.Props{Class: "py-8"}) {
+								@emptystate.Title(emptystate.TitleProps{}) {
+									No jobs match “{ q.Q }” 
+								}
+								@emptystate.Description(emptystate.SubProps{}) {
+									Try a client name or a job number. 
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	</div>
+}
+
+templ jobsSortHeader(q JobsQuery, col string) {
+	@table.SortHeader(table.SortHeaderProps{
+		Href:      "/tables?" + q.sortQuery(col) + "#jobs-table",
+		Direction: q.direction(col),
+		LinkAttrs: templ.Attributes{
+			"hx-get":    "/tables/jobs?" + q.sortQuery(col),
+			"hx-target": "#jobs-table",
+			"hx-swap":   "outerHTML",
+		},
+	}) {
+		{ children... }
+	}
+}
+
+templ jobRowActions(j DemoJob) {
+	@dropdown.Dropdown(dropdown.Props{}) {
+		@button.Button(button.Props{Plain: true, Attrs: dropdown.TriggerAttrs(templ.Attributes{
+			"aria-label": "Actions for job #" + j.ID,
+		})}) {
+			@dotsHorizontal()
+		}
+		@dropdown.Menu(dropdown.MenuProps{Anchor: dropdown.AnchorBottomEnd, Fixed: true}) {
+			@dropdown.Item(dropdown.ItemProps{Href: "#"}) {
+				View 
+			}
+			@dropdown.Item(dropdown.ItemProps{Href: "#"}) {
+				Edit 
+			}
+			@dropdown.Item(dropdown.ItemProps{Attrs: templ.Attributes{
+				"hx-post": "/tables/jobs/archive",
+				"hx-vals": `{"ids": "` + j.ID + `"}`,
+				"hx-swap": "none",
+			}}) {
+				Archive 
+			}
+		}
+	}
+}

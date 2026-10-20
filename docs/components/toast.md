@@ -58,6 +58,8 @@ func handleSave(w http.ResponseWriter, r *http.Request) {
 
 No client-side dispatch code. Any htmx-targeting endpoint can show a toast just by setting the header.
 
+**Keep the header ASCII.** Browsers decode header values as Latin-1, so an em dash or an accented client name in the JSON arrives as mojibake. Escape non-ASCII runes as `\uXXXX`. Go's `json.Marshal` doesn't, so post-process its output; the showcase's `headerJSON` helper in `examples/showcase/main.go` does this in a few lines.
+
 ### From plain JavaScript
 
 ```js

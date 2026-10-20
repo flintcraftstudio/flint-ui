@@ -1,0 +1,71 @@
+// Package text provides the body-copy primitives: a paragraph, an inline
+// link, strong emphasis, and inline code. Converted from
+// catalyst-ui-kit/typescript/text.tsx (Catalyst's Link is a plain <a>, so
+// TextLink is folded in here as Link).
+//
+//	@text.Text(text.Props{}) {
+//	    Invoices are sent from{ " " }
+//	    @text.Strong(text.Props{}) {
+//	        billing@ridgeline.com
+//	    }
+//	    { " " }— change it in{ " " }
+//	    @text.Link(text.LinkProps{Href: "/settings"}) {
+//	        settings
+//	    }
+//	    { "." }
+//	}
+//
+// templ trims whitespace around component calls, so spaces between a word
+// and an inline component must be explicit ({ " " }), and inline children
+// belong on their own lines — `{ settings }` on one line keeps a trailing
+// space inside the element.
+//
+// Use these instead of hand-rolled text-muted-foreground paragraphs so
+// copy stays consistent with the rest of the kit and rebrands with the
+// token contract.
+package text
+
+// Props is shared by Text, Strong, and Code.
+type Props struct {
+	Class string
+	Attrs templ.Attributes
+}
+
+// LinkProps controls an inline link. Href is required.
+type LinkProps struct {
+	Href  string
+	Class string
+	Attrs templ.Attributes
+}
+
+// Text renders a muted body paragraph. data-slot="text" lets parents
+// (fieldsets, dialogs) target it.
+templ Text(p Props) {
+	<p data-slot="text" class={ join(textClasses, p.Class) } { p.Attrs... }>
+		{ children... }
+	</p>
+}
+
+// Link renders an underlined inline link in the foreground color, for
+// links inside running text. For standalone actions use button.Button
+// with Href.
+templ Link(p LinkProps) {
+	<a href={ templ.SafeURL(p.Href) } class={ join(linkClasses, p.Class) } { p.Attrs... }>
+		{ children... }
+	</a>
+}
+
+// Strong renders emphasized text in the foreground color — it stands out
+// from the muted paragraph around it.
+templ Strong(p Props) {
+	<strong class={ join(strongClasses, p.Class) } { p.Attrs... }>
+		{ children... }
+	</strong>
+}
+
+// Code renders an inline code span: IDs, keys, file names.
+templ Code(p Props) {
+	<code class={ join(codeClasses, p.Class) } { p.Attrs... }>
+		{ children... }
+	</code>
+}

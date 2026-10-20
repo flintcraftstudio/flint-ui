@@ -1,12 +1,16 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"html"
 	"log/slog"
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
+	"unicode/utf16"
 
 	"github.com/a-h/templ"
 
@@ -38,8 +42,14 @@ func main() {
 	mux.Handle("GET /switches", page("Switch", "switches", templates.Switches()))
 	mux.Handle("GET /dividers", page("Divider", "dividers", templates.Dividers()))
 	mux.Handle("GET /description-lists", page("Description List", "description-lists", templates.DescriptionLists()))
-	mux.Handle("GET /tables", page("Table", "tables", templates.Tables()))
+	mux.Handle("GET /tables", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		page("Table", "tables", templates.Tables(templates.ParseJobsQuery(r.URL.Query()))).ServeHTTP(w, r)
+	}))
+	mux.Handle("GET /tables/jobs", http.HandlerFunc(tablesJobsHandler))
+	mux.Handle("POST /tables/jobs/archive", bulkJobsHandler("Archived"))
+	mux.Handle("POST /tables/jobs/delete", bulkJobsHandler("Deleted"))
 	mux.Handle("GET /headings", page("Heading", "headings", templates.Headings()))
+	mux.Handle("GET /texts", page("Text", "texts", templates.Texts()))
 	mux.Handle("GET /cards", page("Card", "cards", templates.Cards()))
 	mux.Handle("GET /alerts", page("Alert", "alerts", templates.Alerts()))
 	mux.Handle("GET /modals", page("Modal", "modals", templates.Modals()))
@@ -170,6 +180,59 @@ func textareasSubmitHandler(w http.ResponseWriter, r *http.Request) {
 	))
 }
 
+// tablesJobsHandler re-renders the admin-list table fragment for sort and
+// search swaps.
+func tablesJobsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if err := templates.JobsTable(templates.ParseJobsQuery(r.URL.Query())).Render(r.Context(), w); err != nil {
+		slog.Error("render error", "path", r.URL.Path, "err", err)
+	}
+}
+
+// headerJSON marshals v for an HX-Trigger header. Browsers decode header
+// values as Latin-1, so any non-ASCII rune (an em dash, an accented name)
+// must travel as a JSON \uXXXX escape or it arrives as mojibake.
+func headerJSON(v any) string {
+	b, _ := json.Marshal(v)
+	var out strings.Builder
+	for _, r := range string(b) {
+		if r < 0x80 {
+			out.WriteRune(r)
+			continue
+		}
+		for _, u := range utf16.Encode([]rune{r}) {
+			fmt.Fprintf(&out, "\\u%04x", u)
+		}
+	}
+	return out.String()
+}
+
+// bulkJobsHandler answers a bulk (or single-row) action with a toast and
+// a selection-clear event. The demo data is static, so nothing changes.
+func bulkJobsHandler(verb string) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := r.ParseForm(); err != nil {
+			http.Error(w, "bad form", http.StatusBadRequest)
+			return
+		}
+		ids := r.Form["ids"]
+		label := "job"
+		if len(ids) != 1 {
+			label = "jobs"
+		}
+		trigger := headerJSON(map[string]any{
+			"flint:toast": map[string]string{
+				"variant": "success",
+				"title":   verb + " " + strconv.Itoa(len(ids)) + " " + label,
+				"body":    "#" + strings.Join(ids, ", #") + " — demo only, nothing changed.",
+			},
+			"flint:selection-clear": true,
+		})
+		w.Header().Set("HX-Trigger", trigger)
+		w.WriteHeader(http.StatusNoContent)
+	})
+}
+
 func tablesDetailHandler(w http.ResponseWriter, r *http.Request) {
 	name := html.EscapeString(r.URL.Query().Get("name"))
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -188,7 +251,7 @@ func tablesDetailHandler(w http.ResponseWriter, r *http.Request) {
 // Container picks it up. The response body itself is just a small
 // confirmation that gets swapped into #toast-result.
 func toastsEchoHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("HX-Trigger", `{"flint:toast":{"variant":"success","title":"Saved on the server","body":"HX-Trigger fired — no client-side dispatch code."}}`)
+	w.Header().Set("HX-Trigger", `{"flint:toast":{"variant":"success","title":"Saved on the server","body":"HX-Trigger fired \u2014 no client-side dispatch code."}}`)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	_, _ = w.Write([]byte(`<span class="text-success">server responded — toast fired via HX-Trigger</span>`))
 }

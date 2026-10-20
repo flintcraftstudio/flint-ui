@@ -1,0 +1,150 @@
+package table
+
+import "github.com/flintcraftstudio/flint-ui/components/checkbox"
+
+// SelectableProps controls the row-selection scope.
+type SelectableProps struct {
+	Class string
+	Attrs templ.Attributes
+}
+
+// SelectAllProps controls the select-all header cell. Label is the
+// screen-reader name of its checkbox ("Select all jobs").
+type SelectAllProps struct {
+	Label string
+	Bleed bool
+	Class string
+	Attrs templ.Attributes
+}
+
+// SelectCellProps controls a row's selection cell.
+//
+// Name is the form field the checked rows submit under (default "ids");
+// Value is this row's ID. Label is the screen-reader name of the checkbox
+// ("Select job #1834").
+type SelectCellProps struct {
+	Name    string
+	Value   string
+	Label   string
+	Checked bool
+	// Disabled renders the checkbox disabled; select-all and the count
+	// skip it (e.g. a locked or already-invoiced row).
+	Disabled bool
+	Bleed    bool
+	Dense    bool
+	Striped  bool
+	Class    string
+	Attrs    templ.Attributes
+}
+
+// BulkActionsProps controls the bulk-actions bar.
+type BulkActionsProps struct {
+	Class string
+	Attrs templ.Attributes
+}
+
+// Selectable wraps a BulkActions bar and a Table whose rows can be
+// selected. It owns the selection state in Alpine (count / total), kept
+// in sync with the row checkboxes — including after htmx swaps rows in
+// or out. Selection is form state: the checked boxes are real inputs,
+// and bulk-action buttons submit them with BulkAttrs.
+//
+//	@table.Selectable(table.SelectableProps{}) {
+//	    @table.BulkActions(table.BulkActionsProps{}) {
+//	        @button.Button(button.Props{Outline: true, Attrs: table.BulkAttrs(templ.Attributes{
+//	            "hx-post": "/jobs/archive", "hx-target": "#jobs",
+//	        })}) { Archive }
+//	    }
+//	    @table.Table(table.Props{}) { ...SelectAll header, SelectCell per row }
+//	}
+//
+// Clear the selection from the server with
+// HX-Trigger: {"flint:selection-clear": true}.
+templ Selectable(p SelectableProps) {
+	<div
+		data-flint-selection
+		x-data={ selectionData }
+		x-on:change="$event.target.matches('[data-flint-select]') && sync()"
+		x-on:flint:selection-clear.window="clear()"
+		class={ p.Class }
+		{ p.Attrs... }
+	>
+		{ children... }
+	</div>
+}
+
+// SelectAll is the header cell for the selection column. Its checkbox is
+// checked when every row is, indeterminate when some are, and toggles
+// all rows.
+templ SelectAll(p SelectAllProps) {
+	<th class={ headerClasses(HeaderProps{Bleed: p.Bleed, Class: join(selectColumnClasses, p.Class)}) } { p.Attrs... }>
+		@checkbox.Checkbox(checkbox.Props{Attrs: templ.Attributes{
+			"aria-label":      p.Label,
+			"x-bind:checked":  "total > 0 && count === total",
+			"x-effect":        "$el.indeterminate = count > 0 && count < total",
+			"x-bind:disabled": "total === 0",
+			"x-on:change":     "toggleAll($event.target.checked)",
+		}})
+	</th>
+}
+
+// SelectCell is a row's selection cell: a checkbox that submits Value
+// under Name when checked.
+templ SelectCell(p SelectCellProps) {
+	<td class={ cellClasses(CellProps{Bleed: p.Bleed, Dense: p.Dense, Striped: p.Striped, Class: join(selectColumnClasses, p.Class)}) } { p.Attrs... }>
+		@checkbox.Checkbox(checkbox.Props{
+			Name:     selectName(p.Name),
+			Value:    p.Value,
+			Checked:  p.Checked,
+			Disabled: p.Disabled,
+			Attrs: templ.Attributes{
+				"aria-label":        p.Label,
+				"data-flint-select": true,
+			},
+		})
+	</td>
+}
+
+// BulkActions is the toolbar above a selectable table: the live
+// selection count, a Clear button, and the caller's action buttons
+// (wired with BulkAttrs, which disables them while nothing is
+// selected). The bar is always present so the table doesn't jump when
+// the first row is checked.
+templ BulkActions(p BulkActionsProps) {
+	<div class={ join(bulkBarClasses, p.Class) } { p.Attrs... }>
+		<p
+			class="text-sm/6 text-muted-foreground"
+			aria-live="polite"
+			x-text="count ? count + ' selected' : 'Select rows for bulk actions'"
+		>
+			Select rows for bulk actions
+		</p>
+		<button
+			type="button"
+			hidden
+			x-bind:hidden="count === 0"
+			x-on:click="clear()"
+			class={ bulkClearClasses }
+		>
+			Clear
+		</button>
+		<div class="ml-auto flex flex-wrap items-center gap-3">
+			{ children... }
+		</div>
+	</div>
+}
+
+// BulkAttrs wires a button inside Selectable to act on the selection:
+// it submits the checked rows (hx-include of the selection scope) and is
+// disabled while nothing is selected. Extra attrs (hx-post, hx-target,
+// hx-confirm, ...) are merged in and win on conflicts.
+func BulkAttrs(extra templ.Attributes) templ.Attributes {
+	out := templ.Attributes{
+		"hx-include":      "closest [data-flint-selection]",
+		"x-bind:disabled": "count === 0",
+	}
+	for k, v := range extra {
+		out[k] = v
+	}
+	return out
+}

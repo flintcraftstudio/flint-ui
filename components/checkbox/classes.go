@@ -23,13 +23,23 @@ const boxClasses = "absolute inset-0 z-0 rounded-[0.3125rem] " +
 	"border border-border " +
 	"peer-hover:border-foreground/30 " +
 	"peer-checked:bg-primary peer-checked:border-transparent peer-checked:shadow-none " +
+	"peer-indeterminate:bg-primary peer-indeterminate:border-transparent peer-indeterminate:shadow-none " +
 	"peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ring " +
 	"peer-data-invalid:border-danger peer-hover:peer-data-invalid:border-danger " +
 	"peer-disabled:opacity-50 peer-disabled:bg-muted peer-disabled:border-border peer-disabled:peer-checked:bg-muted"
 
-// checkSvgClasses is the checkmark. Sits above the box (z-10) and fades in
-// when the input is checked. Forced-colors keeps it visible in Windows HC mode.
-const checkSvgClasses = "relative z-10 size-4 stroke-primary-foreground opacity-0 peer-checked:opacity-100 peer-disabled:stroke-muted-foreground sm:size-3.5 forced-colors:stroke-[HighlightText]"
+// checkSvgClasses is the check/dash glyph. Sits above the box (z-10) and
+// fades in when the input is checked or indeterminate. Forced-colors keeps
+// it visible in Windows HC mode.
+const checkSvgClasses = "relative z-10 size-4 stroke-primary-foreground opacity-0 peer-checked:opacity-100 peer-indeterminate:opacity-100 peer-disabled:stroke-muted-foreground sm:size-3.5 forced-colors:stroke-[HighlightText]"
+
+// checkPathClasses / dashPathClasses swap the glyph for the indeterminate
+// state, which wins over checked (matching native rendering). The paths
+// are inside the SVG, so they key off the sibling input with an arbitrary
+// variant rather than peer-*.
+const checkPathClasses = "[input:indeterminate~svg_&]:opacity-0"
+
+const dashPathClasses = "opacity-0 [input:indeterminate~svg_&]:opacity-100"
 
 // groupBase stacks CheckboxFields. space-y-6 when any child has a description,
 // space-y-3 otherwise — matches Catalyst's CheckboxGroup behavior.
