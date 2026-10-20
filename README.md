@@ -71,6 +71,7 @@ All components live under `github.com/flintcraftstudio/flint-ui/components/<pack
 | Page Header | `pageheader` | `PageHeader`, `Back`, `Content`, `Title`, `Description`, `Meta`, `Actions` | Page title block: back link, title, description or meta row, and primary actions. | [page-header.md](./docs/components/page-header.md) |
 | Pagination | `pagination` | `Pagination`, `Previous`, `Next`, `List`, `Page`, `Gap` | Numbered page navigation for tables and lists. | [pagination.md](./docs/components/pagination.md) |
 | Popover | `popover` | `Popover`, `Button`, `Panel` | Click-activated floating panel with arbitrary content. | [popover.md](./docs/components/popover.md) |
+| Progress | `progress` | `Progress` | Determinate or looping indeterminate progress bar; polls with htmx `outerMorph` so the fill animates. | [progress.md](./docs/components/progress.md) |
 | Radio | `radio` | `Radio`, `RadioGroup`, `RadioField` | Native `<input type="radio">` exclusive-choice control. | [radio.md](./docs/components/radio.md) |
 | Select | `selectbox` | `Select` | Native `<select>` styled to match `Input`. Package is `selectbox` because `select` is a Go keyword. | [select.md](./docs/components/select.md) |
 | Sidebar | `sidebar` | `Sidebar`, `Header`, `Body`, `Footer`, `Section`, `Heading`, `Item`, `Label`, `Spacer`, `Divider` | Vertical app navigation for `layout.Sidebar`; current-item bar and `aria-current`. | [sidebar.md](./docs/components/sidebar.md) |

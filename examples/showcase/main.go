@@ -78,6 +78,8 @@ func main() {
 	mux.Handle("GET /stats", page("Stat", "stats", templates.Stats()))
 	mux.Handle("GET /stats/live", http.HandlerFunc(statsLiveHandler))
 	mux.Handle("GET /spinners", page("Spinner", "spinners", templates.Spinners()))
+	mux.Handle("GET /progress", page("Progress", "progress", templates.Progress()))
+	mux.Handle("GET /progress/job", http.HandlerFunc(progressJobHandler))
 	mux.Handle("POST /slow", http.HandlerFunc(slowHandler))
 
 	mux.Handle("GET /demo/sidebar", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -162,6 +164,21 @@ func filesUploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	time.Sleep(600 * time.Millisecond) // long enough to see the button indicator
 	_, _ = w.Write([]byte(`<p class="text-success">Received:</p><ul class="mt-1 space-y-1">` + b.String() + `</ul>`))
+}
+
+// progressJobHandler renders the demo export job at ?step=N. The job is
+// stateless: each response carries the URL of the next step, and the
+// final step drops the polling attributes.
+func progressJobHandler(w http.ResponseWriter, r *http.Request) {
+	step, err := strconv.Atoi(r.URL.Query().Get("step"))
+	if err != nil || step < 0 {
+		step = 0
+	}
+	step = min(step, templates.ProgressJobSteps)
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if err := templates.ProgressJob(step).Render(r.Context(), w); err != nil {
+		slog.Error("render error", "path", r.URL.Path, "err", err)
+	}
 }
 
 // slowHandler sleeps long enough to see loading states (spinners,

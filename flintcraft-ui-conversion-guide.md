@@ -345,7 +345,10 @@ The structure every admin screen sits in. Converted from Catalyst where it has a
 
 33. **File input** — `fileinput.Input` (native, styled like Input) and `fileinput.Dropzone` (drag and drop, accept filtering on drop).
 
-**Next up:** dark-mode tokens, progress, skeletons.
+34. **Dark mode** — opt-in dark token values switched by `data-theme` on `<html>` (see "Dark Mode" below).
+35. **Progress** — from scratch. Determinate and looping indeterminate bars; server-reported progress polls with htmx and swaps with `outerMorph` so the fill animates.
+
+**Next up:** skeletons.
 
 **Shared infrastructure to build alongside:**
 

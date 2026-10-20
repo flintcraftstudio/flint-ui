@@ -1,0 +1,84 @@
+// Package progress provides a horizontal progress bar. From-scratch
+// design (Catalyst has no progress.tsx).
+//
+// Two modes:
+//   - Determinate: Value out of Max (default 100). The fill width and
+//     aria-valuenow track Value.
+//   - Indeterminate: a segment loops across the track for work with no
+//     known length. aria-valuenow is omitted, which is how assistive
+//     tech recognises an indeterminate progressbar.
+//
+// For server-reported progress, poll with htmx through Attrs and swap the
+// bar with hx-swap="outerMorph" so the fill animates to its new width
+// instead of jumping (see docs/components/progress.md).
+package progress
+
+// Variant picks the fill color. The zero value is VariantPrimary.
+type Variant string
+
+const (
+	VariantPrimary Variant = "primary"
+	VariantAccent  Variant = "accent"
+	VariantSuccess Variant = "success"
+	VariantWarning Variant = "warning"
+	VariantDanger  Variant = "danger"
+)
+
+// Size picks the track height. The zero value is SizeMD.
+type Size string
+
+const (
+	SizeSM Size = "sm" // 4px — inline, table cells, card footers
+	SizeMD Size = "md" // 8px — default
+)
+
+// Props controls a Progress bar.
+//
+// Label is the accessible name (aria-label). Always set it, or point
+// aria-labelledby at visible text through Attrs: a progressbar without a
+// name is announced as just "progress bar".
+type Props struct {
+	Value         float64
+	Max           float64 // zero means 100
+	Indeterminate bool
+	Label         string
+	ValueText     string // aria-valuetext, e.g. "Step 2 of 5"; defaults to the percentage
+	Variant       Variant
+	Size          Size
+	Class         string
+	Attrs         templ.Attributes
+}
+
+// Progress renders the track and its fill.
+templ Progress(p Props) {
+	if p.Indeterminate {
+		<div
+			role="progressbar"
+			if p.Label != "" {
+				aria-label={ p.Label }
+			}
+			if p.ValueText != "" {
+				aria-valuetext={ p.ValueText }
+			}
+			class={ trackClasses(p) }
+			{ p.Attrs... }
+		>
+			<div class={ indeterminateFillClasses(p) }></div>
+		</div>
+	} else {
+		<div
+			role="progressbar"
+			if p.Label != "" {
+				aria-label={ p.Label }
+			}
+			aria-valuemin="0"
+			aria-valuemax={ formatNumber(maxValue(p)) }
+			aria-valuenow={ formatNumber(clamp(p)) }
+			aria-valuetext={ valueText(p) }
+			class={ trackClasses(p) }
+			{ p.Attrs... }
+		>
+			<div class={ fillClasses(p) } style={ fillStyle(p) }></div>
+		</div>
+	}
+}

@@ -200,6 +200,32 @@
 [x-cloak] { display: none !important; }
 
 /*
+  Indeterminate progress bar (components/progress). A 40%-wide segment
+  slides from fully off the left edge to fully off the right: translateX
+  percentages are relative to the segment, and the track is 2.5 segments
+  wide, so -100% → 250% crosses it exactly. Under reduced motion the
+  segment fills the track and pulses instead — like the spinner, gentle
+  motion beats a frozen bar that reads as "stuck".
+*/
+@keyframes flint-progress-indeterminate {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(250%); }
+}
+@keyframes flint-progress-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.4; }
+}
+.flint-progress-indeterminate {
+  animation: flint-progress-indeterminate 1.5s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .flint-progress-indeterminate {
+    width: 100%;
+    animation: flint-progress-pulse 2s ease-in-out infinite;
+  }
+}
+
+/*
   Toast progress-bar countdown. The bar sits at the bottom of each toast
   and drains from full width down to zero over the toast's duration.
   Paused via animation-play-state when the user hovers or focuses the

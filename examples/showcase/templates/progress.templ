@@ -1,0 +1,130 @@
+package templates
+
+import (
+	"fmt"
+
+	"github.com/flintcraftstudio/flint-ui/components/button"
+	"github.com/flintcraftstudio/flint-ui/components/progress"
+)
+
+// ProgressJobSteps is how many polls the demo job takes to finish.
+const ProgressJobSteps = 10
+
+templ Progress() {
+	<div class="space-y-12">
+		@pageHeader("Progress", "Horizontal progress bar. Determinate (Value out of Max) or Indeterminate, a segment that loops for work with no known length. Renders role=\"progressbar\"; always give it a Label.")
+		@section("Determinate", "Value out of Max (default 100). Values outside 0..Max are clamped. aria-valuetext defaults to the rounded percentage.") {
+			<div class="max-w-md space-y-6">
+				for _, v := range []float64{0, 25, 60, 100} {
+					@progressRow(fmt.Sprintf("Upload %g%%", v), fmt.Sprintf("%g%%", v), progress.Props{Value: v, Label: "Upload"})
+				}
+				@progressRow("Onboarding", "Step 2 of 5", progress.Props{Value: 2, Max: 5, Label: "Onboarding", ValueText: "Step 2 of 5"})
+			</div>
+		}
+		@section("Indeterminate", "A segment loops across the track; aria-valuenow is omitted. Under prefers-reduced-motion the bar fills and pulses instead of sliding.") {
+			<div class="max-w-md space-y-6">
+				@progressRow("Syncing invoices", "", progress.Props{Indeterminate: true, Label: "Syncing invoices"})
+				@progressRow("Small", "", progress.Props{Indeterminate: true, Size: progress.SizeSM, Label: "Loading", Variant: progress.VariantAccent})
+			</div>
+		}
+		@section("Variants", "The fill uses the matching semantic token. Primary is the default.") {
+			<div class="max-w-md space-y-4">
+				@progress.Progress(progress.Props{Value: 70, Label: "Primary"})
+				@progress.Progress(progress.Props{Value: 70, Label: "Accent", Variant: progress.VariantAccent})
+				@progress.Progress(progress.Props{Value: 70, Label: "Success", Variant: progress.VariantSuccess})
+				@progress.Progress(progress.Props{Value: 70, Label: "Warning", Variant: progress.VariantWarning})
+				@progress.Progress(progress.Props{Value: 70, Label: "Danger", Variant: progress.VariantDanger})
+			</div>
+		}
+		@section("Sizes", "SizeSM (4px) for table cells and card footers, SizeMD (8px, the default) everywhere else.") {
+			<div class="max-w-md space-y-4">
+				@progress.Progress(progress.Props{Value: 45, Size: progress.SizeSM, Label: "Small"})
+				@progress.Progress(progress.Props{Value: 45, Label: "Medium"})
+			</div>
+		}
+		@section("Server-reported progress", "The bar polls with hx-trigger=\"every 600ms\" and swaps itself with hx-swap=\"outerMorph\", so the fill animates to each new width. When the job finishes the server sends the bar without hx-* attributes; the morph removes them and polling stops.") {
+			<div class="max-w-md">
+				@ProgressJob(-1)
+			</div>
+		}
+		@section("As an htmx indicator", "An indeterminate bar with the htmx-indicator class stays hidden until the request it's pointed at is in flight. The endpoint sleeps 1.5 seconds.") {
+			<div class="max-w-md space-y-3">
+				<div class="flex items-center gap-4">
+					@button.Button(button.Props{Outline: true, Attrs: templ.Attributes{
+						"hx-post":      "/slow",
+						"hx-target":    "#progress-ind-out",
+						"hx-indicator": "#progress-ind",
+					}}) { Load report }
+					<span id="progress-ind-out" class="text-sm text-muted-foreground"></span>
+				</div>
+				@progress.Progress(progress.Props{Indeterminate: true, Size: progress.SizeSM, Label: "Loading report", Class: "htmx-indicator", Attrs: templ.Attributes{"id": "progress-ind"}})
+			</div>
+		}
+	</div>
+}
+
+// progressRow is a visible label + value line above a bar.
+templ progressRow(label, value string, p progress.Props) {
+	<div class="space-y-2">
+		<div class="flex justify-between text-sm/6">
+			<span class="font-medium text-foreground">{ label }</span>
+			<span class="text-muted-foreground tabular-nums">{ value }</span>
+		</div>
+		@progress.Progress(p)
+	</div>
+}
+
+// ProgressJob renders the demo job at a step: -1 is "not started",
+// 0..ProgressJobSteps-1 polls for the next step, and ProgressJobSteps is
+// done (no hx-* attributes, so the morph stops the polling).
+templ ProgressJob(step int) {
+	<div
+		id="progress-job"
+		class="space-y-3"
+		if step >= 0 && step < ProgressJobSteps {
+			hx-get={ fmt.Sprintf("/progress/job?step=%d", step+1) }
+			hx-trigger="every 600ms"
+			hx-swap="outerMorph"
+		}
+	>
+		<div class="flex items-center justify-between text-sm/6">
+			<span class="font-medium text-foreground">
+				switch {
+					case step < 0:
+						Export 1,204 invoices
+					case step < ProgressJobSteps:
+						Exporting invoices…
+					default:
+						Export complete
+				}
+			</span>
+			<span class="text-muted-foreground tabular-nums">{ fmt.Sprintf("%d%%", max(step, 0)*100/ProgressJobSteps) }</span>
+		</div>
+		@progress.Progress(progress.Props{
+			Value:   float64(max(step, 0)),
+			Max:     ProgressJobSteps,
+			Label:   "Invoice export",
+			Variant: jobVariant(step),
+		})
+		if step < 0 || step >= ProgressJobSteps {
+			@button.Button(button.Props{Outline: true, Attrs: templ.Attributes{
+				"hx-get":    "/progress/job?step=0",
+				"hx-target": "#progress-job",
+				"hx-swap":   "outerMorph",
+			}}) {
+				if step < 0 {
+					Start export
+				} else {
+					Run again
+				}
+			}
+		}
+	</div>
+}
+
+func jobVariant(step int) progress.Variant {
+	if step >= ProgressJobSteps {
+		return progress.VariantSuccess
+	}
+	return progress.VariantPrimary
+}
