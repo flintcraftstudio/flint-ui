@@ -1,0 +1,81 @@
+// Package stat provides KPI tiles for dashboard home pages: a label, a
+// headline value, and an optional change badge with context ("+4.5% from
+// last week"). Converted from the Stat component in Catalyst's demo app
+// (catalyst-ui-kit/demo/.../app/stat.tsx).
+//
+//	@stat.Grid(stat.GridProps{}) {
+//	    @stat.Stat(stat.Props{Label: "Revenue", Value: "$48,200", Change: "+4.5%", Context: "from last month"})
+//	    @stat.Stat(stat.Props{Label: "Overdue invoices", Value: "3", Change: "-2", LowerIsBetter: true})
+//	}
+//
+// Grid renders a <dl>; each Stat is a <div> grouping its <dt> label and
+// <dd> value, so assistive tech reads label and value as a pair.
+package stat
+
+import "github.com/flintcraftstudio/flint-ui/components/badge"
+
+// Trend is the direction of a change. The zero value (TrendAuto) infers
+// it from Change's sign: "+" is up, "-" or "−" is down, anything else is
+// flat.
+type Trend string
+
+const (
+	TrendAuto Trend = ""
+	TrendUp   Trend = "up"
+	TrendDown Trend = "down"
+	TrendFlat Trend = "flat"
+)
+
+// GridProps controls the stat grid.
+type GridProps struct {
+	Class string
+	Attrs templ.Attributes
+}
+
+// Props controls a single stat.
+//
+// Value is preformatted ("$2.6M", "823,067") — format numbers on the
+// server where locale and rounding are known. Change is optional; when
+// empty the badge row is omitted. LowerIsBetter flips the badge colors
+// for metrics where a rise is bad (overdue invoices, churn, response
+// time).
+type Props struct {
+	Label         string
+	Value         string
+	Change        string
+	Trend         Trend
+	LowerIsBetter bool
+	Context       string
+	Class         string
+	Attrs         templ.Attributes
+}
+
+// Grid lays stats out one per row on mobile, two at sm, four at xl —
+// Catalyst's dashboard grid.
+templ Grid(p GridProps) {
+	<dl class={ join(gridClasses, p.Class) } { p.Attrs... }>
+		{ children... }
+	</dl>
+}
+
+// Stat renders one KPI: a top rule, the label, the value, and the change
+// row. Must sit inside Grid (or another <dl>). Catalyst draws the rule
+// with a <Divider>; a <dl> group may only hold <dt>/<dd>, so here it's
+// the group's own top border.
+templ Stat(p Props) {
+	<div class={ join(statClasses, p.Class) } { p.Attrs... }>
+		<dt class={ labelClasses }>{ p.Label }</dt>
+		<dd class={ valueClasses }>{ p.Value }</dd>
+		if p.Change != "" {
+			<dd class={ changeClasses }>
+				@badge.Badge(badge.Props{Variant: changeVariant(p)}) {
+					{ p.Change }
+				}
+				if p.Context != "" {
+					{ " " }
+					<span class="text-muted-foreground">{ p.Context }</span>
+				}
+			</dd>
+		}
+	</div>
+}

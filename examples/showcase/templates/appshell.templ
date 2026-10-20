@@ -110,7 +110,10 @@ templ demoPage(base, current, title string) {
 	}
 	<div class="mt-8">
 		if current == "jobs" {
-			@demoJobsTable()
+			@demoStatGrid()
+			<div class="mt-12">
+				@demoJobsTable()
+			</div>
 		} else {
 			@emptystate.EmptyState(emptystate.Props{Bordered: true}) {
 				@iconFolderOutline()

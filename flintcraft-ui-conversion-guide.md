@@ -341,7 +341,9 @@ The structure every admin screen sits in. Converted from Catalyst where it has a
 30. **Table features** — `SortHeader` (server-side sort, `aria-sort`), row selection with bulk actions (`Selectable` / `SelectAll` / `SelectCell` / `BulkActions` / `BulkAttrs`), and row-action menus via `dropdown.MenuProps.Fixed`.
 31. **Text** — Catalyst's `Text`, `TextLink` (as `text.Link`), `Strong`, `Code`.
 
-**Next up:** Stat card, dark-mode tokens, file input, progress, skeletons.
+32. **Stat** — the KPI tile from Catalyst's demo app, as a `<dl>` grid.
+
+**Next up:** dark-mode tokens, file input, progress, skeletons.
 
 **Shared infrastructure to build alongside:**
 

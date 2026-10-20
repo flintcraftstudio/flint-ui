@@ -1,0 +1,47 @@
+package templates
+
+import (
+	"github.com/flintcraftstudio/flint-ui/components/heading"
+	"github.com/flintcraftstudio/flint-ui/components/spinner"
+	"github.com/flintcraftstudio/flint-ui/components/stat"
+)
+
+templ Stats() {
+	<div class="space-y-12">
+		@pageHeader("Stat", "KPI tiles for dashboard home pages, converted from the Stat in Catalyst's demo app. Label, headline value, and an optional change badge whose color follows the sign of the change. Grid renders a <dl>, so each label and value are announced as a pair.")
+		@section("Dashboard row", "Catalyst's grid: one column on mobile, two at sm, four at xl. Badge color is inferred from the leading + or − of Change.") {
+			@demoStatGrid()
+		}
+		@section("Lower is better", "For metrics where a rise is bad — overdue invoices, response time, cancellations — set LowerIsBetter to flip the colors.") {
+			@stat.Grid(stat.GridProps{}) {
+				@stat.Stat(stat.Props{Label: "Overdue invoices", Value: "3", Change: "-2", Context: "since Monday", LowerIsBetter: true})
+				@stat.Stat(stat.Props{Label: "Avg. quote turnaround", Value: "1.8 days", Change: "+0.4", Context: "vs. last month", LowerIsBetter: true})
+				@stat.Stat(stat.Props{Label: "Cancellations", Value: "1", Change: "0", Context: "this week"})
+				@stat.Stat(stat.Props{Label: "Crew utilization", Value: "86%"})
+			}
+		}
+		@section("Loaded with htmx", "Expensive numbers can load after the page: the section has hx-get with hx-trigger=\"load\" and shows a spinner until the server responds. The endpoint below takes 1.5 seconds.") {
+			<div class="space-y-4">
+				@heading.Subheading(heading.Props{}) { This month }
+				<div hx-get="/stats/live" hx-trigger="load" hx-swap="outerHTML">
+					@spinner.Spinner(spinner.Props{Size: spinner.SizeLG, Label: "Loading stats", Class: "text-muted-foreground"})
+				</div>
+			</div>
+		}
+	</div>
+}
+
+// demoStatGrid is the Catalyst dashboard row, reused by the live endpoint.
+templ demoStatGrid() {
+	@stat.Grid(stat.GridProps{}) {
+		@stat.Stat(stat.Props{Label: "Revenue", Value: "$48,200", Change: "+4.5%", Context: "from last month"})
+		@stat.Stat(stat.Props{Label: "Average job value", Value: "$6,890", Change: "-0.5%", Context: "from last month"})
+		@stat.Stat(stat.Props{Label: "Jobs completed", Value: "27", Change: "+4", Context: "from last month"})
+		@stat.Stat(stat.Props{Label: "Quotes sent", Value: "41", Change: "+21.2%", Context: "from last month"})
+	}
+}
+
+// StatsLive is the hx-get response for the lazy-loaded section.
+templ StatsLive() {
+	@demoStatGrid()
+}

@@ -73,6 +73,8 @@ func main() {
 	mux.Handle("GET /sidebars", page("Sidebar", "sidebars", templates.Sidebars()))
 	mux.Handle("GET /page-headers", page("Page header", "page-headers", templates.PageHeaders()))
 	mux.Handle("GET /empty-states", page("Empty state", "empty-states", templates.EmptyStates()))
+	mux.Handle("GET /stats", page("Stat", "stats", templates.Stats()))
+	mux.Handle("GET /stats/live", http.HandlerFunc(statsLiveHandler))
 	mux.Handle("GET /spinners", page("Spinner", "spinners", templates.Spinners()))
 	mux.Handle("POST /slow", http.HandlerFunc(slowHandler))
 
@@ -116,6 +118,20 @@ func page(title, current string, body templ.Component) http.Handler {
 func bare(w http.ResponseWriter, r *http.Request, title string, body templ.Component) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if err := templates.Bare(title, body).Render(r.Context(), w); err != nil {
+		slog.Error("render error", "path", r.URL.Path, "err", err)
+	}
+}
+
+// statsLiveHandler serves the lazy-loaded stat grid after a delay, so the
+// loading spinner is visible.
+func statsLiveHandler(w http.ResponseWriter, r *http.Request) {
+	select {
+	case <-time.After(1500 * time.Millisecond):
+	case <-r.Context().Done():
+		return
+	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if err := templates.StatsLive().Render(r.Context(), w); err != nil {
 		slog.Error("render error", "path", r.URL.Path, "err", err)
 	}
 }
