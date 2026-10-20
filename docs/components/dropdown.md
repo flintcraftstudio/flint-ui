@@ -91,7 +91,7 @@ The menu closes via the bubbled click; htmx fires its request. Both happen.
 
 ### Disabled
 
-`Disabled: true` sets the native `disabled` on a button or `aria-disabled="true"` on a link. The `data-disabled:opacity-50 data-disabled:pointer-events-none` classes (mapped to `:disabled`/`[aria-disabled="true"]` via the `data-disabled` custom variant in `flint.css`) handle both visuals and click suppression.
+`Disabled: true` sets the native `disabled` on a button or `aria-disabled="true"` on a link. The `data-disabled:opacity-50 data-disabled:pointer-events-none` classes (mapped to `:disabled`/`[aria-disabled="true"]` via the `data-disabled` custom variant in `styles/flint-ui.css`) handle both visuals and click suppression.
 
 ## Items with icon, description, shortcut
 

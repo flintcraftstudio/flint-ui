@@ -44,7 +44,7 @@ All four sub-components carry `Mode` (and `Active` where relevant) that **must m
 Two trapdoors handled for you:
 
 1. **Tab pill flash.** Tabs render with static `aria-selected` based on `Active` so the active tab is highlighted on first paint, before Alpine binds. After init, `x-bind:aria-selected` reactively takes over.
-2. **All panels visible flash.** Panels whose `Name != Active` render with `x-cloak`, hidden by the `[x-cloak]{display:none!important}` rule already in `styles/flint.css`. After init, Alpine removes `x-cloak` and `x-show` keeps inactive panels hidden via `display:none`. The active panel renders without `x-cloak` so it's visible from the first byte.
+2. **All panels visible flash.** Panels whose `Name != Active` render with `x-cloak`, hidden by the `[x-cloak]{display:none!important}` rule already in `styles/flint-ui.css`. After init, Alpine removes `x-cloak` and `x-show` keeps inactive panels hidden via `display:none`. The active panel renders without `x-cloak` so it's visible from the first byte.
 
 This is why `Panel.Active` and `Tab.Active` exist as props — they let the server render correct initial visibility.
 

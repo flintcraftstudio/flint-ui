@@ -92,6 +92,6 @@ Native `<optgroup>` works out of the box — Catalyst's `[&_optgroup]:font-semib
 
 - Always pair with `fieldset.Label{For: id}` (or a surrounding `<label>`) for screen reader users.
 - `Invalid` sets `aria-invalid="true"` so assistive tech announces validation state.
-- `data-invalid` targets both Headless UI's `[data-invalid]` *and* the native `:user-invalid` pseudo-class (see `styles/flint.css`), so browser-validated fields light up without extra JS.
+- `data-invalid` targets both Headless UI's `[data-invalid]` *and* the native `:user-invalid` pseudo-class (see `styles/flint-ui.css`), so browser-validated fields light up without extra JS.
 - The chevron icon carries `forced-colors:stroke-[CanvasText]` so it remains visible in Windows high-contrast mode.
 - Focus ring is applied via `has-data-focus:after:ring-2 has-data-focus:after:ring-ring` on the wrapper — visible for both mouse and keyboard users.

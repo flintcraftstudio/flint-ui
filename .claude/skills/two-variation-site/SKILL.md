@@ -45,8 +45,7 @@ internal/
       ...
     contact.templ                      # Contact form (shared, styled per variation)
 tailwind/
-  tailwind.config.js                   # Color palettes for BOTH variations (namespaced)
-  input.css                            # Font imports for both variations
+  input.css                            # Tailwind v4 entry: @source + @theme palettes/fonts for BOTH variations
 web/static/
   css/site.css                         # Compiled Tailwind output (single file, both palettes)
   js/                                  # HTMX, Alpine.js, custom scripts
@@ -82,64 +81,51 @@ Audit the inputs and present a structured summary:
 
 **Stop and wait for confirmation before writing code.**
 
-### Phase 2: Tailwind Config
+### Phase 2: Tailwind Theme (v4)
 
-Extend `tailwind/tailwind.config.js` with **namespaced color palettes** for both variations. Each variation gets its own prefix (e.g., `va-*` and `vb-*`, or use the slug names like `warm-*` and `bold-*`).
-
-```js
-/** @type {import('tailwindcss').Config} */
-const defaultTheme = require("tailwindcss/defaultTheme");
-
-module.exports = {
-  content: ["./internal/view/**/*.templ"],
-  theme: {
-    extend: {
-      colors: {
-        // Variation A palette
-        va: {
-          dark:    "#...",
-          panel:   "#...",
-          primary: "#...",
-          // ... full palette
-        },
-        // Variation B palette
-        vb: {
-          dark:    "#...",
-          panel:   "#...",
-          primary: "#...",
-          // ... full palette
-        },
-      },
-      fontFamily: {
-        // Variation A fonts
-        "va-display": ['"Font A Display"', ...defaultTheme.fontFamily.serif],
-        "va-body":    ['"Font A Body"', ...defaultTheme.fontFamily.sans],
-        // Variation B fonts
-        "vb-display": ['"Font B Display"', ...defaultTheme.fontFamily.sans],
-        "vb-body":    ['"Font B Body"', ...defaultTheme.fontFamily.sans],
-      },
-    },
-  },
-  plugins: [],
-};
-```
-
-Update `tailwind/input.css` to import fonts for both variations:
+Tailwind v4 is configured in CSS — there is no `tailwind.config.js`. Define **namespaced color palettes and font stacks** for both variations in `tailwind/input.css` with an `@theme` block. Each variation gets its own prefix (e.g., `va-*` and `vb-*`, or use the slug names like `warm-*` and `bold-*`). A `--color-va-dark` variable generates `bg-va-dark`, `text-va-dark`, `border-va-dark`, etc.; a `--font-va-display` variable generates `font-va-display`.
 
 ```css
-@import url("https://fonts.googleapis.com/css2?family=...");
+@import "tailwindcss";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Templates to scan — paths resolve relative to this file */
+@source "../internal/view";
+
+@theme {
+  /* Variation A palette */
+  --color-va-dark: #...;
+  --color-va-panel: #...;
+  --color-va-primary: #...;
+  /* ... full palette */
+
+  /* Variation B palette */
+  --color-vb-dark: #...;
+  --color-vb-panel: #...;
+  --color-vb-primary: #...;
+  /* ... full palette */
+
+  /* Variation A fonts */
+  --font-va-display: "Font A Display", ui-serif, Georgia, serif;
+  --font-va-body: "Font A Body", ui-sans-serif, system-ui, sans-serif;
+
+  /* Variation B fonts */
+  --font-vb-display: "Font B Display", ui-sans-serif, system-ui, sans-serif;
+  --font-vb-body: "Font B Body", ui-sans-serif, system-ui, sans-serif;
+}
 
 @layer base {
   ::selection {
-    background: rgba(...);
+    background: rgb(... / 0.3);
     color: #...;
   }
 }
 ```
+
+Notes:
+- Theme values are plain CSS colors (hex, `rgb()`, `oklch()`); opacity modifiers like `bg-va-primary/50` work automatically.
+- Load web fonts with `<link rel="preconnect">` + `<link rel="stylesheet">` in `layout.templ`'s `<head>` rather than a CSS `@import url(...)`, so the font request isn't blocked behind the stylesheet.
+- v4 renamed a few utilities. Use the v4 names: `shadow-xs`/`shadow-sm` (was `shadow-sm`/`shadow`), `rounded-xs`/`rounded-sm` (was `rounded-sm`/`rounded`), `outline-hidden` (was `outline-none`), `shrink-0`/`grow` (was `flex-shrink-0`/`flex-grow`), and `bg-black/50` (was `bg-opacity-*`). Reference CSS variables as `bg-(--my-var)`, not `bg-[--my-var]`.
+- Borders default to `currentColor` in v4, so always pair `border` with a color class (`border-va-panel`).
 
 ### Phase 3: Config and Business Data
 
@@ -315,7 +301,7 @@ Key rules:
 
 The existing Mage tasks handle everything. No changes needed to `magefile.go` or `Dockerfile`:
 
-- `mage BuildCSS` compiles both variation palettes into a single `site.css`
+- `mage BuildCSS` runs the Tailwind v4 standalone CLI (`tailwindcss -i ./tailwind/input.css -o ./web/static/css/site.css --minify`) and compiles both variation palettes into a single `site.css`. If the project's magefile still passes `-c tailwind.config.js` or downloads a v3 binary, update it to a v4 release and drop the config flag.
 - `mage BuildGo` runs `templ generate` then `go build`
 - `mage Build` does both
 - Docker multi-stage build works unchanged
@@ -338,7 +324,7 @@ Every page must have:
 
 1. **Config over code** — business data in `shared.go` or config, never hardcoded in templates
 2. **Tailwind utility-first** — use Tailwind classes, no separate CSS files per variation
-3. **Namespaced palettes** — each variation's colors prefixed in Tailwind config (e.g., `va-*`, `vb-*`)
+3. **Namespaced palettes** — each variation's colors and fonts prefixed in the `@theme` block (e.g., `--color-va-*`, `--font-vb-*`)
 4. **templ composition** — `@Base()` wraps everything, reusable components as templ functions
 5. **Stdlib HTTP** — no router frameworks, use Go 1.22+ `http.ServeMux` path values
 6. **Mage build tasks** — use existing `mage Build`, `mage Dev` workflow

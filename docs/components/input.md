@@ -70,5 +70,5 @@ Every icon must carry `data-slot="icon"` — the CSS selectors that position it 
 
 - Always pair with `fieldset.Label{For: id}` (or surrounding `<label>`) for screen reader users.
 - `Invalid` sets `aria-invalid="true"` so AT announces validation state.
-- `data-invalid` targets both Headless UI's own attribute *and* the native `:user-invalid` pseudo-class (see `styles/flint.css`), so browser-validated fields light up without extra JS.
+- `data-invalid` targets both Headless UI's own attribute *and* the native `:user-invalid` pseudo-class (see `styles/flint-ui.css`), so browser-validated fields light up without extra JS.
 - Focus ring is applied via `focus-within:after:ring-2 focus-within:after:ring-blue-500` on the wrapper — visible for both mouse and keyboard users.

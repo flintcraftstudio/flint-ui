@@ -70,8 +70,8 @@ github.com/flintcraftstudio/flint-ui/
 │       ├── types.go              // shared prop types
 │       └── classes.go            // class utilities (cn, etc.)
 ├── styles/
-│   ├── flint.css                 // any base styles not covered by Tailwind
-│   └── tailwind.config.example.js // config clients need to extend
+│   ├── flint-ui.css              // importable Tailwind v4 partial: tokens, variants, @source
+│   └── flint.css                 // showcase entry: imports tailwindcss + flint-ui.css
 ├── examples/
 │   ├── showcase/                 // running Go app showing all components
 │   │   ├── main.go
@@ -385,7 +385,7 @@ FlintCraft clients have meaningfully different brand palettes (A-Team Gutters: b
 
 1. **flint-ui components reference semantic tokens** (`bg-primary`, `text-danger-foreground`) instead of raw Tailwind colors (`bg-zinc-900`, `text-white`).
 2. **Each client site defines CSS variables** for those semantic tokens in their base stylesheet, using their brand palette.
-3. **Each client's `tailwind.config.js` maps the semantic tokens to those CSS variables**, so Tailwind's JIT generates the right utility classes.
+3. **flint-ui declares the tokens in a Tailwind v4 `@theme` block** (`styles/flint-ui.css`), so Tailwind generates `bg-primary`, `text-danger-foreground`, etc. and exposes each token as a `--color-*` CSS variable. No `tailwind.config.js` is involved.
 4. **Result**: the same `bg-primary` class renders A-Team's red on A-Team's site and Lo Mo's teal on Lo Mo's site, with zero component changes.
 
 ### The Semantic Token Contract
@@ -416,102 +416,47 @@ Every flint-ui component is built against exactly this set of tokens. Clients mu
 
 ### Client Site Setup
 
-Each client site needs three things to use flint-ui: CSS variable definitions, Tailwind config mapping, and the content globs pointing at flint-ui.
+Each client site needs two things to use flint-ui: an import of flint-ui's Tailwind partial, and `:root` overrides for the tokens it wants to rebrand.
 
-**1. CSS variables — `styles/theme.css`**
+**1. Import the partial**
 
-Define all tokens as space-separated RGB triplets. The `<alpha-value>` placeholder in Tailwind lets opacity modifiers work (`bg-primary/50`).
+`styles/flint-ui.css` carries the `@theme` token defaults, the `@custom-variant` aliases for Headless UI's `data-*` state attributes, an `@source` for flint-ui's component templates, and the small amount of plain CSS the components need (`[x-cloak]`, toast animations). Tailwind v4 resolves `@source` relative to the file that declares it, so importing the partial is all it takes to scan flint-ui's classes.
+
+Go keeps modules in the module cache, so link the module to a stable path first (gitignored; rerun after bumping flint-ui):
+
+```sh
+ln -sfn "$(go list -m -f '{{.Dir}}' github.com/flintcraftstudio/flint-ui)" .flint-ui
+```
+
+Then in the client's entry stylesheet:
 
 ```css
-@layer base {
-  :root {
-    /* Neutrals */
-    --color-background: 255 255 255;
-    --color-foreground: 24 24 27;
-    --color-surface: 255 255 255;
-    --color-surface-foreground: 24 24 27;
-    --color-muted: 244 244 245;
-    --color-muted-foreground: 113 113 122;
+@import "tailwindcss";
+@import "../.flint-ui/styles/flint-ui.css";
 
-    /* Brand — CLIENT CUSTOMIZES THESE */
-    --color-primary: 24 24 27;              /* zinc-900 default; override per client */
-    --color-primary-foreground: 255 255 255;
-    --color-accent: 217 119 6;              /* client brand accent */
-    --color-accent-foreground: 255 255 255;
+@source "../templates";
+@source "../internal";
+```
 
-    /* Semantic states */
-    --color-danger: 220 38 38;
-    --color-danger-foreground: 255 255 255;
-    --color-success: 22 163 74;
-    --color-success-foreground: 255 255 255;
-    --color-warning: 234 179 8;
-    --color-warning-foreground: 24 24 27;
+**2. Override tokens — `styles/theme.css`**
 
-    /* Structural */
-    --color-border: 228 228 231;
-    --color-input: 255 255 255;
-    --color-ring: 24 24 27;
-  }
+Tokens are plain CSS colors (hex, `rgb()`, `oklch()`) — **not** space-separated RGB triplets. Tailwind v4 implements opacity modifiers (`bg-primary/50`) with `color-mix()`, so no `<alpha-value>` plumbing is needed. Overrides declared at `:root` win over the `@theme` defaults, which Tailwind emits in its lower-priority `theme` layer.
+
+```css
+:root {
+  /* Brand — CLIENT CUSTOMIZES THESE */
+  --color-primary: #18181b;
+  --color-primary-foreground: #ffffff;
+  --color-accent: #d97706;
+  --color-accent-foreground: #ffffff;
 }
 ```
 
-**2. Tailwind config — `tailwind.config.js`**
-
-Map semantic token names to the CSS variables. The `rgb(var(--...) / <alpha-value>)` pattern is what enables `bg-primary/50` to work.
-
-```js
-module.exports = {
-  content: [
-    "./templates/**/*.templ",
-    "./internal/**/*.templ",
-    // Include flint-ui so Tailwind scans its classes
-    "./vendor/github.com/flintcraftstudio/flint-ui/**/*.templ",
-  ],
-  theme: {
-    extend: {
-      colors: {
-        background: 'rgb(var(--color-background) / <alpha-value>)',
-        foreground: 'rgb(var(--color-foreground) / <alpha-value>)',
-        surface: {
-          DEFAULT: 'rgb(var(--color-surface) / <alpha-value>)',
-          foreground: 'rgb(var(--color-surface-foreground) / <alpha-value>)',
-        },
-        muted: {
-          DEFAULT: 'rgb(var(--color-muted) / <alpha-value>)',
-          foreground: 'rgb(var(--color-muted-foreground) / <alpha-value>)',
-        },
-        primary: {
-          DEFAULT: 'rgb(var(--color-primary) / <alpha-value>)',
-          foreground: 'rgb(var(--color-primary-foreground) / <alpha-value>)',
-        },
-        accent: {
-          DEFAULT: 'rgb(var(--color-accent) / <alpha-value>)',
-          foreground: 'rgb(var(--color-accent-foreground) / <alpha-value>)',
-        },
-        danger: {
-          DEFAULT: 'rgb(var(--color-danger) / <alpha-value>)',
-          foreground: 'rgb(var(--color-danger-foreground) / <alpha-value>)',
-        },
-        success: {
-          DEFAULT: 'rgb(var(--color-success) / <alpha-value>)',
-          foreground: 'rgb(var(--color-success-foreground) / <alpha-value>)',
-        },
-        warning: {
-          DEFAULT: 'rgb(var(--color-warning) / <alpha-value>)',
-          foreground: 'rgb(var(--color-warning-foreground) / <alpha-value>)',
-        },
-        border: 'rgb(var(--color-border) / <alpha-value>)',
-        input: 'rgb(var(--color-input) / <alpha-value>)',
-        ring: 'rgb(var(--color-ring) / <alpha-value>)',
-      },
-    },
-  },
-}
-```
+Only redeclare the tokens that differ; see `styles/flint-ui.css` for the full list and defaults.
 
 **3. flint-ui ships a default theme**
 
-flint-ui itself includes `styles/flint.css` with a neutral default theme (essentially Catalyst's zinc-based palette). This lets the showcase app render without additional setup, and gives clients a working baseline they can override selectively — a client only overriding `--color-primary` and `--color-accent` still gets sensible defaults for everything else.
+The `@theme` block in `styles/flint-ui.css` is a neutral default theme (essentially Catalyst's zinc-based palette). This lets the showcase app render without additional setup, and gives clients a working baseline they can override selectively — a client only overriding `--color-primary` and `--color-accent` still gets sensible defaults for everything else.
 
 ### Example: Per-Client Overrides
 
@@ -521,10 +466,10 @@ Once the contract is in place, each client's site only needs to override the tok
 ```css
 @layer base {
   :root {
-    --color-primary: 0 0 0;          /* A-Team black */
-    --color-primary-foreground: 255 255 255;
-    --color-accent: 220 38 38;       /* A-Team red */
-    --color-accent-foreground: 255 255 255;
+    --color-primary: #000000;        /* A-Team black */
+    --color-primary-foreground: #ffffff;
+    --color-accent: #dc2626;         /* A-Team red */
+    --color-accent-foreground: #ffffff;
   }
 }
 ```
@@ -533,10 +478,10 @@ Once the contract is in place, each client's site only needs to override the tok
 ```css
 @layer base {
   :root {
-    --color-primary: 45 55 72;       /* Slate */
-    --color-primary-foreground: 255 255 255;
-    --color-accent: 13 148 136;      /* Teal & Bone accent */
-    --color-accent-foreground: 255 255 255;
+    --color-primary: #2d3748;        /* Slate */
+    --color-primary-foreground: #ffffff;
+    --color-accent: #0d9488;         /* Teal & Bone accent */
+    --color-accent-foreground: #ffffff;
   }
 }
 ```
@@ -545,15 +490,15 @@ Once the contract is in place, each client's site only needs to override the tok
 ```css
 @layer base {
   :root {
-    --color-primary: 20 83 45;       /* Forest pine */
-    --color-primary-foreground: 255 255 255;
-    --color-accent: 202 138 4;       /* Gold */
-    --color-accent-foreground: 24 24 27;
+    --color-primary: #14532d;        /* Forest pine */
+    --color-primary-foreground: #ffffff;
+    --color-accent: #ca8a04;         /* Gold */
+    --color-accent-foreground: #18181b;
   }
 }
 ```
 
-Each site imports its `theme.css` after flint-ui's base stylesheet. Cascade handles the rest.
+Each site imports its `theme.css` after `flint-ui.css`. Cascade handles the rest.
 
 ### Dark Mode (Future)
 

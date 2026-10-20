@@ -10,7 +10,7 @@ flint-ui exists to speed up internal dashboard development. The component catalo
 
 - **Invocation pattern**: `@<package>.<Func>(<package>.Props{...}) { children }` inside a `.templ` file.
 - **Per-component docs**: every component has a reference in [`docs/components/`](./docs/components/) — open it before using the component. Each doc has: import, usage examples, a full props table, variants, and accessibility notes.
-- **Semantic tokens**: components never hard-code colors. Rebrand via the CSS variables in [`styles/flint.css`](./styles/flint.css) (see [Tailwind](#tailwind) below).
+- **Semantic tokens**: components never hard-code colors. Rebrand via the CSS variables in [`styles/flint-ui.css`](./styles/flint-ui.css) (see [Tailwind](#tailwind) below).
 - **htmx**: every component accepts `Attrs templ.Attributes` for `hx-*` / `data-*` / `aria-*` pass-through on the root element.
 - **Alpine**: only for local UI state (open/closed, selected tab). Never application data.
 - **Showcase**: run `mage Showcase` to see every component live on `:8080`.
@@ -79,17 +79,30 @@ All components live under `github.com/flintcraftstudio/flint-ui/components/<pack
 
 ## Tailwind
 
-Every color in flint-ui draws from the semantic token contract defined in [`styles/flint.css`](./styles/flint.css)'s `@theme` block (`primary`, `accent`, `danger`, `success`, `warning`, `foreground`, `muted`, `border`, `input`, `ring`, plus `-foreground` pairs). Non-color classes (spacing, sizing, layering, transitions) are preserved verbatim from Catalyst.
+flint-ui requires Tailwind CSS v4. Everything a client stylesheet needs ships in one importable partial, [`styles/flint-ui.css`](./styles/flint-ui.css):
 
-Client projects must:
+- the semantic token contract as an `@theme` block (`primary`, `accent`, `danger`, `success`, `warning`, `foreground`, `muted`, `border`, `input`, `ring`, plus `-foreground` pairs), with Catalyst-zinc defaults;
+- `@custom-variant` aliases that map Headless UI's `data-hover`, `data-focus`, `data-active`, `data-disabled` and `data-invalid` state attributes to native pseudo-classes;
+- an `@source` for flint-ui's own component templates (resolved relative to the partial, so importing it is enough for Tailwind to scan them);
+- the few plain CSS rules the components rely on (`[x-cloak]`, toast animations).
 
-1. Use Tailwind CSS v4.
-2. Scan flint-ui templates as content sources:
-   ```css
-   @source "../vendor/github.com/flintcraftstudio/flint-ui/components/**/*.templ";
+Non-color classes (spacing, sizing, layering, transitions) are preserved verbatim from Catalyst.
+
+### Client setup
+
+1. **Expose the module directory to Tailwind.** Go keeps modules in the module cache, so link it to a stable path in the client project (add `.flint-ui` to `.gitignore`, and rerun after bumping the flint-ui version):
+   ```sh
+   ln -sfn "$(go list -m -f '{{.Dir}}' github.com/flintcraftstudio/flint-ui)" .flint-ui
    ```
-3. Include the `@custom-variant` declarations that alias Headless UI's `data-hover`, `data-focus`, `data-active`, `data-disabled`, `data-invalid` state attributes to native pseudo-classes. Copy the block from [`styles/flint.css`](./styles/flint.css).
-4. **Rebrand by overriding CSS variables**, not by editing components:
+   Projects that use `go mod vendor` can point at `vendor/github.com/flintcraftstudio/flint-ui` instead.
+2. **Import the partial** after Tailwind in the client's entry stylesheet:
+   ```css
+   @import "tailwindcss";
+   @import "../.flint-ui/styles/flint-ui.css";
+
+   @source "../templates";            /* the client's own templates */
+   ```
+3. **Rebrand by overriding CSS variables**, not by editing components. Values are ordinary CSS colors (hex, `rgb()`, `oklch()`), not RGB triplets; opacity modifiers like `bg-primary/50` work automatically:
    ```css
    :root {
      --color-primary: #0a0a0a;            /* client brand primary */
@@ -99,6 +112,8 @@ Client projects must:
    }
    ```
    Every other token falls through to flint-ui's defaults.
+
+No `tailwind.config.js` is needed.
 
 ## Running the reference site
 
@@ -127,7 +142,8 @@ components/
   fieldset/             Fieldset, FieldGroup, Field, Label, Description, ErrorMessage
   shared/               shared prop types
 styles/
-  flint.css             Tailwind v4 entry: @theme tokens + @custom-variant + @source
+  flint-ui.css          importable Tailwind v4 partial: @theme tokens + @custom-variant + @source
+  flint.css             showcase entry: imports tailwindcss + flint-ui.css
 examples/
   showcase/             reference site, similar to catalyst-demo
     main.go

@@ -1,6 +1,6 @@
 # Button
 
-Converted from `catalyst-ui-kit/typescript/button.tsx`. Solid, outline, and plain styles wired to the semantic token contract in [`styles/flint.css`](../../styles/flint.css). Optionally renders as `<a>` when `Href` is set.
+Converted from `catalyst-ui-kit/typescript/button.tsx`. Solid, outline, and plain styles wired to the semantic token contract in [`styles/flint-ui.css`](../../styles/flint-ui.css). Optionally renders as `<a>` when `Href` is set.
 
 ## Import
 
@@ -65,7 +65,7 @@ import "github.com/flintcraftstudio/flint-ui/components/button"
 
 ## Theming
 
-Every visible color comes from a CSS variable declared in `styles/flint.css`'s `@theme` block. Client sites rebrand by overriding those variables at `:root`:
+Every visible color comes from a CSS variable declared in `styles/flint-ui.css`'s `@theme` block. Client sites rebrand by overriding those variables at `:root`:
 
 ```css
 :root {
@@ -82,5 +82,5 @@ Every visible color comes from a CSS variable declared in `styles/flint.css`'s `
 
 - Renders as a real `<button>` or `<a>` — no role shims, full keyboard support by default.
 - `Disabled` maps to the `disabled` attribute on `<button>` and `aria-disabled="true"` + `data-disabled` on `<a>` (anchors can't be truly disabled; the attribute cues AT and our Tailwind selectors).
-- Focus outline uses `data-focus:outline-ring`, aliased to `:focus-visible` in `styles/flint.css`.
+- Focus outline uses `data-focus:outline-ring`, aliased to `:focus-visible` in `styles/flint-ui.css`.
 - A `pointer-fine:hidden` overlay expands the touch target to 44×44px on coarse pointers, matching Catalyst's `<TouchTarget>`.
