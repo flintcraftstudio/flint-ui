@@ -11,7 +11,7 @@ flint-ui exists to speed up internal dashboard development. The component catalo
 - **Invocation pattern**: `@<package>.<Func>(<package>.Props{...}) { children }` inside a `.templ` file.
 - **Per-component docs**: every component has a reference in [`docs/components/`](./docs/components/) — open it before using the component. Each doc has: import, usage examples, a full props table, variants, and accessibility notes.
 - **Semantic tokens**: components never hard-code colors. Rebrand via the CSS variables in [`styles/flint-ui.css`](./styles/flint-ui.css) (see [Tailwind](#tailwind) below).
-- **htmx**: every component accepts `Attrs templ.Attributes` for `hx-*` / `data-*` / `aria-*` pass-through on the root element.
+- **htmx**: targets **htmx 4** (see [htmx 4 notes](#htmx-4)). Every component accepts `Attrs templ.Attributes` for `hx-*` / `data-*` / `aria-*` pass-through on the root element.
 - **Alpine**: only for local UI state (open/closed, selected tab). Never application data.
 - **Showcase**: run `mage Showcase` to see every component live on `:8080`.
 
@@ -114,6 +114,17 @@ Non-color classes (spacing, sizing, layering, transitions) are preserved verbati
    Every other token falls through to flint-ui's defaults.
 
 No `tailwind.config.js` is needed.
+
+## htmx 4
+
+flint-ui targets [htmx 4](https://four.htmx.org/) (`htmx.org@4.0.0`). The differences from htmx 2 that matter when wiring components:
+
+- **Inheritance is explicit.** `hx-target`, `hx-swap`, `hx-confirm` etc. no longer flow down from ancestors. Put them on the element that makes the request (that's what every flint-ui example does), or opt in with the `:inherited` suffix (`hx-target:inherited="#main"`).
+- **Error responses swap.** 4xx/5xx bodies are swapped like 200s, so a handler can return `422` with the re-rendered form and its `fieldset.ErrorMessage`s. Only `204` and `304` skip the swap.
+- **Event names are colon-separated.** `htmx:afterRequest` → `htmx:after:request`, so `hx-on::after-request` → `hx-on::after:request`. `hx-on` code runs with the event detail in scope; the request context is `ctx`.
+- **`hx-disabled-elt` is now `hx-disable`** (and the old `hx-disable` is `hx-ignore`). Use `hx-disable="this"` to block double-submits.
+- **`HX-Trigger` (response) is unchanged**, so the `flint:toast` / `flint:modal-*` / `flint:slideover-*` header patterns work as before. `HX-Trigger-After-Swap` and `-After-Settle` are gone.
+- **`htmx-request` / `htmx-indicator` classes are unchanged**, so loading indicators still key off them.
 
 ## Running the reference site
 

@@ -109,7 +109,7 @@ Any of these close an open modal:
 - **ESC key** — bound on `window`.
 - **Clicking the backdrop** — empty area around the panel.
 - **A button inside the modal** — use `x-on:click="open = false"`. `open` is in the modal's Alpine scope and is accessible from anywhere inside the panel.
-- **Global close event** — `$dispatch('flint:modal-close')` closes every open modal. Useful after a successful htmx response (`hx-on::after-request="$dispatch('flint:modal-close')"`).
+- **Global close event** — `$dispatch('flint:modal-close')` closes every open modal. Useful after a successful htmx response — see [htmx patterns](#htmx-patterns).
 - **Targeted close** — `$dispatch('flint:modal-close', 'delete-job')` closes only the named modal.
 
 ## Focus management
@@ -133,15 +133,28 @@ When the modal closes, focus returns to the element that was focused when it ope
 
 ### Open a modal after a server response
 
-Any htmx-triggered response can open a modal by dispatching the event — either via `hx-on` on the trigger or via `HX-Trigger` response header:
+Any htmx-triggered response can open a modal via the `HX-Trigger` response header:
 
 ```
 HX-Trigger: {"flint:modal-open": "subscription-required"}
 ```
 
+htmx wraps scalar payloads as `{value: ...}`; the open/close handlers accept either the bare name (from `$dispatch`) or the wrapped form (from `HX-Trigger`), so both work. To close every modal from a header, send `true` — not `null`, which makes htmx 4's `htmx.trigger` throw.
+
 ### Close a modal after a successful submit
 
-Put `hx-on::after-request="$dispatch('flint:modal-close')"` on the form or submit button — closes every open modal. Useful when you don't know (or don't want to hard-code) which modal is open.
+Preferred: have the server set the header only on success — a validation failure (htmx 4 swaps 4xx/5xx responses by default) re-renders the form in place and leaves the modal open:
+
+```go
+w.Header().Set("HX-Trigger", `{"flint:modal-close": true}`) // every modal
+w.Header().Set("HX-Trigger", `{"flint:modal-close": "edit-job"}`) // just one
+```
+
+Client-side alternative, when the endpoint isn't yours to change. `hx-on` runs htmx's handler, not Alpine's, so use `htmx.trigger` rather than `$dispatch`; `ctx` is the htmx 4 request context:
+
+```html
+hx-on::after:request="ctx.response.raw.ok && htmx.trigger(this, 'flint:modal-close')"
+```
 
 ### Render the modal body via htmx
 

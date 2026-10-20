@@ -10,7 +10,7 @@ FlintCraft Studio builds integrated platforms for service businesses (contractor
 
 - **Backend**: Go (standard library HTTP, sqlc, SQLite/PostgreSQL)
 - **Templating**: templ (type-safe HTML templates)
-- **Interactivity**: htmx for server-driven UI, Alpine.js for client-side state
+- **Interactivity**: htmx 4 for server-driven UI (see README § htmx 4), Alpine.js for client-side state
 - **Styling**: Tailwind CSS (no custom CSS frameworks)
 
 Catalyst was chosen because it's Tailwind-native, designed for business dashboards, and maintained by the Tailwind team. The conversion preserves Catalyst's visual design while adapting to server-rendered patterns.

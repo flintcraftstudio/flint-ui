@@ -60,7 +60,7 @@ Same event API as Modal, with a different event name so the two don't collide:
 | ESC             | Bound globally; closes the currently-open slideover           |
 | Backdrop click  | Closes                                                        |
 
-Mirror Modal's convention: a successful htmx form submit can dispatch `flint:slideover-close` (no detail) via `HX-Trigger: {"flint:slideover-close":null}` to close whatever drawer drove the form.
+Mirror Modal's convention: a successful htmx form submit can dispatch `flint:slideover-close` via `HX-Trigger: {"flint:slideover-close":true}` to close whatever drawer drove the form, or `{"flint:slideover-close":"job-filters"}` to close one. htmx wraps the scalar as `{value: ...}`; the handlers accept both forms. Don't send `null` — htmx 4's `htmx.trigger` throws on a null detail.
 
 ## Side
 

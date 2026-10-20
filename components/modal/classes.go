@@ -205,16 +205,23 @@ func alpineData(name string) string {
 	return fmt.Sprintf("{ open: false, name: '%s' }", safeName(name))
 }
 
+// detailName is the JS expression that extracts the target name from an
+// open/close event. $dispatch sends the bare name as the detail; an htmx
+// HX-Trigger header wraps a scalar payload as {value: name}. Accept both.
+// On close, any non-string detail (none, true, an object) means "close
+// all" — htmx 4 can't send a null detail (htmx.trigger throws on it).
+const detailName = "$event.detail?.value ?? $event.detail"
+
 // openHandler listens for the global open event and matches on name so a
 // single dispatch can address one modal on a page with many.
 func openHandler(name string) string {
-	return fmt.Sprintf("if ($event.detail === '%s') { open = true }", safeName(name))
+	return fmt.Sprintf("const n = %s; if (n === '%s') { open = true }", detailName, safeName(name))
 }
 
 // closeHandler: no detail closes every modal (useful after a successful
 // htmx form submit); a detail matching this modal's name closes just this one.
 func closeHandler(name string) string {
-	return fmt.Sprintf("if (!$event.detail || $event.detail === '%s') { open = false }", safeName(name))
+	return fmt.Sprintf("const n = %s; if (typeof n !== 'string' || !n || n === '%s') { open = false }", detailName, safeName(name))
 }
 
 // safeName keeps only characters safe to embed in a single-quoted JS string

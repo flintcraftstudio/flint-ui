@@ -94,9 +94,9 @@ Each tab click hits the server, which re-renders the entire tabs section with th
 
 ### Why swap the whole section, not just the panel?
 
-It's the simplest correct behavior. Swapping only the panel leaves the active-pill state stale until the next page load (or requires a client-side update via `hx-on::after-request`). Swapping the whole section makes the server the source of truth for both content *and* selection — one render, one swap, consistent.
+It's the simplest correct behavior. Swapping only the panel leaves the active-pill state stale until the next page load (or requires a client-side update via `hx-on::after:request`). Swapping the whole section makes the server the source of truth for both content *and* selection — one render, one swap, consistent.
 
-If you need partial swaps (e.g. very large tablists), you can do it manually — wire `hx-target` to a panel-only container and write your own `hx-on::after-request` that updates the tab pill. The component doesn't fight you, but the default pattern is whole-section swap.
+If you need partial swaps (e.g. very large tablists), you can do it manually — wire `hx-target` to a panel-only container and write your own `hx-on::after:request` that updates the tab pill. The component doesn't fight you, but the default pattern is whole-section swap.
 
 ## Sub-component prop convention
 
