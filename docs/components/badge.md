@@ -28,12 +28,12 @@ The zero-value Props renders a `Muted` (neutral gray) badge:
 | --------------- | ------------------------------------ | ------------------------------- |
 | `VariantMuted`  | `bg-muted` + `text-muted-foreground` | Default / neutral state         |
 | `VariantPrimary`| `bg-primary/15` + `text-primary`     | Active / in progress            |
-| `VariantAccent` | `bg-accent/15` + `text-accent`       | Featured / highlight            |
-| `VariantDanger` | `bg-danger/15` + `text-danger`       | Overdue / failed / critical     |
-| `VariantSuccess`| `bg-success/15` + `text-success`     | Complete / paid / passing       |
-| `VariantWarning`| `bg-warning/25` + `text-warning-foreground` | Awaiting / at-risk       |
+| `VariantAccent` | `bg-accent/15` + `text-accent-text`  | Featured / highlight            |
+| `VariantDanger` | `bg-danger/15` + `text-danger-text`  | Overdue / failed / critical     |
+| `VariantSuccess`| `bg-success/15` + `text-success-text`| Complete / paid / passing       |
+| `VariantWarning`| `bg-warning/25` + `text-warning-text`| Awaiting / at-risk              |
 
-Warning uses `text-warning-foreground` (dark) instead of `text-warning` because the warning token is yellow — yellow-on-yellow fails contrast.
+The `-text` tokens are each hue pulled toward `foreground` (`color-mix` in `styles/flint-ui.css`), so tinted text stays AA in light and dark mode. Warning gets a stronger `/25` tint because yellow is so light.
 
 ## Props
 

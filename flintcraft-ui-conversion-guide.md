@@ -419,6 +419,7 @@ Every flint-ui component is built against exactly this set of tokens. Clients mu
 | `surface-foreground` | Text on surface | `text-surface-foreground` |
 | `muted` | Subtle backgrounds | `bg-muted` on hover states, table stripes |
 | `muted-foreground` | Secondary text | `text-muted-foreground` for captions, placeholders |
+| `canvas` | App-shell page behind the content panel | `lg:bg-canvas` in layout shells. Defaults to `muted` in light, `background` in dark |
 | `primary` | Primary action color | `bg-primary` on primary buttons |
 | `primary-foreground` | Text on primary | `text-primary-foreground` |
 | `accent` | Brand accent / secondary action | `bg-accent` for client brand highlights |
@@ -429,9 +430,13 @@ Every flint-ui component is built against exactly this set of tokens. Clients mu
 | `success-foreground` | Text on success | `text-success-foreground` |
 | `warning` | Caution states | `bg-warning` on warning alerts |
 | `warning-foreground` | Text on warning | `text-warning-foreground` |
+| `accent-text`, `danger-text`, `success-text`, `warning-text` | Hue as text on its own tint | `bg-success/15 text-success-text` in badges and alerts. Derived with `color-mix` toward `foreground`; clients rarely set these |
 | `border` | Default borders | `border-border` on cards, inputs, dividers |
 | `input` | Input backgrounds | `bg-input` on form fields |
 | `ring` | Focus rings | `focus:ring-ring` on focusable elements |
+| `scrim` | Backdrop behind overlays (carries its own alpha) | `bg-scrim` on modal, slide-over, command palette and mobile drawer backdrops |
+
+Each hue (`primary`, `accent`, `danger`, `success`, `warning`) does two jobs: it's a fill under its `-foreground` pair, and it's text on a surface. Choose values that pass WCAG AA (4.5:1) for both, in each theme. `styles/contrast_test.go` enforces this for the defaults.
 
 ### Client Site Setup
 
@@ -519,9 +524,47 @@ Once the contract is in place, each client's site only needs to override the tok
 
 Each site imports its `theme.css` after `flint-ui.css`. Cascade handles the rest.
 
-### Dark Mode (Future)
+### Dark Mode
 
-The CSS variable pattern makes dark mode trivial to add later without touching component code: define a `.dark` selector (or `@media (prefers-color-scheme: dark)`) that overrides the tokens with dark values. Components stay identical. Not required for v0.x but worth designing the tokens with this in mind — e.g., `background` and `surface` separate so dark mode can invert them independently.
+flint-ui ships dark values for every token in `styles/flint-ui.css`. Dark mode is **opt-in per client site**: with no `data-theme` attribute a site renders light only.
+
+**Client setup**
+
+1. **Choose the mode** on `<html>`. Use `data-theme="system"` to follow the OS, `"dark"` to force dark, or `"light"` (or no attribute) to stay light.
+2. **If the site has a theme toggle**, add the inline `<head>` script from the README's "Dark mode" section. It applies the saved choice from `localStorage` before first paint, so the page doesn't flash. The toggle writes `document.documentElement.dataset.theme` and saves the same key.
+3. **Set dark brand values** in the client's `theme.css`, after the flint-ui import and **outside any `@layer`**:
+
+   ```css
+   :root[data-theme] {
+     @variant dark {
+       --color-primary: #93c5fd;
+       --color-primary-foreground: #172554;
+       --color-accent: #2dd4bf;
+       --color-accent-foreground: #042f2e;
+     }
+   }
+   ```
+
+   Without this step dark mode uses flint-ui's neutral dark palette for every token, including primary and accent. The light brand overrides don't carry over, on purpose: a dark brand primary would be unreadable as text on a dark page. Dark hues should be light shades (roughly Tailwind -300 / -400) with a dark `-foreground`.
+4. **App shells**: put `lg:bg-canvas` on `<html>` when using `layout.Auth` (the `Sidebar` and `Stacked` shells set it themselves).
+
+**How it works**
+
+- Light values live in `@theme`. Dark values live in one unlayered `:root[data-theme] { @variant dark { … } }` block. Its specificity (0,2,0) beats a client's `:root` overrides whether or not they're layered, and a client's own `:root[data-theme]` block placed later wins over it.
+- `@custom-variant dark` matches `[data-theme="dark"]`, plus `[data-theme="system"]` under `prefers-color-scheme: dark`. It uses `:where()`, so `dark:` utilities add no specificity, like Tailwind's built-in variant.
+- `color-scheme` follows the mode, so native controls and scrollbars match.
+
+**What wasn't a plain token swap.** The tokens covered almost everything. These needed changes:
+
+| Problem in dark | Fix |
+|---|---|
+| Backdrops used `bg-foreground/25`, which turns into a white wash | New `scrim` token (zinc-950/25 light, black/50 dark) |
+| Catalyst's dark page (zinc-950) is darker than the panel, but hovers on `muted` must be lighter | New `canvas` token for the shell page; `muted` stays the lighter hover tone |
+| Tinted badge/alert text (`text-success` on `bg-success/15`) failed AA, and warning's `text-warning-foreground` was dark-on-dark | Derived `-text` tokens, mixed toward `foreground` so they work in both themes |
+| Button's inset highlight used `primary-foreground`, which draws a dark line on light dark-mode buttons | White highlight, as in Catalyst |
+| Checkbox and radio inset highlight showed as a stray line on unchecked controls | Highlight only when checked |
+| Switch thumb (`surface`) vanished on the unchecked track | `dark:bg-muted-foreground` on the unchecked thumb, the one `dark:` class in the components |
+| Shadows vanish on dark surfaces | Nothing needed: every floating panel already pairs its shadow with `ring-1 ring-border`, and `border` is white/10 in dark |
 
 ### What This Means for Component Authors
 

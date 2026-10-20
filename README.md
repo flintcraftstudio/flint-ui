@@ -91,7 +91,8 @@ All components live under `github.com/flintcraftstudio/flint-ui/components/<pack
 
 flint-ui requires Tailwind CSS v4. Everything a client stylesheet needs ships in one importable partial, [`styles/flint-ui.css`](./styles/flint-ui.css):
 
-- the semantic token contract as an `@theme` block (`primary`, `accent`, `danger`, `success`, `warning`, `foreground`, `muted`, `border`, `input`, `ring`, plus `-foreground` pairs), with Catalyst-zinc defaults;
+- the semantic token contract as an `@theme` block (`primary`, `accent`, `danger`, `success`, `warning`, `foreground`, `muted`, `canvas`, `border`, `input`, `ring`, `scrim`, plus `-foreground` pairs and derived `-text` colors), with Catalyst-zinc defaults;
+- dark values for every token, switched on per site with `data-theme` (see [Dark mode](#dark-mode)), and a matching `dark:` variant;
 - `@custom-variant` aliases that map Headless UI's `data-hover`, `data-focus`, `data-active`, `data-disabled` and `data-invalid` state attributes to native pseudo-classes;
 - an `@source` for flint-ui's own component templates (resolved relative to the partial, so importing it is enough for Tailwind to scan them);
 - the few plain CSS rules the components rely on (`[x-cloak]`, toast animations).
@@ -124,6 +125,57 @@ Non-color classes (spacing, sizing, layering, transitions) are preserved verbati
    Every other token falls through to flint-ui's defaults.
 
 No `tailwind.config.js` is needed.
+
+## Dark mode
+
+flint-ui ships a dark palette (derived from Catalyst's dark mode: zinc-950 page, zinc-900 panels, white/10 borders), but it is **opt-in**. With no `data-theme` attribute a site renders light only, so existing client sites don't change.
+
+**Turn it on** with one attribute on `<html>`:
+
+```html
+<html lang="en" data-theme="system">   <!-- follow the OS setting -->
+<html lang="en" data-theme="dark">     <!-- always dark -->
+<html lang="en" data-theme="light">    <!-- always light (same as no attribute) -->
+```
+
+Components need no changes: they draw from the tokens, and the tokens switch. Native controls (scrollbars, date pickers, `<select>` menus) follow too, because flint-ui sets `color-scheme` to match.
+
+**Offer a toggle** by writing the attribute from a small inline script at the top of `<head>`, before the stylesheet, so the page never flashes the wrong theme:
+
+```html
+<script>
+  (function () {
+    var t = null;
+    try { t = localStorage.getItem("flint-theme"); } catch (e) {}
+    if (t === "light" || t === "dark" || t === "system") {
+      document.documentElement.dataset.theme = t;
+    }
+  })();
+</script>
+```
+
+The toggle itself sets `document.documentElement.dataset.theme` and saves the choice to `localStorage`. The showcase has a working Light / Dark / System switch (`themeToggle` in `examples/showcase/templates/layout.templ`). To crossfade instead of snapping, wrap the attribute change in `document.startViewTransition()` when it exists and the visitor hasn't asked for reduced motion; the showcase does this with a 300ms fade.
+
+**Set dark brand colors.** In dark mode flint-ui's dark palette replaces every token, including a client's light brand overrides. That's deliberate: a dark-navy primary would otherwise become dark text on a dark page. To bring the brand into dark mode, add dark values after the import, **outside any `@layer`**:
+
+```css
+:root[data-theme] {
+  @variant dark {
+    --color-primary: #93c5fd;            /* brand primary, lightened */
+    --color-primary-foreground: #172554;
+    --color-accent: #2dd4bf;
+    --color-accent-foreground: #042f2e;
+  }
+}
+```
+
+Two rules keep this working. Use the `:root[data-theme]` selector, which beats a plain `:root`. And stay out of `@layer`: flint-ui's dark block is unlayered, so a layered override loses to it. In dark mode, each hue works as a fill under its `-foreground` and as text on a dark surface, so pick lighter shades (roughly Tailwind -300 / -400) with a dark foreground. The `-text` tokens (`accent-text`, `danger-text`, `success-text`, `warning-text`) are mixed from the hue and `foreground`, so they follow your brand colors without an override.
+
+**The `dark:` variant** follows the same rules (`dark:bg-…` applies under `data-theme="dark"`, and under `data-theme="system"` when the OS is dark). Prefer tokens. Reach for `dark:` only when one element needs different treatment in dark mode, as the switch thumb does.
+
+**App shells** should use `lg:bg-canvas` (not `lg:bg-muted`) for the page behind the content panel, e.g. on `<html>` for `layout.Auth`. Canvas follows `muted` in light and drops to `background` in dark, so the panel stays lighter than the page.
+
+**Contrast is tested.** `styles/contrast_test.go` parses `flint-ui.css` and checks every text/background pair the components render for WCAG AA, in both themes. If you change a default token value, run `go test ./styles/`.
 
 ## htmx 4
 
@@ -163,7 +215,8 @@ components/
   fieldset/             Fieldset, FieldGroup, Field, Label, Description, ErrorMessage
   shared/               shared prop types
 styles/
-  flint-ui.css          importable Tailwind v4 partial: @theme tokens + @custom-variant + @source
+  flint-ui.css          importable Tailwind v4 partial: @theme tokens + dark values + @custom-variant + @source
+  contrast_test.go      WCAG AA contrast check for every token pair, light and dark
   flint.css             showcase entry: imports tailwindcss + flint-ui.css
 examples/
   showcase/             reference site, similar to catalyst-demo

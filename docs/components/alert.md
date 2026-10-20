@@ -41,9 +41,11 @@ Match Badge's palette so alerts and badges read as the same concept at different
 | Variant                  | Color family                                              |
 | ------------------------ | --------------------------------------------------------- |
 | `alert.VariantInfo`      | `bg-primary/10 text-primary`. Default if unset.           |
-| `alert.VariantSuccess`   | `bg-success/10 text-success`.                             |
-| `alert.VariantWarning`   | `bg-warning/25 text-warning-foreground`. The warning token is yellow, so text flips to the foreground pair for readability (same exception as Badge). |
-| `alert.VariantDanger`    | `bg-danger/10 text-danger`.                               |
+| `alert.VariantSuccess`   | `bg-success/10 text-success-text`.                        |
+| `alert.VariantWarning`   | `bg-warning/25 text-warning-text`. Yellow is light, so warning gets a stronger tint (same as Badge). |
+| `alert.VariantDanger`    | `bg-danger/10 text-danger-text`.                          |
+
+The `-text` tokens are each hue pulled toward `foreground`, so the text stays AA on its own tint in light and dark mode without extra classes.
 
 Per-client rebranding flows through the variant tokens automatically — an A-Team alert uses A-Team red on `VariantDanger`, Lo Mo's teal on `VariantInfo`, etc.
 

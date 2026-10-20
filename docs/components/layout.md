@@ -88,7 +88,7 @@ templ JobsPage(jobs []Job) {
 }
 ```
 
-The panel is raised (`lg:bg-surface` + ring) only at `lg+`. Give the page a muted background there (e.g. `lg:bg-muted` on `<html>`) so it reads as a card.
+The panel is raised (`lg:bg-surface` + ring) only at `lg+`. Give the page the canvas background there (`lg:bg-canvas` on `<html>`) so it reads as a card. Canvas follows `muted` in light and drops to `background` in dark mode, so the panel stays lighter than the page in both.
 
 ## Mobile drawer
 
