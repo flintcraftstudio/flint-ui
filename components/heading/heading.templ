@@ -24,35 +24,49 @@ type Props struct {
 
 // Heading renders a page-level title. Defaults to <h1>.
 templ Heading(p Props) {
-	@element(resolveLevel(p.Level, 1), headingClasses(p)) {
+	@element(resolveLevel(p.Level, 1), headingClasses(p), p.Attrs) {
 		{ children... }
 	}
 }
 
 // Subheading renders a section title. Defaults to <h2>.
 templ Subheading(p Props) {
-	@element(resolveLevel(p.Level, 2), subheadingClasses(p)) {
+	@element(resolveLevel(p.Level, 2), subheadingClasses(p), p.Attrs) {
 		{ children... }
 	}
 }
 
 // element switches on the level and renders the matching HTML tag. templ
 // doesn't support dynamic tag names, so this is the escape hatch.
-templ element(level int, class string) {
+templ element(level int, class string, attrs templ.Attributes) {
 	switch level {
 		case 1:
-			<h1 class={ class }>{ children... }</h1>
+			<h1 class={ class } { attrs... }>
+				{ children... }
+			</h1>
 		case 2:
-			<h2 class={ class }>{ children... }</h2>
+			<h2 class={ class } { attrs... }>
+				{ children... }
+			</h2>
 		case 3:
-			<h3 class={ class }>{ children... }</h3>
+			<h3 class={ class } { attrs... }>
+				{ children... }
+			</h3>
 		case 4:
-			<h4 class={ class }>{ children... }</h4>
+			<h4 class={ class } { attrs... }>
+				{ children... }
+			</h4>
 		case 5:
-			<h5 class={ class }>{ children... }</h5>
+			<h5 class={ class } { attrs... }>
+				{ children... }
+			</h5>
 		case 6:
-			<h6 class={ class }>{ children... }</h6>
+			<h6 class={ class } { attrs... }>
+				{ children... }
+			</h6>
 		default:
-			<h1 class={ class }>{ children... }</h1>
+			<h1 class={ class } { attrs... }>
+				{ children... }
+			</h1>
 	}
 }
