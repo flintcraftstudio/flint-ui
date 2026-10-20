@@ -185,7 +185,7 @@ func Button(p ButtonProps) templ.Component {
 			Plain:    p.Plain,
 			Class:    p.Class,
 			Disabled: p.Disabled,
-			Attrs:    triggerAttrs(p.Attrs),
+			Attrs:    TriggerAttrs(p.Attrs),
 		}).Render(templ.WithChildren(ctx, templ_7745c5c3_Var5), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

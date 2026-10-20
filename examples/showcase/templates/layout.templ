@@ -5,23 +5,10 @@ import "github.com/flintcraftstudio/flint-ui/components/toast"
 templ Layout(title, current string, body templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en" class="bg-background text-foreground antialiased lg:bg-muted">
-		<head>
-			<meta charset="UTF-8"/>
-			<meta name="viewport" content="width=device-width, initial-scale=1"/>
-			<title>{ title } — flint-ui</title>
-			<link rel="preconnect" href="https://rsms.me/"/>
-			<link rel="stylesheet" href="https://rsms.me/inter/inter.css"/>
-			<link rel="stylesheet" href="/static/css/showcase.css"/>
-			<link rel="stylesheet" href="/static/css/signature.css"/>
-			<link rel="icon" type="image/svg+xml" href="/static/img/flintcraft-mark.svg"/>
-			<script src="https://unpkg.com/htmx.org@4.0.0/dist/htmx.min.js" defer></script>
-			<script src="https://unpkg.com/@alpinejs/focus@3.14.1/dist/cdn.min.js" defer></script>
-			<script src="https://unpkg.com/@alpinejs/collapse@3.14.1/dist/cdn.min.js" defer></script>
-			<script src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js" defer></script>
-		</head>
+		@documentHead(title)
 		<body x-data class="min-h-screen">
 			<div class="flex min-h-screen">
-				@sidebar(current)
+				@showcaseSidebar(current)
 				<main class="flex flex-1 flex-col px-6 py-10 sm:px-10 lg:px-14">
 					<div class="mx-auto w-full max-w-5xl flex-1">
 						@body
@@ -36,7 +23,39 @@ templ Layout(title, current string, body templ.Component) {
 	</html>
 }
 
-templ sidebar(current string) {
+// Bare renders a full document without the showcase chrome — used by the
+// app-shell demos (/demo/*), which bring their own layout.
+templ Bare(title string, body templ.Component) {
+	<!DOCTYPE html>
+	<html lang="en" class="bg-background text-foreground antialiased lg:bg-muted">
+		@documentHead(title)
+		<body x-data>
+			@body
+			@toast.Container(toast.ContainerProps{})
+		</body>
+	</html>
+}
+
+// documentHead is the shared <head>: Inter, the compiled showcase CSS,
+// htmx 4, and Alpine with the Focus and Collapse plugins.
+templ documentHead(title string) {
+	<head>
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		<title>{ title } — flint-ui</title>
+		<link rel="preconnect" href="https://rsms.me/"/>
+		<link rel="stylesheet" href="https://rsms.me/inter/inter.css"/>
+		<link rel="stylesheet" href="/static/css/showcase.css"/>
+		<link rel="stylesheet" href="/static/css/signature.css"/>
+		<link rel="icon" type="image/svg+xml" href="/static/img/flintcraft-mark.svg"/>
+		<script src="https://unpkg.com/htmx.org@4.0.0/dist/htmx.min.js" defer></script>
+		<script src="https://unpkg.com/@alpinejs/focus@3.14.1/dist/cdn.min.js" defer></script>
+		<script src="https://unpkg.com/@alpinejs/collapse@3.14.1/dist/cdn.min.js" defer></script>
+		<script src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js" defer></script>
+	</head>
+}
+
+templ showcaseSidebar(current string) {
 	<aside class="hidden w-72 shrink-0 border-r border-border bg-surface px-6 py-8 lg:block">
 		<a href="/" class="flex items-center gap-2">
 			<img src="/static/img/flintcraft-mark.svg" alt="" width="28" height="28" class="size-7 shrink-0"/>
@@ -52,7 +71,7 @@ templ sidebar(current string) {
 					<ul class="flex flex-col gap-0.5">
 						for _, item := range section.Items {
 							<li>
-								@sidebarLink(item, current)
+								@showcaseSidebarLink(item, current)
 							</li>
 						}
 					</ul>
@@ -62,7 +81,7 @@ templ sidebar(current string) {
 	</aside>
 }
 
-templ sidebarLink(item NavItem, current string) {
+templ showcaseSidebarLink(item NavItem, current string) {
 	if item.Slug == current {
 		<a
 			href={ templ.SafeURL("/" + item.Slug) }

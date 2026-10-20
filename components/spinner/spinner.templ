@@ -1,0 +1,56 @@
+// Package spinner provides an indeterminate loading indicator. From-
+// scratch design (Catalyst has no spinner.tsx); the SVG is the standard
+// Tailwind spinner.
+//
+// Three uses:
+//   - Standalone, with a Label, as a polite status ("Loading jobs…").
+//   - As an htmx request indicator: add Class "htmx-indicator" and point
+//     hx-indicator at it. htmx's built-in indicator CSS hides it until a
+//     request is in flight.
+//   - Inside Button via button.Props.Indicator, which renders one for you.
+//
+// The spinner inherits currentColor, so set its color with a text-*
+// class on it or an ancestor.
+package spinner
+
+// Size picks the rendered dimensions. The zero value is SizeMD.
+type Size string
+
+const (
+	SizeSM Size = "sm" // 16px — inline with sm text
+	SizeMD Size = "md" // 20px on touch, 16px at sm+, matching button icons
+	SizeLG Size = "lg" // 32px — section and panel loading states
+)
+
+// Props controls a Spinner.
+//
+// Label, when set, makes the spinner a role="status" live region with
+// the label as screen-reader text. Leave it empty when the spinner is
+// decorative (inside a button that already says "Save", or next to
+// visible "Loading…" copy) and it renders aria-hidden.
+type Props struct {
+	Size  Size
+	Label string
+	Class string
+	Attrs templ.Attributes
+}
+
+// Spinner renders the animated SVG, wrapped in a status region when
+// Label is set.
+templ Spinner(p Props) {
+	if p.Label != "" {
+		<span role="status" class={ join("inline-flex", p.Class) } { p.Attrs... }>
+			@svg(svgClasses(p.Size, ""), nil)
+			<span class="sr-only">{ p.Label }</span>
+		</span>
+	} else {
+		@svg(svgClasses(p.Size, p.Class), p.Attrs)
+	}
+}
+
+templ svg(class string, attrs templ.Attributes) {
+	<svg class={ class } viewBox="0 0 24 24" fill="none" aria-hidden="true" { attrs... }>
+		<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+		<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4Z"></path>
+	</svg>
+}

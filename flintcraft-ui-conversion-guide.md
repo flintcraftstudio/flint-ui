@@ -328,6 +328,18 @@ Build these only when a client project requires them. Order reflects usefulness-
 23. **Command Palette** — cmd+K search across app actions. High-impact for admin dashboards; complex (keyboard nav, fuzzy match, section grouping). Build only when an admin tool warrants it.
 24. **DatePicker** — for scheduling tools. Heaviest component in the set; consider whether a native `<input type="date">` wrapped with flint-ui styling covers 80% of cases before building a full calendar grid.
 
+### Phase 5: App shell
+
+The structure every admin screen sits in. Converted from Catalyst where it has a source, and built from scratch where it doesn't.
+
+25. **Layouts** — `SidebarLayout`, `StackedLayout`, `AuthLayout` (one `layout` package). Headless UI's mobile Dialog becomes an Alpine drawer with the Modal/Slide-over focus-trap plumbing.
+26. **Sidebar** and **Navbar** — Catalyst's nav primitives. motion's animated current-item indicator becomes a static, server-rendered one.
+27. **Page header** — back link, title, description/meta, actions. Composed from Heading + Button, with spacing from the Catalyst demo.
+28. **Empty state** — from scratch; Tailwind UI proportions.
+29. **Spinner + button loading state** — from scratch. `button.Props.Indicator` keys off htmx's `.htmx-request` class via the `htmx-request:` variant in `flint-ui.css`.
+
+**Next up:** sortable table header (`aria-sort` + `hx-get`), row actions and bulk select, Stat card, Text/Link primitives, dark-mode tokens.
+
 **Shared infrastructure to build alongside:**
 
 - `components/floating/` — anchor positioning + transition classes, consumed by Dropdown (refactor), Tooltip, Popover, HoverCard.

@@ -1,0 +1,328 @@
+package templates
+
+import (
+	"github.com/flintcraftstudio/flint-ui/components/avatar"
+	"github.com/flintcraftstudio/flint-ui/components/badge"
+	"github.com/flintcraftstudio/flint-ui/components/button"
+	"github.com/flintcraftstudio/flint-ui/components/checkbox"
+	"github.com/flintcraftstudio/flint-ui/components/dropdown"
+	"github.com/flintcraftstudio/flint-ui/components/emptystate"
+	"github.com/flintcraftstudio/flint-ui/components/fieldset"
+	"github.com/flintcraftstudio/flint-ui/components/heading"
+	"github.com/flintcraftstudio/flint-ui/components/input"
+	"github.com/flintcraftstudio/flint-ui/components/layout"
+	"github.com/flintcraftstudio/flint-ui/components/navbar"
+	"github.com/flintcraftstudio/flint-ui/components/pageheader"
+	"github.com/flintcraftstudio/flint-ui/components/sidebar"
+	"github.com/flintcraftstudio/flint-ui/components/table"
+)
+
+// DemoNav is one destination in the app-shell demos. Every demo link
+// points back at the same shell with ?nav=<Slug>, so the current-item
+// highlight is visible without building out real pages.
+type DemoNav struct {
+	Slug  string
+	Title string
+	Icon  templ.Component
+}
+
+var demoNav = []DemoNav{
+	{Slug: "jobs", Title: "Jobs", Icon: iconBriefcase()},
+	{Slug: "schedule", Title: "Schedule", Icon: iconCalendar()},
+	{Slug: "crews", Title: "Crews", Icon: iconUsers()},
+	{Slug: "invoices", Title: "Invoices", Icon: iconDocument()},
+}
+
+// DemoNavTitle resolves a ?nav= slug to its title, defaulting to Jobs.
+func DemoNavTitle(slug string) (string, string) {
+	for _, n := range demoNav {
+		if n.Slug == slug {
+			return n.Slug, n.Title
+		}
+	}
+	return "jobs", "Jobs"
+}
+
+// SidebarDemo is the full sidebar application shell.
+templ SidebarDemo(current, title string) {
+	@layout.Sidebar(layout.SidebarProps{
+		Navbar:  demoMobileNavbar(),
+		Sidebar: demoSidebar("/demo/sidebar", current),
+	}) {
+		@demoPage("/demo/sidebar", current, title)
+	}
+}
+
+// StackedDemo is the full top-nav application shell.
+templ StackedDemo(current, title string) {
+	@layout.Stacked(layout.StackedProps{
+		Navbar:  demoStackedNavbar("/demo/stacked", current),
+		Sidebar: demoStackedSidebar("/demo/stacked", current),
+	}) {
+		@demoPage("/demo/stacked", current, title)
+	}
+}
+
+// AuthDemo is the auth shell around a login form.
+templ AuthDemo() {
+	@layout.Auth(layout.AuthProps{}) {
+		<form action="/demo/sidebar" method="get" class="grid w-full max-w-sm grid-cols-1 gap-8">
+			<a href="/" class="flex items-center gap-2">
+				<img src="/static/img/flintcraft-mark.svg" alt="" width="32" height="32" class="size-8"/>
+				<span class="font-semibold tracking-tight">Ridgeline Roofing</span>
+			</a>
+			@heading.Heading(heading.Props{}) { Sign in to your account }
+			@fieldset.Field(fieldset.Props{}) {
+				@fieldset.Label(fieldset.LabelProps{For: "auth-email"}) { Email }
+				@input.Input(input.Props{Type: "email", Name: "email", ID: "auth-email"})
+			}
+			@fieldset.Field(fieldset.Props{}) {
+				@fieldset.Label(fieldset.LabelProps{For: "auth-password"}) { Password }
+				@input.Input(input.Props{Type: "password", Name: "password", ID: "auth-password"})
+			}
+			@checkbox.CheckboxField(checkbox.GroupProps{}) {
+				@checkbox.Checkbox(checkbox.Props{Name: "remember", ID: "auth-remember"})
+				@fieldset.Label(fieldset.LabelProps{For: "auth-remember"}) { Remember me }
+			}
+			@button.Button(button.Props{Type: "submit", Class: "w-full"}) { Sign in }
+		</form>
+	}
+}
+
+// demoPage is the content panel shared by both shells: a page header,
+// then either the jobs table or an empty state.
+templ demoPage(base, current, title string) {
+	@pageheader.PageHeader(pageheader.Props{}) {
+		@pageheader.Content(pageheader.SubProps{}) {
+			@pageheader.Title(pageheader.TitleProps{}) { { title } }
+			@pageheader.Description(pageheader.SubProps{}) {
+				if current == "jobs" {
+					Every open job across both crews, newest first.
+				} else {
+					This section is a placeholder in the demo — it shows the empty state.
+				}
+			}
+		}
+		@pageheader.Actions(pageheader.SubProps{}) {
+			@button.Button(button.Props{Outline: true}) { Export }
+			@button.Button(button.Props{}) { New job }
+		}
+	}
+	<div class="mt-8">
+		if current == "jobs" {
+			@demoJobsTable()
+		} else {
+			@emptystate.EmptyState(emptystate.Props{Bordered: true}) {
+				@iconFolderOutline()
+				@emptystate.Title(emptystate.TitleProps{Level: 2}) { No { title } yet }
+				@emptystate.Description(emptystate.SubProps{}) {
+					Once your team adds { title }, they'll show up here.
+				}
+				@emptystate.Actions(emptystate.SubProps{}) {
+					@button.Button(button.Props{Href: base}) { Back to jobs }
+				}
+			}
+		}
+	</div>
+}
+
+templ demoJobsTable() {
+	@table.Table(table.Props{Bleed: true}) {
+		@table.Head(table.HeadProps{}) {
+			@table.Row(table.RowProps{}) {
+				@table.Header(table.HeaderProps{}) { Job }
+				@table.Header(table.HeaderProps{}) { Client }
+				@table.Header(table.HeaderProps{}) { Crew }
+				@table.Header(table.HeaderProps{}) { Status }
+			}
+		}
+		@table.Body(table.BodyProps{}) {
+			@demoJobRow("#1834", "Henderson residence — tear-off", "Crew A", "Scheduled", badge.VariantMuted)
+			@demoJobRow("#1833", "Glacier Peak Dental — gutters", "Crew B", "In progress", badge.VariantWarning)
+			@demoJobRow("#1829", "Mill Street Bakery — flat roof", "Crew A", "Complete", badge.VariantSuccess)
+		}
+	}
+}
+
+templ demoJobRow(id, client, crew, status string, variant badge.Variant) {
+	@table.Row(table.RowProps{}) {
+		@table.Cell(table.CellProps{Class: "font-medium"}) { { id } }
+		@table.Cell(table.CellProps{}) { { client } }
+		@table.Cell(table.CellProps{Class: "text-muted-foreground"}) { { crew } }
+		@table.Cell(table.CellProps{}) {
+			@badge.Badge(badge.Props{Variant: variant}) { { status } }
+		}
+	}
+}
+
+// demoSidebar is the sidebar used by layout.Sidebar: team header,
+// primary nav, a spacer, secondary links, and an account footer menu.
+templ demoSidebar(base, current string) {
+	@sidebar.Sidebar(sidebar.Props{}) {
+		@sidebar.Header(sidebar.SubProps{}) {
+			@sidebar.Section(sidebar.SubProps{}) {
+				@sidebar.Item(sidebar.ItemProps{Href: base}) {
+					@avatar.Avatar(avatar.Props{Src: "/static/img/flintcraft-mark.svg", Square: true})
+					@sidebar.Label(sidebar.SubProps{}) { Ridgeline Roofing }
+				}
+			}
+		}
+		@sidebar.Body(sidebar.SubProps{}) {
+			@sidebar.Section(sidebar.SubProps{}) {
+				for _, n := range demoNav {
+					@sidebar.Item(sidebar.ItemProps{Href: base + "?nav=" + n.Slug, Current: n.Slug == current}) {
+						@n.Icon
+						@sidebar.Label(sidebar.SubProps{}) { { n.Title } }
+					}
+				}
+			}
+			@sidebar.Section(sidebar.SubProps{}) {
+				@sidebar.Heading(sidebar.SubProps{}) { Recent jobs }
+				@sidebar.Item(sidebar.ItemProps{Href: base}) { Henderson residence }
+				@sidebar.Item(sidebar.ItemProps{Href: base}) { Glacier Peak Dental }
+			}
+			@sidebar.Spacer(sidebar.SubProps{})
+			@sidebar.Section(sidebar.SubProps{}) {
+				@sidebar.Item(sidebar.ItemProps{Href: "/layouts"}) {
+					@iconQuestion()
+					@sidebar.Label(sidebar.SubProps{}) { Back to showcase }
+				}
+			}
+		}
+		@sidebar.Footer(sidebar.SubProps{Class: "max-lg:hidden"}) {
+			@dropdown.Dropdown(dropdown.Props{Class: "w-full"}) {
+				@sidebar.Item(sidebar.ItemProps{Attrs: dropdown.TriggerAttrs(nil)}) {
+					<span class="flex min-w-0 items-center gap-3">
+						@avatar.Avatar(avatar.Props{Initials: "LW", Square: true, Class: "size-10 bg-muted text-foreground"})
+						<span class="min-w-0">
+							<span class="block truncate text-sm/5 font-medium text-foreground">Logan</span>
+							<span class="block truncate text-xs/5 font-normal text-muted-foreground">logan@example.com</span>
+						</span>
+					</span>
+					@chevronUp()
+				}
+				@dropdown.Menu(dropdown.MenuProps{Anchor: dropdown.AnchorTopStart, Class: "min-w-64"}) {
+					@demoAccountMenuItems()
+				}
+			}
+		}
+	}
+}
+
+// demoStackedSidebar is the mobile drawer for layout.Stacked — the same
+// destinations as the navbar, laid out vertically.
+templ demoStackedSidebar(base, current string) {
+	@sidebar.Sidebar(sidebar.Props{}) {
+		@sidebar.Header(sidebar.SubProps{}) {
+			@sidebar.Item(sidebar.ItemProps{Href: base}) {
+				@avatar.Avatar(avatar.Props{Src: "/static/img/flintcraft-mark.svg", Square: true})
+				@sidebar.Label(sidebar.SubProps{}) { Ridgeline Roofing }
+			}
+		}
+		@sidebar.Body(sidebar.SubProps{}) {
+			@sidebar.Section(sidebar.SubProps{}) {
+				for _, n := range demoNav {
+					@sidebar.Item(sidebar.ItemProps{Href: base + "?nav=" + n.Slug, Current: n.Slug == current}) {
+						@sidebar.Label(sidebar.SubProps{}) { { n.Title } }
+					}
+				}
+			}
+		}
+	}
+}
+
+// demoMobileNavbar is the header shown beside the hamburger in the
+// sidebar shell below lg: just a spacer and the account menu.
+templ demoMobileNavbar() {
+	@navbar.Navbar(navbar.Props{}) {
+		@navbar.Spacer(navbar.SubProps{})
+		@navbar.Section(navbar.SubProps{}) {
+			@navbar.Item(navbar.ItemProps{Href: "#", Attrs: templ.Attributes{"aria-label": "Search"}}) {
+				@iconSearch()
+			}
+			@demoNavbarAccount()
+		}
+	}
+}
+
+// demoStackedNavbar is the full top bar for layout.Stacked.
+templ demoStackedNavbar(base, current string) {
+	@navbar.Navbar(navbar.Props{}) {
+		@navbar.Item(navbar.ItemProps{Href: base, Class: "max-lg:hidden"}) {
+			@avatar.Avatar(avatar.Props{Src: "/static/img/flintcraft-mark.svg", Square: true})
+			@navbar.Label(navbar.SubProps{}) { Ridgeline Roofing }
+		}
+		@navbar.Divider(navbar.SubProps{Class: "max-lg:hidden"})
+		@navbar.Section(navbar.SubProps{Class: "max-lg:hidden"}) {
+			for _, n := range demoNav {
+				@navbar.Item(navbar.ItemProps{Href: base + "?nav=" + n.Slug, Current: n.Slug == current}) { { n.Title } }
+			}
+		}
+		@navbar.Spacer(navbar.SubProps{})
+		@navbar.Section(navbar.SubProps{}) {
+			@navbar.Item(navbar.ItemProps{Href: "#", Attrs: templ.Attributes{"aria-label": "Search"}}) {
+				@iconSearch()
+			}
+			@navbar.Item(navbar.ItemProps{Href: "/layouts", Attrs: templ.Attributes{"aria-label": "Back to showcase"}}) {
+				@iconQuestion()
+			}
+			@demoNavbarAccount()
+		}
+	}
+}
+
+templ demoNavbarAccount() {
+	@dropdown.Dropdown(dropdown.Props{}) {
+		@navbar.Item(navbar.ItemProps{Attrs: dropdown.TriggerAttrs(templ.Attributes{"aria-label": "Account menu"})}) {
+			@avatar.Avatar(avatar.Props{Initials: "LW", Square: true, Class: "bg-muted text-foreground"})
+		}
+		@dropdown.Menu(dropdown.MenuProps{Anchor: dropdown.AnchorBottomEnd, Class: "min-w-64"}) {
+			@demoAccountMenuItems()
+		}
+	}
+}
+
+templ demoAccountMenuItems() {
+	@dropdown.Item(dropdown.ItemProps{Href: "#"}) {
+		@dropdown.Label(dropdown.SubProps{}) { My profile }
+	}
+	@dropdown.Item(dropdown.ItemProps{Href: "#"}) {
+		@dropdown.Label(dropdown.SubProps{}) { Settings }
+	}
+	@dropdown.Divider(dropdown.SubProps{})
+	@dropdown.Item(dropdown.ItemProps{Href: "/demo/auth"}) {
+		@dropdown.Label(dropdown.SubProps{}) { Sign out }
+	}
+}
+
+templ iconBriefcase() {
+	<svg data-slot="icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+		<path fill-rule="evenodd" d="M6 3.75A2.75 2.75 0 0 1 8.75 1h2.5A2.75 2.75 0 0 1 14 3.75v.443c.572.055 1.14.122 1.706.2C17.053 4.582 18 5.75 18 7.07v3.469c0 1.126-.694 2.191-1.83 2.54-1.952.599-4.024.921-6.17.921s-4.219-.322-6.17-.921C2.694 12.73 2 11.665 2 10.539V7.07c0-1.321.947-2.489 2.294-2.676A41.047 41.047 0 0 1 6 4.193V3.75Zm6.5 0v.325a41.622 41.622 0 0 0-5 0V3.75c0-.69.56-1.25 1.25-1.25h2.5c.69 0 1.25.56 1.25 1.25ZM10 10a1 1 0 0 0-1 1v.01a1 1 0 0 0 1 1h.01a1 1 0 0 0 1-1V11a1 1 0 0 0-1-1H10Z" clip-rule="evenodd"></path>
+		<path d="M3 15.055v-.684c.126.053.255.1.39.142 2.092.642 4.313.987 6.61.987 2.297 0 4.518-.345 6.61-.987.135-.041.264-.089.39-.142v.684c0 1.347-.985 2.53-2.363 2.686a41.454 41.454 0 0 1-9.274 0C3.985 17.585 3 16.402 3 15.055Z"></path>
+	</svg>
+}
+
+templ iconUsers() {
+	<svg data-slot="icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+		<path d="M7 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM14.5 9a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM1.615 16.428a1.224 1.224 0 0 1-.569-1.175 6.002 6.002 0 0 1 11.908 0c.058.467-.172.92-.57 1.174A9.953 9.953 0 0 1 7 18a9.953 9.953 0 0 1-5.385-1.572ZM14.5 16h-.106c.07-.297.088-.611.048-.933a7.47 7.47 0 0 0-1.588-3.755 4.502 4.502 0 0 1 5.874 2.636.818.818 0 0 1-.36.98A7.465 7.465 0 0 1 14.5 16Z"></path>
+	</svg>
+}
+
+templ iconDocument() {
+	<svg data-slot="icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+		<path fill-rule="evenodd" d="M4.5 2A1.5 1.5 0 0 0 3 3.5v13A1.5 1.5 0 0 0 4.5 18h11a1.5 1.5 0 0 0 1.5-1.5V7.621a1.5 1.5 0 0 0-.44-1.06l-4.12-4.122A1.5 1.5 0 0 0 11.378 2H4.5Zm2.25 8.5a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-6.5Zm0 3a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-6.5Z" clip-rule="evenodd"></path>
+	</svg>
+}
+
+templ iconQuestion() {
+	<svg data-slot="icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+		<path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0ZM8.94 6.94a.75.75 0 1 1-1.061-1.061 3 3 0 1 1 2.871 5.026v.345a.75.75 0 0 1-1.5 0v-.5c0-.72.57-1.172 1.081-1.287A1.5 1.5 0 1 0 8.94 6.94ZM10 15a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"></path>
+	</svg>
+}
+
+// iconFolderOutline is a 24px outline icon, the size empty states expect.
+templ iconFolderOutline() {
+	<svg data-slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+		<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z"></path>
+	</svg>
+}

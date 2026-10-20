@@ -47,7 +47,31 @@ import "github.com/flintcraftstudio/flint-ui/components/button"
 | `Href`     | `string`           | `""`              | When set, renders `<a>` with the same styling instead of `<button>`.  |
 | `Type`     | `string`           | `"button"`        | Sets `type=` on the `<button>`. Ignored when `Href` is set.           |
 | `Disabled` | `bool`             | `false`           | Sets `disabled` on `<button>` or `aria-disabled` on `<a>`.            |
+| `Indicator` | `bool`            | `false`           | Swap the label for a spinner while an htmx request is in flight. See [Loading state](#loading-state). |
 | `Attrs`    | `templ.Attributes` | `nil`             | Passed through to the underlying element. Use for `hx-*`, `data-*`, `aria-*`. |
+
+## Loading state
+
+Set `Indicator` and the button shows a spinner in place of its label while htmx has a request in flight — from the button itself (`hx-post` on the button) or from the `<form>` it submits. It keys off htmx's `.htmx-request` class through the `htmx-request:` variant in `flint-ui.css`, so there's no Alpine or JS wiring. The label stays in the layout (just invisible), so the button doesn't change width.
+
+```go
+// hx-* on the button
+@button.Button(button.Props{Indicator: true, Attrs: templ.Attributes{
+    "hx-post":    "/jobs/1834/approve",
+    "hx-target":  "#job-status",
+    "hx-disable": "this",
+}}) { Approve }
+
+// submit button in an htmx form
+<form hx-post="/crew/invite" hx-target="#invite-result" hx-disable="find button">
+    ...
+    @button.Button(button.Props{Type: "submit", Indicator: true}) { Send invite }
+</form>
+```
+
+- Pair it with `hx-disable` (htmx 4's name for the old `hx-disabled-elt`) to block double submits. The indicator also sets `pointer-events: none` and keeps the disabled button at full opacity while it's busy.
+- If the form uses `hx-indicator` to point somewhere else, htmx puts `.htmx-request` there instead and the button won't spin.
+- The spinner is decorative. Announce the result (a toast, an updated status) rather than the wait.
 
 ## Variants
 

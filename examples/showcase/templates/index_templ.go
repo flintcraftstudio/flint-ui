@@ -45,7 +45,11 @@ func Index() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = phaseCard("Phase 4 — Utility & Specialized", "Tooltip, Accordion, Slide-over. Upcoming: Copy-to-Clipboard, Popover, Pagination, Breadcrumbs, Combobox, Command, DatePicker.").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = phaseCard("Phase 4 — Utility & Specialized", "Tooltip, Accordion, Slide-over, Copy-to-Clipboard, Popover, Pagination, Breadcrumbs, Combobox, Command Palette.").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = phaseCard("Phase 5 — App shell", "Sidebar, Stacked, and Auth layouts; Sidebar and Navbar; Page header, Empty state, Spinner, and the button loading state.").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -85,7 +89,7 @@ func phaseCard(title, body string) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/showcase/templates/index.templ`, Line: 27, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/showcase/templates/index.templ`, Line: 28, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -98,7 +102,7 @@ func phaseCard(title, body string) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(body)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/showcase/templates/index.templ`, Line: 28, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/showcase/templates/index.templ`, Line: 29, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {

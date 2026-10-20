@@ -1,0 +1,98 @@
+// Package emptystate provides the placeholder shown where a list, table,
+// or panel has nothing to display yet. From-scratch design (Catalyst has
+// no empty state); proportions follow the Tailwind UI empty-state
+// pattern.
+//
+//	@emptystate.EmptyState(emptystate.Props{}) {
+//	    <svg data-slot="icon" ...></svg>
+//	    @emptystate.Title(emptystate.TitleProps{}) { No jobs yet }
+//	    @emptystate.Description(emptystate.SubProps{}) {
+//	        Jobs you schedule will show up here.
+//	    }
+//	    @emptystate.Actions(emptystate.SubProps{}) {
+//	        @button.Button(button.Props{Href: "/jobs/new"}) { New job }
+//	    }
+//	}
+//
+// An icon (an <svg data-slot="icon">, typically a 24px outline
+// Heroicon) placed as a direct child is sized and tinted automatically.
+//
+// Inside a table, put it in a single full-width cell:
+//
+//	@table.Row(table.RowProps{}) {
+//	    @table.Cell(table.CellProps{Attrs: templ.Attributes{"colspan": "5"}}) {
+//	        @emptystate.EmptyState(emptystate.Props{}) { ... }
+//	    }
+//	}
+package emptystate
+
+// Props controls the EmptyState container.
+// Bordered draws a dashed outline — use it when the empty state stands
+// alone on a page section rather than inside a card or table that
+// already frames it.
+type Props struct {
+	Bordered bool
+	Class    string
+	Attrs    templ.Attributes
+}
+
+// SubProps is the shared shape for Description and Actions.
+type SubProps struct {
+	Class string
+	Attrs templ.Attributes
+}
+
+// TitleProps controls the title. Level picks the heading element
+// (default 3) so it fits the surrounding document outline.
+type TitleProps struct {
+	Level int
+	Class string
+	Attrs templ.Attributes
+}
+
+// EmptyState renders the centered column.
+templ EmptyState(p Props) {
+	<div class={ rootClasses(p) } { p.Attrs... }>
+		{ children... }
+	</div>
+}
+
+// Title renders the one-line summary ("No invoices yet").
+templ Title(p TitleProps) {
+	switch resolveLevel(p.Level) {
+		case 2:
+			<h2 class={ join(titleClasses, p.Class) } { p.Attrs... }>
+				{ children... }
+			</h2>
+		case 4:
+			<h4 class={ join(titleClasses, p.Class) } { p.Attrs... }>
+				{ children... }
+			</h4>
+		case 5:
+			<h5 class={ join(titleClasses, p.Class) } { p.Attrs... }>
+				{ children... }
+			</h5>
+		case 6:
+			<h6 class={ join(titleClasses, p.Class) } { p.Attrs... }>
+				{ children... }
+			</h6>
+		default:
+			<h3 class={ join(titleClasses, p.Class) } { p.Attrs... }>
+				{ children... }
+			</h3>
+	}
+}
+
+// Description explains why it's empty or what to do next.
+templ Description(p SubProps) {
+	<p class={ join(descriptionClasses, p.Class) } { p.Attrs... }>
+		{ children... }
+	</p>
+}
+
+// Actions holds the call to action — usually one primary Button.
+templ Actions(p SubProps) {
+	<div class={ join(actionsClasses, p.Class) } { p.Attrs... }>
+		{ children... }
+	</div>
+}

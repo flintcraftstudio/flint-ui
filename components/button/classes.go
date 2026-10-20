@@ -50,6 +50,20 @@ var variantClasses = map[Variant]string{
 		"[--btn-icon:var(--color-warning-foreground)]/70 data-active:[--btn-icon:var(--color-warning-foreground)] data-hover:[--btn-icon:var(--color-warning-foreground)]",
 }
 
+// indicatorClasses hide the label (text and element children alike) and
+// reveal the spinner slot while an htmx request is in flight. The label
+// stays in the layout so the button keeps its width. pointer-events-none
+// swallows repeat clicks; hx-disable is still the real double-submit guard,
+// and since it sets disabled, opacity-100 keeps a busy button from looking
+// unavailable.
+const indicatorClasses = "htmx-request:pointer-events-none htmx-request:text-transparent htmx-request:opacity-100 " +
+	"htmx-request:*:not-data-[slot=spinner]:invisible htmx-request:*:data-[slot=spinner]:flex"
+
+// indicatorSlotClasses center the spinner over the (hidden) label. It
+// takes the variant's icon tint, since the button's own text color is
+// transparent during the request.
+const indicatorSlotClasses = "absolute inset-0 hidden items-center justify-center text-(--btn-icon)"
+
 // Classes returns the full className string for the button, combining the
 // base, the selected style (outline / plain / solid-with-variant), and any
 // caller-supplied extras.
@@ -73,6 +87,9 @@ func Classes(p Props) string {
 		}
 	}
 
+	if p.Indicator {
+		parts = append(parts, indicatorClasses)
+	}
 	if p.Class != "" {
 		parts = append(parts, p.Class)
 	}

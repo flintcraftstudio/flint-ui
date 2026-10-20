@@ -1,0 +1,129 @@
+// Package navbar provides the horizontal top navigation bar used by
+// layout.Stacked (and as the mobile header in layout.Sidebar).
+// Converted from catalyst-ui-kit/typescript/navbar.tsx.
+//
+// Composition:
+//
+//	@navbar.Navbar(navbar.Props{}) {
+//	    @navbar.Item(navbar.ItemProps{Href: "/"}) { Logo }
+//	    @navbar.Divider(navbar.SubProps{Class: "max-lg:hidden"})
+//	    @navbar.Section(navbar.SubProps{Class: "max-lg:hidden"}) {
+//	        @navbar.Item(navbar.ItemProps{Href: "/jobs", Current: true}) { Jobs }
+//	        @navbar.Item(navbar.ItemProps{Href: "/crews"}) { Crews }
+//	    }
+//	    @navbar.Spacer(navbar.SubProps{})
+//	    @navbar.Section(navbar.SubProps{}) { ...search, inbox, avatar dropdown }
+//	}
+//
+// Catalyst animates the current-page underline between items with
+// motion's layoutId. flint-ui pages are server-rendered, so the
+// underline is static: the server marks the current item and the next
+// navigation renders a fresh page.
+package navbar
+
+// Props controls the outer <nav>.
+type Props struct {
+	Class string
+	Attrs templ.Attributes
+}
+
+// SubProps is the shared shape for Divider, Section, Spacer, and Label.
+type SubProps struct {
+	Class string
+	Attrs templ.Attributes
+}
+
+// ItemProps controls a single navbar entry.
+//
+// Href renders an <a>; empty renders a <button type="button"> (wire the
+// handler via Attrs — x-on:click, hx-*, or use it as a Dropdown trigger).
+// Current marks the page the user is on: it draws the underline and sets
+// aria-current="page" on links.
+//
+// Children are typically an icon (<svg data-slot="icon">), an avatar,
+// and/or a Label. A trailing icon (chevron) is pushed to the right.
+type ItemProps struct {
+	Href    string
+	Current bool
+	Class   string
+	Attrs   templ.Attributes
+}
+
+// Navbar renders the <nav> flex row. Add aria-label via Attrs when a
+// page has more than one nav landmark.
+templ Navbar(p Props) {
+	<nav class={ join(navbarClasses, p.Class) } { p.Attrs... }>
+		{ children... }
+	</nav>
+}
+
+// Divider is a short vertical rule between navbar groups. Decorative.
+templ Divider(p SubProps) {
+	<div aria-hidden="true" class={ join(dividerClasses, p.Class) } { p.Attrs... }></div>
+}
+
+// Section groups related items in a horizontal row.
+templ Section(p SubProps) {
+	<div class={ join(sectionClasses, p.Class) } { p.Attrs... }>
+		{ children... }
+	</div>
+}
+
+// Spacer is a flex-1 gap that pushes the following sections to the
+// right edge.
+templ Spacer(p SubProps) {
+	<div aria-hidden="true" class={ join(spacerClasses, p.Class) } { p.Attrs... }></div>
+}
+
+// Item renders a navbar link or button with an optional current-page
+// underline.
+templ Item(p ItemProps) {
+	<span class={ join("relative", p.Class) }>
+		if p.Current {
+			<span class={ currentIndicatorClasses }></span>
+		}
+		if p.Href != "" {
+			<a
+				href={ templ.SafeURL(p.Href) }
+				class={ itemClasses }
+				data-current?={ p.Current }
+				if p.Current {
+					aria-current="page"
+				}
+				{ p.Attrs... }
+			>
+				@touchTarget() {
+					{ children... }
+				}
+			</a>
+		} else {
+			<button
+				type="button"
+				class={ "cursor-default " + itemClasses }
+				data-current?={ p.Current }
+				{ p.Attrs... }
+			>
+				@touchTarget() {
+					{ children... }
+				}
+			</button>
+		}
+	</span>
+}
+
+// Label wraps an item's text so it truncates instead of wrapping.
+templ Label(p SubProps) {
+	<span class={ join("truncate", p.Class) } { p.Attrs... }>
+		{ children... }
+	</span>
+}
+
+// touchTarget mirrors the button package's TouchTarget — an invisible
+// layer that expands the hit area to at least 44×44px on touch devices.
+templ touchTarget() {
+	<span
+		class="absolute top-1/2 left-1/2 size-[max(100%,2.75rem)] -translate-x-1/2 -translate-y-1/2 pointer-fine:hidden"
+		aria-hidden="true"
+	></span>
+	{ children... }
+}

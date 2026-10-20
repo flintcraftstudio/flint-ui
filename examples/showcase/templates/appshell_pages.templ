@@ -1,0 +1,239 @@
+package templates
+
+import (
+	"github.com/flintcraftstudio/flint-ui/components/badge"
+	"github.com/flintcraftstudio/flint-ui/components/button"
+	"github.com/flintcraftstudio/flint-ui/components/emptystate"
+	"github.com/flintcraftstudio/flint-ui/components/fieldset"
+	"github.com/flintcraftstudio/flint-ui/components/input"
+	"github.com/flintcraftstudio/flint-ui/components/navbar"
+	"github.com/flintcraftstudio/flint-ui/components/pageheader"
+	"github.com/flintcraftstudio/flint-ui/components/sidebar"
+	"github.com/flintcraftstudio/flint-ui/components/spinner"
+	"github.com/flintcraftstudio/flint-ui/components/table"
+)
+
+templ Layouts() {
+	<div class="space-y-12">
+		@pageHeader("Layouts", "The three application shells: layout.Sidebar (fixed left rail), layout.Stacked (top navbar), and layout.Auth (centered card). Below lg, Sidebar and Stacked collapse their navigation into a slide-in drawer behind a hamburger. The previews are iframes — narrower than lg, so they show the mobile drawer; open the full page to see the desktop rail.")
+		@layoutPreview("Sidebar layout", "layout.Sidebar with a sidebar.Sidebar rail and a mobile navbar. Click through the nav: the current item moves, and non-Jobs sections render the empty state.", "/demo/sidebar")
+		@layoutPreview("Stacked layout", "layout.Stacked with a navbar.Navbar across the top. Navbar sections marked max-lg:hidden move into the drawer below lg.", "/demo/stacked")
+		@layoutPreview("Auth layout", "layout.Auth centers a login form in a raised panel at lg+, edge-to-edge below.", "/demo/auth")
+	</div>
+}
+
+templ layoutPreview(title, body, href string) {
+	@section(title, body) {
+		<div class="space-y-3">
+			<a href={ templ.SafeURL(href) } class="text-sm font-medium text-foreground underline underline-offset-4 hover:text-muted-foreground">Open full page →</a>
+			<iframe src={ href } title={ title + " preview" } class="h-[560px] w-full rounded-lg border border-border"></iframe>
+		</div>
+	}
+}
+
+templ Navbars() {
+	<div class="space-y-12">
+		@pageHeader("Navbar", "Horizontal top navigation, converted from Catalyst. Items render <a> with Href or <button> without; Current draws the underline and sets aria-current=\"page\". Spacer pushes later sections right. Used by layout.Stacked and as the mobile header in layout.Sidebar.")
+		@section("Full bar", "Brand, divider, primary links, spacer, then utility icons and an account menu (dropdown.TriggerAttrs turns a navbar.Item into a Dropdown trigger).") {
+			@demoStackedNavbar("/navbars", "jobs")
+		}
+		@section("Icon-only items", "Give icon-only items an aria-label via Attrs.") {
+			@navbar.Navbar(navbar.Props{}) {
+				@navbar.Spacer(navbar.SubProps{})
+				@navbar.Section(navbar.SubProps{}) {
+					@navbar.Item(navbar.ItemProps{Href: "#", Attrs: templ.Attributes{"aria-label": "Search"}}) {
+						@iconSearch()
+					}
+					@navbar.Item(navbar.ItemProps{Href: "#", Attrs: templ.Attributes{"aria-label": "Calendar"}}) {
+						@iconCalendar()
+					}
+				}
+			}
+		}
+	</div>
+}
+
+templ Sidebars() {
+	<div class="space-y-12">
+		@pageHeader("Sidebar", "Vertical app navigation, converted from Catalyst. Header and Footer are pinned; Body scrolls. Sections space themselves; Spacer pushes later sections to the bottom. Current draws the leading bar, darkens the icon, and sets aria-current=\"page\".")
+		@section("Full sidebar", "Team header, primary nav with icons, a headed section, spacer, secondary links, and an account footer menu that opens upward. Shown in a fixed-height frame; in layout.Sidebar it fills the viewport.") {
+			<div class="h-[600px] w-64 overflow-hidden rounded-lg border border-border">
+				@demoSidebar("/sidebars", "schedule")
+			</div>
+		}
+		@section("Minimal", "Just a Body with one Section — enough for a small internal tool.") {
+			<div class="w-64 rounded-lg border border-border">
+				@sidebar.Sidebar(sidebar.Props{}) {
+					@sidebar.Body(sidebar.SubProps{}) {
+						@sidebar.Section(sidebar.SubProps{}) {
+							@sidebar.Item(sidebar.ItemProps{Href: "#", Current: true}) {
+								@sidebar.Label(sidebar.SubProps{}) { Leads }
+							}
+							@sidebar.Item(sidebar.ItemProps{Href: "#"}) {
+								@sidebar.Label(sidebar.SubProps{}) { Quotes }
+							}
+							@sidebar.Item(sidebar.ItemProps{Href: "#"}) {
+								@sidebar.Label(sidebar.SubProps{}) { Settings }
+							}
+						}
+					}
+				}
+			</div>
+		}
+	</div>
+}
+
+templ PageHeaders() {
+	<div class="space-y-12">
+		@pageHeader("Page header", "The title block at the top of a dashboard page. Content (Title + Description or Meta) grows on the left, Actions sit on the right, and Back takes its own row above. Below sm, Actions wrap under the title.")
+		@section("List page", "Title, one line of description, and the page's primary actions.") {
+			@pageheader.PageHeader(pageheader.Props{}) {
+				@pageheader.Content(pageheader.SubProps{}) {
+					@pageheader.Title(pageheader.TitleProps{Level: 2}) { Jobs }
+					@pageheader.Description(pageheader.SubProps{}) { Every open job across both crews, newest first. }
+				}
+				@pageheader.Actions(pageheader.SubProps{}) {
+					@button.Button(button.Props{Outline: true}) { Export }
+					@button.Button(button.Props{}) { New job }
+				}
+			}
+		}
+		@section("Detail page", "Back link, title with a status badge beside it, and a Meta row of facts.") {
+			@pageheader.PageHeader(pageheader.Props{}) {
+				@pageheader.Back(pageheader.BackProps{Href: "/page-headers"}) { Jobs }
+				@pageheader.Content(pageheader.SubProps{}) {
+					<div class="flex flex-wrap items-center gap-4">
+						@pageheader.Title(pageheader.TitleProps{Level: 2}) { Job #1834 }
+						@badge.Badge(badge.Props{Variant: badge.VariantSuccess}) { Scheduled }
+					</div>
+					@pageheader.Meta(pageheader.SubProps{}) {
+						<span>
+							@iconCalendar()
+							Apr 22, 2026
+						</span>
+						<span>
+							@iconUsers()
+							Crew A
+						</span>
+						<span>Henderson residence — tear-off</span>
+					}
+				}
+				@pageheader.Actions(pageheader.SubProps{}) {
+					@button.Button(button.Props{Outline: true}) { Reschedule }
+					@button.Button(button.Props{}) { Send invoice }
+				}
+			}
+		}
+		@section("With a search row", "Content can hold any controls under the title — the Catalyst orders page puts search and sort here. Actions bottom-align with it.") {
+			@pageheader.PageHeader(pageheader.Props{}) {
+				@pageheader.Content(pageheader.SubProps{}) {
+					@pageheader.Title(pageheader.TitleProps{Level: 2}) { Invoices }
+					<div class="mt-4 max-w-sm">
+						@input.InputGroup(input.GroupProps{}) {
+							@iconSearch()
+							@input.Input(input.Props{Type: "search", Name: "q", Placeholder: "Search invoices…", Attrs: templ.Attributes{"aria-label": "Search invoices"}})
+						}
+					</div>
+				}
+				@pageheader.Actions(pageheader.SubProps{}) {
+					@button.Button(button.Props{}) { New invoice }
+				}
+			}
+		}
+	</div>
+}
+
+templ EmptyStates() {
+	<div class="space-y-12">
+		@pageHeader("Empty state", "The placeholder for a list, table, or panel with nothing in it yet. A direct-child <svg data-slot=\"icon\"> is sized and tinted automatically; Title defaults to <h3>.")
+		@section("Bordered", "Standalone in a page section. Bordered draws the dashed outline.") {
+			@emptystate.EmptyState(emptystate.Props{Bordered: true}) {
+				@iconFolderOutline()
+				@emptystate.Title(emptystate.TitleProps{}) { No jobs yet }
+				@emptystate.Description(emptystate.SubProps{}) { Jobs you schedule will show up here, grouped by crew. }
+				@emptystate.Actions(emptystate.SubProps{}) {
+					@button.Button(button.Props{}) { New job }
+				}
+			}
+		}
+		@section("Inside a table", "One full-width cell. The table already frames it, so no border.") {
+			@table.Table(table.Props{}) {
+				@table.Head(table.HeadProps{}) {
+					@table.Row(table.RowProps{}) {
+						@table.Header(table.HeaderProps{}) { Invoice }
+						@table.Header(table.HeaderProps{}) { Client }
+						@table.Header(table.HeaderProps{}) { Amount }
+					}
+				}
+				@table.Body(table.BodyProps{}) {
+					@table.Row(table.RowProps{}) {
+						@table.Cell(table.CellProps{Attrs: templ.Attributes{"colspan": "3"}}) {
+							@emptystate.EmptyState(emptystate.Props{Class: "py-8"}) {
+								@emptystate.Title(emptystate.TitleProps{}) { No invoices match these filters }
+								@emptystate.Description(emptystate.SubProps{}) { Try a wider date range or clear the status filter. }
+								@emptystate.Actions(emptystate.SubProps{}) {
+									@button.Button(button.Props{Outline: true}) { Clear filters }
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	</div>
+}
+
+templ Spinners() {
+	<div class="space-y-12">
+		@pageHeader("Spinner", "Indeterminate loading indicator. Decorative by default (aria-hidden); set Label to make it a role=\"status\" region with screen-reader text. Inherits currentColor.")
+		@section("Sizes", "SizeSM (16px), SizeMD (20px touch / 16px desktop, matching button icons), SizeLG (32px).") {
+			<div class="flex items-center gap-6 text-muted-foreground">
+				@spinner.Spinner(spinner.Props{Size: spinner.SizeSM})
+				@spinner.Spinner(spinner.Props{})
+				@spinner.Spinner(spinner.Props{Size: spinner.SizeLG, Label: "Loading"})
+			</div>
+		}
+		@section("As an htmx indicator", "Add the htmx-indicator class and point hx-indicator at it. htmx's built-in CSS keeps it hidden until the request is in flight. The endpoint below sleeps 1.5 seconds.") {
+			<div class="flex items-center gap-4">
+				@button.Button(button.Props{Outline: true, Attrs: templ.Attributes{
+					"hx-post":      "/slow",
+					"hx-target":    "#spinner-out",
+					"hx-indicator": "#spinner-ind",
+				}}) { Load report }
+				@spinner.Spinner(spinner.Props{Label: "Loading report", Class: "htmx-indicator text-muted-foreground", Attrs: templ.Attributes{"id": "spinner-ind"}})
+				<span id="spinner-out" class="text-sm text-muted-foreground"></span>
+			</div>
+		}
+		@section("Button loading state", "button.Props.Indicator swaps the label for a spinner while htmx has the button — or the form it submits — in flight, keeping the button's width. Pair it with hx-disable to block double submits. Both forms below hit a 1.5 second endpoint.") {
+			<div class="space-y-8">
+				<div class="flex flex-wrap items-center gap-4">
+					@button.Button(button.Props{Indicator: true, Attrs: templ.Attributes{
+						"hx-post":    "/slow",
+						"hx-target":  "#indicator-out",
+						"hx-disable": "this",
+					}}) { Save changes }
+					@button.Button(button.Props{Indicator: true, Outline: true, Attrs: templ.Attributes{
+						"hx-post":   "/slow",
+						"hx-target": "#indicator-out",
+					}}) { Outline }
+					@button.Button(button.Props{Indicator: true, Variant: button.VariantDanger, Attrs: templ.Attributes{
+						"hx-post":   "/slow",
+						"hx-target": "#indicator-out",
+					}}) {
+						@iconTrash()
+						Delete
+					}
+					<span id="indicator-out" class="text-sm text-muted-foreground"></span>
+				</div>
+				<form hx-post="/slow" hx-target="#indicator-form-out" hx-disable="find button" class="flex max-w-md items-end gap-3">
+					@fieldset.Field(fieldset.Props{Class: "flex-1"}) {
+						@fieldset.Label(fieldset.LabelProps{For: "indicator-email"}) { Invite by email }
+						@input.Input(input.Props{Type: "email", Name: "email", ID: "indicator-email", Placeholder: "crew@example.com"})
+					}
+					@button.Button(button.Props{Type: "submit", Indicator: true}) { Send invite }
+				</form>
+				<span id="indicator-form-out" class="text-sm text-muted-foreground"></span>
+			</div>
+		}
+	</div>
+}

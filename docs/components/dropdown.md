@@ -181,6 +181,22 @@ Same baseline as Modal:
 @dropdown.Button(dropdown.ButtonProps{Variant: button.VariantAccent}) { New }
 ```
 
+### Custom triggers
+
+Any button inside the `Dropdown` root can be the trigger: spread `dropdown.TriggerAttrs(extra)` onto it. This is how account menus use a `sidebar.Item` or `navbar.Item` as the trigger (Catalyst's `<DropdownButton as={SidebarItem}>`):
+
+```go
+@dropdown.Dropdown(dropdown.Props{Class: "w-full"}) {
+    @sidebar.Item(sidebar.ItemProps{Attrs: dropdown.TriggerAttrs(nil)}) {
+        @avatar.Avatar(avatar.Props{Initials: "LW"})
+        @sidebar.Label(sidebar.SubProps{}) { Logan }
+    }
+    @dropdown.Menu(dropdown.MenuProps{Anchor: dropdown.AnchorTopStart}) { ... }
+}
+```
+
+Pass extra attributes (e.g. an `aria-label` for an icon-only trigger) as the argument; they win on key conflicts.
+
 ## Highlight color
 
 Hovered or keyboard-focused items use `bg-accent` / `text-accent-foreground`. This means the highlight inherits each client's brand accent — Lo Mo's teal, A-Team's red, Western Skies' gold. Override per-item via `Class` if you need a different color (e.g. the Delete item using `data-focus:bg-danger` in the showcase).

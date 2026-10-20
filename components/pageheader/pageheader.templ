@@ -1,0 +1,113 @@
+// Package pageheader provides the title block at the top of a dashboard
+// page: an optional back link, the page title, supporting copy or
+// metadata, and the page's primary actions. From-scratch composition
+// (Catalyst ships the pieces — Heading, Text, Button — and its demo app
+// lays them out inline on every page); spacing follows the Catalyst
+// demo's list and detail pages.
+//
+// List page:
+//
+//	@pageheader.PageHeader(pageheader.Props{}) {
+//	    @pageheader.Content(pageheader.SubProps{}) {
+//	        @pageheader.Title(pageheader.TitleProps{}) { Jobs }
+//	        @pageheader.Description(pageheader.SubProps{}) { Every job across both crews. }
+//	    }
+//	    @pageheader.Actions(pageheader.SubProps{}) {
+//	        @button.Button(button.Props{Href: "/jobs/new"}) { New job }
+//	    }
+//	}
+//
+// Detail page: add Back above Content, and Meta under Title. To put a
+// Badge next to the title, wrap Title and the badge in
+// <div class="flex flex-wrap items-center gap-4">.
+package pageheader
+
+import "github.com/flintcraftstudio/flint-ui/components/heading"
+
+// Props controls the PageHeader row.
+type Props struct {
+	Class string
+	Attrs templ.Attributes
+}
+
+// SubProps is the shared shape for Content, Description, Meta, and
+// Actions.
+type SubProps struct {
+	Class string
+	Attrs templ.Attributes
+}
+
+// TitleProps controls the page title. Level defaults to 1; set it when
+// the header sits below another h1.
+type TitleProps struct {
+	Level heading.Level
+	Class string
+	Attrs templ.Attributes
+}
+
+// BackProps controls the back link. Href is required.
+type BackProps struct {
+	Href  string
+	Class string
+	Attrs templ.Attributes
+}
+
+// PageHeader lays out its children in a wrapping row: Content grows on
+// the left, Actions sit on the right aligned to Content's bottom edge,
+// and Back takes a full row of its own above both. Below sm, Content
+// takes the full width and Actions wrap underneath.
+templ PageHeader(p Props) {
+	<div class={ join(rootClasses, p.Class) } { p.Attrs... }>
+		{ children... }
+	</div>
+}
+
+// Back renders a "‹ Parent" link to the page one level up. Use it on
+// detail pages in place of (or alongside) Breadcrumbs.
+templ Back(p BackProps) {
+	<div class={ join(backRowClasses, p.Class) }>
+		<a href={ templ.SafeURL(p.Href) } class={ backLinkClasses } { p.Attrs... }>
+			<svg data-slot="icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="size-4">
+				<path fill-rule="evenodd" d="M9.78 4.22a.75.75 0 0 1 0 1.06L7.06 8l2.72 2.72a.75.75 0 1 1-1.06 1.06L5.47 8.53a.75.75 0 0 1 0-1.06l3.25-3.25a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd"></path>
+			</svg>
+			{ children... }
+		</a>
+	</div>
+}
+
+// Content is the left column holding Title and Description / Meta.
+templ Content(p SubProps) {
+	<div class={ join(contentClasses, p.Class) } { p.Attrs... }>
+		{ children... }
+	</div>
+}
+
+// Title renders the page title with heading.Heading's styles.
+templ Title(p TitleProps) {
+	@heading.Heading(heading.Props{Level: p.Level, Class: p.Class, Attrs: p.Attrs}) {
+		{ children... }
+	}
+}
+
+// Description is a sentence or two of supporting copy under the title.
+templ Description(p SubProps) {
+	<p class={ join(descriptionClasses, p.Class) } { p.Attrs... }>
+		{ children... }
+	</p>
+}
+
+// Meta is a wrapping row of small facts under the title — dates,
+// owners, amounts. Children are typically <span>s, optionally with a
+// leading <svg data-slot="icon">.
+templ Meta(p SubProps) {
+	<div class={ join(metaClasses, p.Class) } { p.Attrs... }>
+		{ children... }
+	</div>
+}
+
+// Actions holds the page's primary buttons, right-aligned.
+templ Actions(p SubProps) {
+	<div class={ join(actionsClasses, p.Class) } { p.Attrs... }>
+		{ children... }
+	</div>
+}

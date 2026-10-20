@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/a-h/templ"
 
@@ -57,6 +58,26 @@ func main() {
 	mux.Handle("GET /comboboxes", page("Combobox", "comboboxes", templates.Comboboxes()))
 	mux.Handle("GET /commands", page("Command Palette", "commands", templates.Commands()))
 
+	mux.Handle("GET /layouts", page("Layouts", "layouts", templates.Layouts()))
+	mux.Handle("GET /navbars", page("Navbar", "navbars", templates.Navbars()))
+	mux.Handle("GET /sidebars", page("Sidebar", "sidebars", templates.Sidebars()))
+	mux.Handle("GET /page-headers", page("Page header", "page-headers", templates.PageHeaders()))
+	mux.Handle("GET /empty-states", page("Empty state", "empty-states", templates.EmptyStates()))
+	mux.Handle("GET /spinners", page("Spinner", "spinners", templates.Spinners()))
+	mux.Handle("POST /slow", http.HandlerFunc(slowHandler))
+
+	mux.Handle("GET /demo/sidebar", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		current, title := templates.DemoNavTitle(r.URL.Query().Get("nav"))
+		bare(w, r, title, templates.SidebarDemo(current, title))
+	}))
+	mux.Handle("GET /demo/stacked", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		current, title := templates.DemoNavTitle(r.URL.Query().Get("nav"))
+		bare(w, r, title, templates.StackedDemo(current, title))
+	}))
+	mux.Handle("GET /demo/auth", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		bare(w, r, "Sign in", templates.AuthDemo())
+	}))
+
 	mux.Handle("GET /tables/detail", http.HandlerFunc(tablesDetailHandler))
 
 	mux.Handle("POST /echo", http.HandlerFunc(echoHandler))
@@ -79,6 +100,26 @@ func page(title, current string, body templ.Component) http.Handler {
 			slog.Error("render error", "path", r.URL.Path, "err", err)
 		}
 	})
+}
+
+// bare renders an app-shell demo as a full page without the showcase chrome.
+func bare(w http.ResponseWriter, r *http.Request, title string, body templ.Component) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if err := templates.Bare(title, body).Render(r.Context(), w); err != nil {
+		slog.Error("render error", "path", r.URL.Path, "err", err)
+	}
+}
+
+// slowHandler sleeps long enough to see loading states (spinners,
+// button.Props.Indicator) before responding.
+func slowHandler(w http.ResponseWriter, r *http.Request) {
+	select {
+	case <-time.After(1500 * time.Millisecond):
+	case <-r.Context().Done():
+		return
+	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	_, _ = w.Write([]byte(`<span class="text-success">done</span>`))
 }
 
 func echoHandler(w http.ResponseWriter, r *http.Request) {

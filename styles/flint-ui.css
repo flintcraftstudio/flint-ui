@@ -66,6 +66,16 @@
 @custom-variant data-invalid (&:user-invalid, &[data-invalid], &[aria-invalid="true"]);
 
 /*
+  In-flight htmx request. htmx (2 and 4) adds .htmx-request to the element
+  that issued the request — the button itself for hx-post on a button, the
+  <form> for a form submit. This variant matches either, so a submit button
+  can show its loading state without caller wiring (see button.Props.Indicator).
+  Scoped to forms on purpose: a generic ancestor match would light up every
+  button inside any requesting container (an hx-get table row, a tabs root).
+*/
+@custom-variant htmx-request (&.htmx-request, form.htmx-request &);
+
+/*
   Alpine x-cloak: hide elements until Alpine initializes. Used by any flint-ui
   component with Alpine state that needs FOUC prevention — Modal, Dropdown,
   and any caller-authored Alpine component. Alpine strips the x-cloak

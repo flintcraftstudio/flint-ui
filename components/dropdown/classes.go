@@ -23,11 +23,17 @@ func rootClasses(p Props) string {
 	return strings.Join(parts, " ")
 }
 
-// triggerAttrs is the Alpine wiring layered onto the underlying button.
+// TriggerAttrs is the Alpine wiring layered onto the trigger button.
 // Caller-supplied Attrs are merged in last so they win on key conflicts.
 // ArrowDown on the trigger opens the menu and focuses the first item —
 // matches Headless UI Menu's keyboard behavior.
-func triggerAttrs(extra templ.Attributes) templ.Attributes {
+//
+// Exported so any button inside a Dropdown can act as the trigger, not
+// just dropdown.Button — e.g. a sidebar.Item or navbar.Item account menu
+// (Catalyst's <DropdownButton as={SidebarItem}>):
+//
+//	@sidebar.Item(sidebar.ItemProps{Attrs: dropdown.TriggerAttrs(nil)}) { ... }
+func TriggerAttrs(extra templ.Attributes) templ.Attributes {
 	out := templ.Attributes{
 		"x-on:click":                "open = !open",
 		"x-bind:aria-expanded":      "open",

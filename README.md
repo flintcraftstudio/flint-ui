@@ -9,6 +9,7 @@ Server-rendered UI components for FlintCraft Studio client projects. Built with 
 flint-ui exists to speed up internal dashboard development. The component catalog below is the entry point — use it to pick the right component, then open its markdown reference for props, variants, and examples.
 
 - **Invocation pattern**: `@<package>.<Func>(<package>.Props{...}) { children }` inside a `.templ` file.
+- **Starting a screen**: wrap pages in a shell from [`layout`](./docs/components/layout.md) (with [`sidebar`](./docs/components/sidebar.md) / [`navbar`](./docs/components/navbar.md)), open each page with [`pageheader`](./docs/components/page-header.md), and render [`emptystate`](./docs/components/empty-state.md) when a list comes back empty.
 - **Per-component docs**: every component has a reference in [`docs/components/`](./docs/components/) — open it before using the component. Each doc has: import, usage examples, a full props table, variants, and accessibility notes.
 - **Semantic tokens**: components never hard-code colors. Rebrand via the CSS variables in [`styles/flint-ui.css`](./styles/flint-ui.css) (see [Tailwind](#tailwind) below).
 - **htmx**: targets **htmx 4** (see [htmx 4 notes](#htmx-4)). Every component accepts `Attrs templ.Attributes` for `hx-*` / `data-*` / `aria-*` pass-through on the root element.
@@ -50,7 +51,7 @@ All components live under `github.com/flintcraftstudio/flint-ui/components/<pack
 | Avatar | `avatar` | `Avatar`, `AvatarButton` | User image or initials, optionally wrapped in a button with touch target. | [avatar.md](./docs/components/avatar.md) |
 | Badge | `badge` | `Badge` | Compact semantic status label. | [badge.md](./docs/components/badge.md) |
 | Breadcrumbs | `breadcrumbs` | `Breadcrumbs`, `Item`, `Current` | Navigation trail for nested hierarchies. | [breadcrumbs.md](./docs/components/breadcrumbs.md) |
-| Button | `button` | `Button` | Solid / outline / plain button; renders `<a>` when `Href` is set. | [button.md](./docs/components/button.md) |
+| Button | `button` | `Button` | Solid / outline / plain button; renders `<a>` when `Href` is set. `Indicator` shows a spinner during htmx requests. | [button.md](./docs/components/button.md) |
 | Card | `card` | `Card`, `Header`, `Body`, `Footer` | Surface container for grouping related content. | [card.md](./docs/components/card.md) |
 | Checkbox | `checkbox` | `Checkbox`, `CheckboxGroup`, `CheckboxField` | Native checkbox control with styled sibling box, plus stacked group. | [checkbox.md](./docs/components/checkbox.md) |
 | Clipboard | `clipboard` | `Copy` | Alpine wrapper that copies a value to the system clipboard. | [clipboard.md](./docs/components/clipboard.md) |
@@ -58,16 +59,22 @@ All components live under `github.com/flintcraftstudio/flint-ui/components/<pack
 | Command Palette | `command` | `Palette`, `Group`, `Item` | Cmd+K / Ctrl+K overlay for searching and invoking actions. | [command.md](./docs/components/command.md) |
 | Description List | `descriptionlist` | `DescriptionList`, `Term`, `Details` | Semantic `<dl>` / `<dt>` / `<dd>` two-column key/value display. | [description-list.md](./docs/components/description-list.md) |
 | Divider | `divider` | `Divider` | Semantic `<hr>` with regular or soft variants. | [divider.md](./docs/components/divider.md) |
-| Dropdown | `dropdown` | `Dropdown`, `Button`, `Menu`, `Item`, `Header`, `Section`, `Heading`, `Divider`, `Label`, `Description`, `Shortcut` | Alpine-powered menu with click-outside / ESC / Tab close and focus navigation. | [dropdown.md](./docs/components/dropdown.md) |
+| Dropdown | `dropdown` | `Dropdown`, `Button`, `Menu`, `Item`, `Header`, `Section`, `Heading`, `Divider`, `Label`, `Description`, `Shortcut` | Alpine-powered menu with click-outside / ESC / Tab close and focus navigation. `TriggerAttrs` makes any button the trigger. | [dropdown.md](./docs/components/dropdown.md) |
+| Empty State | `emptystate` | `EmptyState`, `Title`, `Description`, `Actions` | Placeholder for an empty list, table, or panel; optional dashed border. | [empty-state.md](./docs/components/empty-state.md) |
 | Fieldset | `fieldset` | `Fieldset`, `Legend`, `FieldGroup`, `Field`, `Label`, `Description`, `ErrorMessage` | Form layout primitives — `Field` auto-spaces label / description / control / error. | [fieldset.md](./docs/components/fieldset.md) |
 | Heading | `heading` | `Heading`, `Subheading` | Page (`<h1>`) and section (`<h2>`) titles; `Level` decouples tag from visual size. | [heading.md](./docs/components/heading.md) |
 | Input | `input` | `Input`, `InputGroup` | Text input, plus `InputGroup` for leading/trailing icons. | [input.md](./docs/components/input.md) |
+| Layout | `layout` | `Sidebar`, `Stacked`, `Auth` | App shells: fixed sidebar rail, top navbar, or centered auth card. Collapse to a mobile drawer below `lg`. | [layout.md](./docs/components/layout.md) |
 | Modal | `modal` | `Modal`, `Title`, `Description`, `Body`, `Actions` | Dialog + alert dialog in one component (`Props.Alert` switches layout). | [modal.md](./docs/components/modal.md) |
+| Navbar | `navbar` | `Navbar`, `Section`, `Item`, `Label`, `Spacer`, `Divider` | Horizontal top nav for `layout.Stacked` and the mobile header in `layout.Sidebar`. | [navbar.md](./docs/components/navbar.md) |
+| Page Header | `pageheader` | `PageHeader`, `Back`, `Content`, `Title`, `Description`, `Meta`, `Actions` | Page title block: back link, title, description or meta row, and primary actions. | [page-header.md](./docs/components/page-header.md) |
 | Pagination | `pagination` | `Pagination`, `Previous`, `Next`, `List`, `Page`, `Gap` | Numbered page navigation for tables and lists. | [pagination.md](./docs/components/pagination.md) |
 | Popover | `popover` | `Popover`, `Button`, `Panel` | Click-activated floating panel with arbitrary content. | [popover.md](./docs/components/popover.md) |
 | Radio | `radio` | `Radio`, `RadioGroup`, `RadioField` | Native `<input type="radio">` exclusive-choice control. | [radio.md](./docs/components/radio.md) |
 | Select | `selectbox` | `Select` | Native `<select>` styled to match `Input`. Package is `selectbox` because `select` is a Go keyword. | [select.md](./docs/components/select.md) |
+| Sidebar | `sidebar` | `Sidebar`, `Header`, `Body`, `Footer`, `Section`, `Heading`, `Item`, `Label`, `Spacer`, `Divider` | Vertical app navigation for `layout.Sidebar`; current-item bar and `aria-current`. | [sidebar.md](./docs/components/sidebar.md) |
 | Slide-over | `slideover` | `Slideover`, `Title`, `Description`, `Body`, `Actions` | Edge-anchored side drawer sharing Modal's teleport + focus-trap plumbing. | [slideover.md](./docs/components/slideover.md) |
+| Spinner | `spinner` | `Spinner` | Loading indicator; decorative or `role="status"` with a label; works as an `hx-indicator`. | [spinner.md](./docs/components/spinner.md) |
 | Switch | `toggle` | `Switch`, `SwitchGroup`, `SwitchField` | On/off toggle — native `<input type="checkbox" role="switch">`. Package is `toggle`. | [switch.md](./docs/components/switch.md) |
 | Table | `table` | `Table`, `Head`, `Body`, `Row`, `Header`, `Cell` | Data table; each sub-component carries the `bleed` / `dense` / `grid` / `striped` flags it needs. | [table.md](./docs/components/table.md) |
 | Tabs | `tabs` | `Tabs`, `List`, `Tab`, `Panel` | Tabbed navigation with two drivers — set `Mode` to `ModeServer` (htmx) or `ModeAlpine`. | [tabs.md](./docs/components/tabs.md) |

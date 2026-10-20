@@ -1,0 +1,217 @@
+// Package layout provides the three application shells: a sidebar app
+// (Sidebar), a top-nav app (Stacked), and a centered auth card (Auth).
+// Converted from catalyst-ui-kit/typescript/sidebar-layout.tsx,
+// stacked-layout.tsx, and auth-layout.tsx.
+//
+// Sidebar and Stacked take the navigation as templ.Component props and
+// the page content as children:
+//
+//	@layout.Sidebar(layout.SidebarProps{
+//	    Navbar:  appNavbar(),  // mobile header contents (search, avatar)
+//	    Sidebar: appSidebar(), // a sidebar.Sidebar
+//	}) {
+//	    ...page content
+//	}
+//
+// Below lg, both shells collapse the sidebar into a slide-in drawer
+// opened by a hamburger button in the header. The drawer is Alpine
+// state on the shell root (mobileNav); it closes on ESC, backdrop
+// click, the close button, any link click inside it (so hx-boost
+// navigation closes it too), resizing past lg, or a
+// 'flint:sidebar-close' window event. Focus trap and scroll lock need
+// the Alpine Focus plugin, same as Modal.
+//
+// The Sidebar component is rendered twice (desktop rail + mobile
+// drawer), as in Catalyst. Only one copy is ever displayed, but avoid
+// fixed id attributes inside it.
+package layout
+
+import "github.com/flintcraftstudio/flint-ui/components/navbar"
+
+// SidebarProps controls the sidebar application shell.
+//
+// Sidebar is the navigation column (desktop: fixed 16rem rail; mobile:
+// drawer). Navbar is the header shown next to the hamburger on mobile
+// only — typically a navbar.Navbar with a Spacer and the account menu.
+type SidebarProps struct {
+	Navbar  templ.Component
+	Sidebar templ.Component
+	Class   string
+	Attrs   templ.Attributes
+}
+
+// StackedProps controls the top-nav application shell.
+//
+// Navbar is always shown across the top. Sidebar is the mobile drawer's
+// contents — usually the same links as the navbar, laid out vertically
+// with sidebar.Sidebar. Hide navbar sections that move into the drawer
+// with Class: "max-lg:hidden".
+type StackedProps struct {
+	Navbar  templ.Component
+	Sidebar templ.Component
+	Class   string
+	Attrs   templ.Attributes
+}
+
+// AuthProps controls the auth shell.
+type AuthProps struct {
+	Class string
+	Attrs templ.Attributes
+}
+
+// Sidebar renders the sidebar application shell: a fixed left rail at
+// lg+, a hamburger header + drawer below lg, and the content panel.
+templ Sidebar(p SidebarProps) {
+	<div
+		x-data={ alpineData }
+		x-on:flint:sidebar-close.window="mobileNav = false"
+		x-on:resize.window.debounce="closeOnDesktop()"
+		class={ join(sidebarRootClasses, p.Class) }
+		{ p.Attrs... }
+	>
+		<div class="fixed inset-y-0 left-0 w-64 max-lg:hidden">
+			@render(p.Sidebar)
+		</div>
+		@mobileSidebar(p.Sidebar)
+		<header class="flex items-center px-4 lg:hidden">
+			<div class="py-2.5">
+				@openButton()
+			</div>
+			<div class="min-w-0 flex-1">
+				@render(p.Navbar)
+			</div>
+		</header>
+		<main class={ sidebarMainClasses }>
+			<div class={ contentPanelClasses }>
+				<div class="mx-auto max-w-6xl">
+					{ children... }
+				</div>
+			</div>
+		</main>
+	</div>
+}
+
+// Stacked renders the top-nav application shell: a full-width navbar
+// header, a drawer below lg, and the content panel.
+templ Stacked(p StackedProps) {
+	<div
+		x-data={ alpineData }
+		x-on:flint:sidebar-close.window="mobileNav = false"
+		x-on:resize.window.debounce="closeOnDesktop()"
+		class={ join(stackedRootClasses, p.Class) }
+		{ p.Attrs... }
+	>
+		@mobileSidebar(p.Sidebar)
+		<header class="flex items-center px-4">
+			<div class="py-2.5 lg:hidden">
+				@openButton()
+			</div>
+			<div class="min-w-0 flex-1">
+				@render(p.Navbar)
+			</div>
+		</header>
+		<main class="flex flex-1 flex-col pb-2 lg:px-2">
+			<div class={ contentPanelClasses }>
+				<div class="mx-auto max-w-6xl">
+					{ children... }
+				</div>
+			</div>
+		</main>
+	</div>
+}
+
+// Auth renders a full-height page with its children centered in a
+// panel — for login, sign-up, and password-reset forms. Give the page
+// background a muted tone (e.g. lg:bg-muted on <html>) so the panel
+// reads as a card at lg+.
+templ Auth(p AuthProps) {
+	<main class={ join("flex min-h-dvh flex-col p-2", p.Class) } { p.Attrs... }>
+		<div class={ authPanelClasses }>
+			{ children... }
+		</div>
+	</main>
+}
+
+// mobileSidebar is the below-lg drawer: backdrop plus a left-anchored
+// panel that slides in. Catalyst renders this with Headless UI's
+// Dialog; flint-ui uses the same Alpine x-show + x-trap pattern as
+// Slideover, without the teleport (the shell is already the page root).
+templ mobileSidebar(content templ.Component) {
+	<div
+		x-show="mobileNav"
+		x-cloak
+		x-on:keydown.escape.window="mobileNav && (mobileNav = false)"
+		class="fixed inset-0 z-40 lg:hidden"
+		role="dialog"
+		aria-modal="true"
+		aria-label="Navigation"
+	>
+		<div
+			x-show="mobileNav"
+			x-transition:enter="transition-opacity duration-300 ease-out"
+			x-transition:enter-start="opacity-0"
+			x-transition:enter-end="opacity-100"
+			x-transition:leave="transition-opacity duration-200 ease-in"
+			x-transition:leave-start="opacity-100"
+			x-transition:leave-end="opacity-0"
+			x-on:click="mobileNav = false"
+			class="fixed inset-0 bg-foreground/30"
+			aria-hidden="true"
+		></div>
+		<div
+			x-show="mobileNav"
+			x-trap.inert.noscroll="mobileNav"
+			x-transition:enter="transition duration-300 ease-in-out"
+			x-transition:enter-start="-translate-x-full"
+			x-transition:enter-end="translate-x-0"
+			x-transition:leave="transition duration-300 ease-in-out"
+			x-transition:leave-start="translate-x-0"
+			x-transition:leave-end="-translate-x-full"
+			x-on:click="$event.target.closest('a[href]') && (mobileNav = false)"
+			class="fixed inset-y-0 w-full max-w-80 p-2"
+		>
+			<div class={ drawerPanelClasses }>
+				<div class="-mb-3 px-4 pt-3">
+					@navbar.Item(navbar.ItemProps{Attrs: templ.Attributes{
+						"aria-label": "Close navigation",
+						"x-on:click": "mobileNav = false",
+					}}) {
+						@closeMenuIcon()
+					}
+				</div>
+				@render(content)
+			</div>
+		</div>
+	</div>
+}
+
+// openButton is the hamburger that opens the drawer.
+templ openButton() {
+	@navbar.Item(navbar.ItemProps{Attrs: templ.Attributes{
+		"aria-label":           "Open navigation",
+		"x-on:click":           "mobileNav = true",
+		"x-bind:aria-expanded": "mobileNav",
+	}}) {
+		@openMenuIcon()
+	}
+}
+
+// render tolerates a nil slot so a shell can be stubbed out without a
+// sidebar or navbar.
+templ render(c templ.Component) {
+	if c != nil {
+		@c
+	}
+}
+
+templ openMenuIcon() {
+	<svg data-slot="icon" viewBox="0 0 20 20" aria-hidden="true">
+		<path d="M2 6.75C2 6.33579 2.33579 6 2.75 6H17.25C17.6642 6 18 6.33579 18 6.75C18 7.16421 17.6642 7.5 17.25 7.5H2.75C2.33579 7.5 2 7.16421 2 6.75ZM2 13.25C2 12.8358 2.33579 12.5 2.75 12.5H17.25C17.6642 12.5 18 12.8358 18 13.25C18 13.6642 17.6642 14 17.25 14H2.75C2.33579 14 2 13.6642 2 13.25Z"></path>
+	</svg>
+}
+
+templ closeMenuIcon() {
+	<svg data-slot="icon" viewBox="0 0 20 20" aria-hidden="true">
+		<path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z"></path>
+	</svg>
+}

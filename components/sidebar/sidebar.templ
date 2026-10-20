@@ -1,0 +1,164 @@
+// Package sidebar provides the vertical app navigation used by
+// layout.Sidebar (desktop rail + mobile drawer) and layout.Stacked
+// (mobile drawer only). Converted from catalyst-ui-kit/typescript/
+// sidebar.tsx.
+//
+// Composition:
+//
+//	@sidebar.Sidebar(sidebar.Props{}) {
+//	    @sidebar.Header(sidebar.SubProps{}) { ...team switcher }
+//	    @sidebar.Body(sidebar.SubProps{}) {
+//	        @sidebar.Section(sidebar.SubProps{}) {
+//	            @sidebar.Item(sidebar.ItemProps{Href: "/", Current: true}) {
+//	                <svg data-slot="icon" ...></svg>
+//	                @sidebar.Label(sidebar.SubProps{}) { Home }
+//	            }
+//	        }
+//	        @sidebar.Spacer(sidebar.SubProps{})
+//	        @sidebar.Section(sidebar.SubProps{}) { ...support, changelog }
+//	    }
+//	    @sidebar.Footer(sidebar.SubProps{}) { ...account dropdown }
+//	}
+//
+// Catalyst animates the current-page bar between items with motion's
+// layoutId. flint-ui pages are server-rendered, so the bar is static:
+// the server marks the current item and the next navigation renders a
+// fresh page.
+package sidebar
+
+// Props controls the outer <nav>.
+type Props struct {
+	Class string
+	Attrs templ.Attributes
+}
+
+// SubProps is the shared shape for every structural sub-component.
+type SubProps struct {
+	Class string
+	Attrs templ.Attributes
+}
+
+// ItemProps controls a single sidebar entry.
+//
+// Href renders an <a>; empty renders a <button type="button"> (wire the
+// handler via Attrs, or use it as a Dropdown trigger). Current marks the
+// page the user is on: it draws the leading bar, highlights the icon,
+// and sets aria-current="page" on links.
+//
+// Children are typically an icon (<svg data-slot="icon">), an avatar,
+// and/or a Label. A trailing icon (chevron) is pushed to the right.
+type ItemProps struct {
+	Href    string
+	Current bool
+	Class   string
+	Attrs   templ.Attributes
+}
+
+// Sidebar renders the full-height <nav> column. Add aria-label via
+// Attrs when a page has more than one nav landmark.
+templ Sidebar(p Props) {
+	<nav class={ join(sidebarClasses, p.Class) } { p.Attrs... }>
+		{ children... }
+	</nav>
+}
+
+// Header is the fixed top region (team switcher, search). Bordered
+// below.
+templ Header(p SubProps) {
+	<div class={ join(headerClasses, p.Class) } { p.Attrs... }>
+		{ children... }
+	</div>
+}
+
+// Body is the scrollable middle region holding the nav sections.
+templ Body(p SubProps) {
+	<div class={ join(bodyClasses, p.Class) } { p.Attrs... }>
+		{ children... }
+	</div>
+}
+
+// Footer is the fixed bottom region (account menu). Bordered above.
+templ Footer(p SubProps) {
+	<div class={ join(footerClasses, p.Class) } { p.Attrs... }>
+		{ children... }
+	</div>
+}
+
+// Section groups related items. Consecutive sections inside Header,
+// Body, or Footer are spaced automatically via data-slot="section".
+templ Section(p SubProps) {
+	<div data-slot="section" class={ join(sectionClasses, p.Class) } { p.Attrs... }>
+		{ children... }
+	</div>
+}
+
+// Divider is a horizontal rule between sections.
+templ Divider(p SubProps) {
+	<hr class={ join(dividerClasses, p.Class) } { p.Attrs... }/>
+}
+
+// Spacer is a flex-1 gap inside Body that pushes the following sections
+// to the bottom of the column.
+templ Spacer(p SubProps) {
+	<div aria-hidden="true" class={ join(spacerClasses, p.Class) } { p.Attrs... }></div>
+}
+
+// Heading labels a Section ("Upcoming events"). Renders an <h3>.
+templ Heading(p SubProps) {
+	<h3 class={ join(headingClasses, p.Class) } { p.Attrs... }>
+		{ children... }
+	</h3>
+}
+
+// Item renders a sidebar link or button with an optional current-page
+// bar.
+templ Item(p ItemProps) {
+	<span class={ join("relative", p.Class) }>
+		if p.Current {
+			<span class={ currentIndicatorClasses }></span>
+		}
+		if p.Href != "" {
+			<a
+				href={ templ.SafeURL(p.Href) }
+				class={ itemClasses }
+				data-current?={ p.Current }
+				if p.Current {
+					aria-current="page"
+				}
+				{ p.Attrs... }
+			>
+				@touchTarget() {
+					{ children... }
+				}
+			</a>
+		} else {
+			<button
+				type="button"
+				class={ "cursor-default " + itemClasses }
+				data-current?={ p.Current }
+				{ p.Attrs... }
+			>
+				@touchTarget() {
+					{ children... }
+				}
+			</button>
+		}
+	</span>
+}
+
+// Label wraps an item's text so it truncates instead of wrapping.
+templ Label(p SubProps) {
+	<span class={ join("truncate", p.Class) } { p.Attrs... }>
+		{ children... }
+	</span>
+}
+
+// touchTarget mirrors the button package's TouchTarget — an invisible
+// layer that expands the hit area to at least 44×44px on touch devices.
+templ touchTarget() {
+	<span
+		class="absolute top-1/2 left-1/2 size-[max(100%,2.75rem)] -translate-x-1/2 -translate-y-1/2 pointer-fine:hidden"
+		aria-hidden="true"
+	></span>
+	{ children... }
+}

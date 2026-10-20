@@ -28,6 +28,17 @@ var NavSections = []struct {
 		},
 	},
 	{
+		Heading: "App shell",
+		Items: []NavItem{
+			{Slug: "layouts", Title: "Layouts", Phase: "5"},
+			{Slug: "sidebars", Title: "Sidebar", Phase: "5"},
+			{Slug: "navbars", Title: "Navbar", Phase: "5"},
+			{Slug: "page-headers", Title: "Page header", Phase: "5"},
+			{Slug: "empty-states", Title: "Empty state", Phase: "5"},
+			{Slug: "spinners", Title: "Spinner", Phase: "5"},
+		},
+	},
+	{
 		Heading: "Layout",
 		Items: []NavItem{
 			{Slug: "tables", Title: "Table", Phase: "2"},
