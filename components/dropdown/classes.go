@@ -63,15 +63,52 @@ func resolveAnchor(a Anchor) string {
 	return anchorClasses[AnchorBottomStart]
 }
 
+func resolveAnchorKey(a Anchor) Anchor {
+	if _, ok := anchorClasses[a]; ok {
+		return a
+	}
+	return AnchorBottomStart
+}
+
+// fixedAnchorClasses keep the gap and transform origin of anchorClasses;
+// the edges come from fixedStyle instead.
+var fixedAnchorClasses = map[Anchor]string{
+	AnchorBottomStart: "mt-2 origin-top-left",
+	AnchorBottomEnd:   "mt-2 origin-top-right",
+	AnchorTopStart:    "mb-2 origin-bottom-left",
+	AnchorTopEnd:      "mb-2 origin-bottom-right",
+}
+
+// fixedStyle is the x-bind:style expression for a Fixed menu. It reads the
+// Dropdown root's rect ($root — the trigger's wrapper) each time the menu
+// opens and pins the matching edges to the viewport. clientWidth/Height
+// exclude the scrollbar, which is what fixed right/bottom measure from.
+func fixedStyle(a Anchor) string {
+	var v, h string
+	switch resolveAnchorKey(a) {
+	case AnchorBottomEnd:
+		v, h = "top: r.bottom + 'px', bottom: 'auto'", "right: (d.clientWidth - r.right) + 'px', left: 'auto'"
+	case AnchorTopStart:
+		v, h = "bottom: (d.clientHeight - r.top) + 'px', top: 'auto'", "left: r.left + 'px', right: 'auto'"
+	case AnchorTopEnd:
+		v, h = "bottom: (d.clientHeight - r.top) + 'px', top: 'auto'", "right: (d.clientWidth - r.right) + 'px', left: 'auto'"
+	default:
+		v, h = "top: r.bottom + 'px', bottom: 'auto'", "left: r.left + 'px', right: 'auto'"
+	}
+	return "open ? ((r, d) => ({ " + v + ", " + h + " }))($root.getBoundingClientRect(), document.documentElement) : {}"
+}
+
 // menuClasses translates Catalyst's MenuItems styles. The supports-[grid-
 // template-columns:subgrid] block opts the menu into the subgrid layout
 // when the browser supports it; items then declare their own column grid
 // that aligns across the whole menu.
 func menuClasses(p MenuProps) string {
+	position := "absolute z-50 " + resolveAnchor(p.Anchor)
+	if p.Fixed {
+		position = "fixed z-50 " + fixedAnchorClasses[resolveAnchorKey(p.Anchor)]
+	}
 	parts := []string{
-		// Position
-		"absolute z-50",
-		resolveAnchor(p.Anchor),
+		position,
 		// Base
 		"isolate w-max min-w-[12rem] rounded-xl p-1",
 		// Invisible border that's only visible in forced-colors mode

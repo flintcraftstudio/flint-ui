@@ -13,8 +13,11 @@
 // — same requirement as Modal.
 //
 // The menu is positioned with CSS (absolute inside a `relative inline-block`
-// root). Ancestor `overflow:hidden` will clip it — wrap the parent or move
-// the dropdown outside the scroll container if you hit that.
+// root). An ancestor with overflow other than visible — a table's
+// horizontal scroll wrapper, a scrolling panel — clips it. Set
+// MenuProps.Fixed in those places: the menu is then positioned against the
+// viewport from the trigger's rect when it opens, and closes on any
+// ancestor scroll or resize.
 package dropdown
 
 import "github.com/flintcraftstudio/flint-ui/components/button"
@@ -79,8 +82,13 @@ templ Button(p ButtonProps) {
 // MenuProps controls the floating menu panel.
 type MenuProps struct {
 	Anchor Anchor
-	Class  string
-	Attrs  templ.Attributes
+	// Fixed positions the menu against the viewport instead of the
+	// Dropdown root, so overflow containers (tables) can't clip it. Don't
+	// use it inside a transformed ancestor (a Slideover panel), which
+	// becomes the containing block for fixed elements.
+	Fixed bool
+	Class string
+	Attrs templ.Attributes
 }
 
 // Menu is the floating panel that holds Items. It is positioned relative
@@ -106,6 +114,11 @@ templ Menu(p MenuProps) {
 		x-transition:leave-end="opacity-0 scale-95"
 		role="menu"
 		class={ menuClasses(p) }
+		if p.Fixed {
+			x-bind:style={ fixedStyle(p.Anchor) }
+			x-on:scroll.window.capture="($event.target === document || $event.target.contains($el)) && (open = false)"
+			x-on:resize.window="open = false"
+		}
 		{ p.Attrs... }
 	>
 		{ children... }

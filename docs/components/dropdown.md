@@ -59,12 +59,17 @@ The menu is `absolute`-positioned inside the Dropdown root (`relative inline-blo
 
 ### Overflow caveat
 
-The menu is *not* teleported to `<body>` (unlike Modal). Ancestor `overflow:hidden`, `transform`, or `filter` will create a stacking context that clips or reorders the menu. If you hit that, either:
+The menu is positioned `absolute` inside the Dropdown root and is *not* teleported to `<body>` (unlike Modal). An ancestor with `overflow` other than `visible` clips it. The common case is a row-actions menu inside `table.Table`, whose horizontal scroll wrapper also clips vertically.
 
-- Move the dropdown outside the offending container, or
-- Remove the overflow constraint on that ancestor.
+Set `MenuProps.Fixed` there:
 
-A future version may add an Alpine Anchor + Teleport pattern to escape these. For now, plan ancestors accordingly.
+```go
+@dropdown.Menu(dropdown.MenuProps{Anchor: dropdown.AnchorBottomEnd, Fixed: true}) { ... }
+```
+
+A Fixed menu is `position: fixed`. When it opens, its edges are computed from the trigger's rect, so no overflow container can clip it. It closes on any scroll of the page or an ancestor, and on resize, so it never drifts away from its trigger. Scrolling inside the menu itself doesn't close it.
+
+Don't use `Fixed` inside an ancestor with a `transform` (a Slideover panel, for example). A transformed ancestor becomes the containing block for fixed elements, and the menu would land in the wrong place.
 
 ## Items: button vs link
 
@@ -233,6 +238,7 @@ Hovered or keyboard-focused items use `bg-accent` / `text-accent-foreground`. Th
 
 | Field    | Type               | Default               | Notes                                                |
 | -------- | ------------------ | --------------------- | ---------------------------------------------------- |
+| `Fixed`  | `bool` | `false` | Position against the viewport so overflow containers (tables) can't clip the menu. See [Overflow caveat](#overflow-caveat). |
 | `Anchor` | `Anchor`           | `AnchorBottomStart`   | Where the menu lands relative to the trigger.        |
 | `Class`  | `string`           | `""`                  | Appended to the menu `<div>`. Common: `min-w-[18rem]` to widen for description rows. |
 | `Attrs`  | `templ.Attributes` | `nil`                 | Spread onto the menu.                                |
