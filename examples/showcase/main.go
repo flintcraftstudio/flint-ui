@@ -35,6 +35,8 @@ func main() {
 	mux.Handle("GET /inputs", page("Input", "inputs", templates.Inputs()))
 	mux.Handle("GET /selects", page("Select", "selects", templates.Selects()))
 	mux.Handle("GET /textareas", page("Textarea", "textareas", templates.Textareas()))
+	mux.Handle("GET /file-inputs", page("File input", "file-inputs", templates.FileInputs()))
+	mux.Handle("POST /files/upload", http.HandlerFunc(filesUploadHandler))
 	mux.Handle("GET /checkboxes", page("Checkbox", "checkboxes", templates.Checkboxes()))
 	mux.Handle("GET /badges", page("Badge", "badges", templates.Badges()))
 	mux.Handle("GET /avatars", page("Avatar", "avatars", templates.Avatars()))
@@ -134,6 +136,32 @@ func statsLiveHandler(w http.ResponseWriter, r *http.Request) {
 	if err := templates.StatsLive().Render(r.Context(), w); err != nil {
 		slog.Error("render error", "path", r.URL.Path, "err", err)
 	}
+}
+
+// filesUploadHandler lists the files a multipart upload carried. It reads
+// only the part headers and sizes; nothing is stored.
+func filesUploadHandler(w http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(w, r.Body, 20<<20)
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	if err := r.ParseMultipartForm(8 << 20); err != nil {
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		_, _ = w.Write([]byte(`<span class="text-danger">No files received — is the request multipart? (` + html.EscapeString(err.Error()) + `)</span>`))
+		return
+	}
+	var b strings.Builder
+	for field, headers := range r.MultipartForm.File {
+		for _, h := range headers {
+			fmt.Fprintf(&b, `<li><span class="font-medium">%s</span> <span class="text-muted-foreground">%s · %d bytes · field “%s”</span></li>`,
+				html.EscapeString(h.Filename), html.EscapeString(h.Header.Get("Content-Type")), h.Size, html.EscapeString(field))
+		}
+	}
+	if b.Len() == 0 {
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		_, _ = w.Write([]byte(`<span class="text-danger">Choose a file first.</span>`))
+		return
+	}
+	time.Sleep(600 * time.Millisecond) // long enough to see the button indicator
+	_, _ = w.Write([]byte(`<p class="text-success">Received:</p><ul class="mt-1 space-y-1">` + b.String() + `</ul>`))
 }
 
 // slowHandler sleeps long enough to see loading states (spinners,

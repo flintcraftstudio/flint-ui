@@ -1,0 +1,142 @@
+// Package fileinput provides file pickers: Input, a native file input
+// styled to match input.Input, and Dropzone, a drag-and-drop area for
+// imports and attachments. From-scratch design (Catalyst has no file
+// input); Dropzone follows the Tailwind UI upload pattern.
+//
+// Both render a real <input type="file">, so a plain form submit works
+// with no JS. Dropzone adds Alpine for the drag-over state, the selected
+// file list, and dropping files onto it.
+//
+// htmx: a request only carries files when it's multipart. Put
+// hx-encoding="multipart/form-data" on the requesting element (or
+// enctype on the <form>); otherwise htmx 4 URL-encodes the body and the
+// files are silently dropped. htmx 4 uploads with fetch, which reports no
+// upload progress — show button.Props.Indicator while it's in flight.
+package fileinput
+
+// Props controls Input.
+// Accept is the native accept list (".csv", "image/*,.pdf"). It filters
+// the picker only — always validate type and size on the server.
+type Props struct {
+	Name     string
+	ID       string
+	Accept   string
+	Multiple bool
+	Required bool
+	Disabled bool
+	Invalid  bool
+	Class    string
+	Attrs    templ.Attributes
+}
+
+// DropzoneProps controls Dropzone.
+//
+// Prompt is the call to action (default "Upload a file", or "Upload
+// files" with Multiple); it's followed by "or drag and drop". Hint is
+// the muted line under it ("CSV up to 5 MB"). ID is required so the
+// label can point at the input. Attrs go on the <input>, like Input.
+type DropzoneProps struct {
+	Name     string
+	ID       string
+	Accept   string
+	Multiple bool
+	Required bool
+	Disabled bool
+	Invalid  bool
+	Prompt   string
+	Hint     string
+	Class    string
+	Attrs    templ.Attributes
+}
+
+// Input renders a native file input in the input.Input frame, with the
+// browser's "Choose file" button restyled as a muted chip.
+templ Input(p Props) {
+	<span data-slot="control" class={ join(wrapperClasses, p.Class) }>
+		<input
+			type="file"
+			if p.Name != "" {
+				name={ p.Name }
+			}
+			if p.ID != "" {
+				id={ p.ID }
+			}
+			if p.Accept != "" {
+				accept={ p.Accept }
+			}
+			multiple?={ p.Multiple }
+			required?={ p.Required }
+			disabled?={ p.Disabled }
+			data-invalid?={ p.Invalid }
+			aria-invalid?={ p.Invalid }
+			class={ inputClasses }
+			{ p.Attrs... }
+		/>
+	</span>
+}
+
+// Dropzone renders a dashed drop area. Clicking anywhere in it (or
+// pressing Space/Enter when the visually hidden input has focus) opens
+// the picker; dropping files assigns them to the input and fires its
+// change event, so hx-trigger="change" uploads work for drops too.
+templ Dropzone(p DropzoneProps) {
+	<div
+		data-slot="control"
+		x-data={ dropzoneData(p.Accept, p.Multiple, p.Disabled) }
+		class={ p.Class }
+	>
+		<label
+			for={ p.ID }
+			x-bind:data-dragging="dragging"
+			x-on:dragover.prevent="dragging = !disabled"
+			x-on:dragleave="$el.contains($event.relatedTarget) || (dragging = false)"
+			x-on:drop.prevent="drop($event)"
+			class={ dropAreaClasses }
+			data-invalid?={ p.Invalid }
+			data-disabled?={ p.Disabled }
+		>
+			<svg data-slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"></path>
+			</svg>
+			<span class="mt-4 text-base/6 text-muted-foreground sm:text-sm/6">
+				<span class="font-semibold text-foreground">{ prompt(p) }</span>
+				{ " " }or drag and drop
+			</span>
+			if p.Hint != "" {
+				<span class="mt-1 text-sm/6 text-muted-foreground sm:text-xs/5">{ p.Hint }</span>
+			}
+			<input
+				type="file"
+				x-ref="input"
+				x-on:change="sync()"
+				class="sr-only"
+				if p.Name != "" {
+					name={ p.Name }
+				}
+				id={ p.ID }
+				if p.Accept != "" {
+					accept={ p.Accept }
+				}
+				multiple?={ p.Multiple }
+				required?={ p.Required }
+				disabled?={ p.Disabled }
+				aria-invalid?={ p.Invalid }
+				{ p.Attrs... }
+			/>
+		</label>
+		<div x-show="files.length || rejected" x-cloak class="mt-3 flex items-start gap-3">
+			<ul class="min-w-0 flex-1 space-y-1 text-sm/6" aria-live="polite">
+				<template x-for="f in files" x-bind:key="f.name + f.size">
+					<li class="flex min-w-0 items-center gap-2">
+						<span class="truncate font-medium text-foreground" x-text="f.name"></span>
+						<span class="shrink-0 text-muted-foreground" x-text="size(f.size)"></span>
+					</li>
+				</template>
+				<li x-show="rejected" class="text-danger" x-text="rejected"></li>
+			</ul>
+			<button type="button" x-show="files.length" x-on:click="clear()" class={ clearClasses }>
+				Clear
+			</button>
+		</div>
+	</div>
+}

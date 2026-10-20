@@ -1,0 +1,62 @@
+package templates
+
+import (
+	"github.com/flintcraftstudio/flint-ui/components/button"
+	"github.com/flintcraftstudio/flint-ui/components/fieldset"
+	"github.com/flintcraftstudio/flint-ui/components/fileinput"
+)
+
+templ FileInputs() {
+	<div class="space-y-12">
+		@pageHeader("File input", "Native file pickers. Input is a styled <input type=\"file\"> that lines up with text inputs; Dropzone is a drag-and-drop area for imports and attachments. Both are real inputs — a plain form submit works without JS. With htmx, set hx-encoding=\"multipart/form-data\" or the files are dropped.")
+		@section("Input", "In a Field with label and description, like any other control. Accept filters the picker; the server still validates.") {
+			<div class="max-w-md space-y-8">
+				@fieldset.Field(fieldset.Props{}) {
+					@fieldset.Label(fieldset.LabelProps{For: "fi-avatar"}) { Profile photo }
+					@fieldset.Description(fieldset.Props{}) { PNG or JPG, up to 2 MB. }
+					@fileinput.Input(fileinput.Props{Name: "avatar", ID: "fi-avatar", Accept: "image/png,image/jpeg"})
+				}
+				@fieldset.Field(fieldset.Props{}) {
+					@fieldset.Label(fieldset.LabelProps{For: "fi-invalid"}) { Insurance certificate }
+					@fileinput.Input(fileinput.Props{Name: "cert", ID: "fi-invalid", Accept: ".pdf", Invalid: true})
+					@fieldset.ErrorMessage(fieldset.Props{}) { Upload a PDF of the current certificate. }
+				}
+				@fieldset.Field(fieldset.Props{}) {
+					@fieldset.Label(fieldset.LabelProps{For: "fi-disabled"}) { Disabled }
+					@fileinput.Input(fileinput.Props{Name: "x", ID: "fi-disabled", Disabled: true})
+				}
+			</div>
+		}
+		@section("Dropzone + htmx form", "A CSV import. Drop a file (or click to pick), then submit — the form has hx-encoding=\"multipart/form-data\" and the button shows its Indicator while the upload is in flight. Dropping a non-CSV is rejected client-side.") {
+			<form
+				hx-post="/files/upload"
+				hx-encoding="multipart/form-data"
+				hx-target="#upload-result"
+				hx-disable="find button[type=submit]"
+				class="max-w-xl space-y-4"
+			>
+				@fileinput.Dropzone(fileinput.DropzoneProps{Name: "import", ID: "fi-import", Accept: ".csv,text/csv", Hint: "CSV up to 5 MB", Required: true})
+				@button.Button(button.Props{Type: "submit", Indicator: true}) { Import jobs }
+			</form>
+			<div id="upload-result" class="mt-4 text-sm/6"></div>
+		}
+		@section("Multiple files, upload on change", "Multiple accepts several files; hx-trigger=\"change\" on the input uploads as soon as files are picked or dropped — no submit button.") {
+			<div class="max-w-xl">
+				@fileinput.Dropzone(fileinput.DropzoneProps{
+					Name:     "photos",
+					ID:       "fi-photos",
+					Accept:   "image/*",
+					Multiple: true,
+					Hint:     "Job-site photos — PNG, JPG, HEIC",
+					Attrs: templ.Attributes{
+						"hx-post":     "/files/upload",
+						"hx-trigger":  "change",
+						"hx-encoding": "multipart/form-data",
+						"hx-target":   "#photos-result",
+					},
+				})
+				<div id="photos-result" class="mt-4 text-sm/6"></div>
+			</div>
+		}
+	</div>
+}

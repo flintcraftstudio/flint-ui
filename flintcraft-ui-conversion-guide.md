@@ -343,7 +343,9 @@ The structure every admin screen sits in. Converted from Catalyst where it has a
 
 32. **Stat** — the KPI tile from Catalyst's demo app, as a `<dl>` grid.
 
-**Next up:** dark-mode tokens, file input, progress, skeletons.
+33. **File input** — `fileinput.Input` (native, styled like Input) and `fileinput.Dropzone` (drag and drop, accept filtering on drop).
+
+**Next up:** dark-mode tokens, progress, skeletons.
 
 **Shared infrastructure to build alongside:**
 
