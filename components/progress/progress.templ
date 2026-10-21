@@ -1,16 +1,5 @@
-// Package progress provides a horizontal progress bar. From-scratch
-// design (Catalyst has no progress.tsx).
-//
-// Two modes:
-//   - Determinate: Value out of Max (default 100). The fill width and
-//     aria-valuenow track Value.
-//   - Indeterminate: a segment loops across the track for work with no
-//     known length. aria-valuenow is omitted, which is how assistive
-//     tech recognises an indeterminate progressbar.
-//
-// For server-reported progress, poll with htmx through Attrs and swap the
-// bar with hx-swap="outerMorph" so the fill animates to its new width
-// instead of jumping (see docs/components/progress.md).
+// Package documentation lives in doc.go.
+
 package progress
 
 // Variant picks the fill color. The zero value is VariantPrimary.

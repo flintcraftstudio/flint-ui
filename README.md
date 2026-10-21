@@ -6,7 +6,7 @@ Server-rendered UI components for FlintCraft Studio client projects. Built with 
 
 ## For coding agents
 
-flint-ui exists to speed up internal dashboard development. The component catalog below is the entry point — use it to pick the right component, then open its markdown reference for props, variants, and examples.
+flint-ui exists to speed up internal dashboard development. Start at [`AGENTS.md`](./AGENTS.md): it says where to look and the rules that save rework. Then use the component catalog below to pick a component, open its markdown reference for props, variants, and examples, and check [`docs/patterns.md`](./docs/patterns.md) for whole screens (list page, forms with validation, modals, toasts, loading states). From a client project, `go doc github.com/flintcraftstudio/flint-ui` prints the catalog grouped by purpose, and `go doc` on any component package prints its overview.
 
 - **Invocation pattern**: `@<package>.<Func>(<package>.Props{...}) { children }` inside a `.templ` file.
 - **Starting a screen**: wrap pages in a shell from [`layout`](./docs/components/layout.md) (with [`sidebar`](./docs/components/sidebar.md) / [`navbar`](./docs/components/navbar.md)), open each page with [`pageheader`](./docs/components/page-header.md), and render [`emptystate`](./docs/components/empty-state.md) when a list comes back empty.
@@ -127,6 +127,22 @@ Non-color classes (spacing, sizing, layering, transitions) are preserved verbati
 
 No `tailwind.config.js` is needed.
 
+### Point the client's coding agent at flint-ui
+
+Agents working in a client repo don't know flint-ui exists unless the repo says so. Add this to the client's `CLAUDE.md` (or `AGENTS.md`):
+
+```markdown
+## UI components
+
+UI is built with flint-ui (github.com/flintcraftstudio/flint-ui), linked at `.flint-ui/`.
+Before writing any UI markup, read `.flint-ui/AGENTS.md`, then the component's
+reference in `.flint-ui/docs/components/` and the recipes in `.flint-ui/docs/patterns.md`.
+Use flint-ui components and semantic color tokens; don't hand-write equivalent markup
+or raw Tailwind color classes. Run `templ generate` after editing `.templ` files.
+```
+
+If the project doesn't keep the `.flint-ui` link, use the module path from `go list -m -f '{{.Dir}}' github.com/flintcraftstudio/flint-ui` instead.
+
 ## Dark mode
 
 flint-ui ships a dark palette (derived from Catalyst's dark mode: zinc-950 page, zinc-900 panels, white/10 borders), but it is **opt-in**. With no `data-theme` attribute a site renders light only, so existing client sites don't change.
@@ -208,10 +224,13 @@ go run ./examples/showcase   # terminal 2
 ## Layout
 
 ```
+AGENTS.md               entry point for coding agents
+doc.go                  root package: go doc prints the catalog
 components/
   button/               one package per component family
     button.templ
     classes.go
+    doc.go              package overview for go doc
   input/                text inputs + InputGroup icon wrapper
   fieldset/             Fieldset, FieldGroup, Field, Label, Description, ErrorMessage
   shared/               shared prop types
@@ -226,6 +245,7 @@ examples/
     static/
 docs/
   components/           per-component markdown reference
+  patterns.md           screen recipes composed from components
 ```
 
 ## Principles

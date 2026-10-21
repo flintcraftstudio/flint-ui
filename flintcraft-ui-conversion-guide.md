@@ -348,7 +348,7 @@ The structure every admin screen sits in. Converted from Catalyst where it has a
 34. **Dark mode** — opt-in dark token values switched by `data-theme` on `<html>` (see "Dark Mode" below).
 35. **Progress** — from scratch. Determinate and looping indeterminate bars; server-reported progress polls with htmx and swaps with `outerMorph` so the fill animates.
 
-**Next up:** skeletons.
+36. **Discoverability** — `AGENTS.md`, `docs/patterns.md`, a root `doc.go` catalog and per-package `doc.go` overviews, kept in sync by `catalog_test.go`.
 
 **Shared infrastructure to build alongside:**
 
