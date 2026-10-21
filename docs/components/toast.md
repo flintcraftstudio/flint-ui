@@ -12,6 +12,15 @@ import "github.com/flintcraftstudio/flint-ui/components/toast"
 
 ## Setup — render Container once
 
+The container's state is registered by flint-ui's script, so serve `flintui.Script()` as a file and load it **before** Alpine:
+
+```html
+<script src="/static/flint-ui.js" defer></script>   <!-- flintui.Script() -->
+<script src="/static/alpine.min.js" defer></script>
+```
+
+This works with the regular Alpine build and with the CSP build (`@alpinejs/csp`), so the toast runs under a strict Content-Security-Policy with no `'unsafe-eval'`.
+
 In your base layout, after the main content:
 
 ```go

@@ -1,7 +1,8 @@
 // Package flintui is the entry point to flint-ui: server-rendered UI
 // components for Go + templ + htmx 4 + Alpine.js + Tailwind CSS v4,
-// converted from Tailwind's Catalyst UI kit. This package has no code; the
-// components live under components/, one package per family.
+// converted from Tailwind's Catalyst UI kit. The components live under
+// components/, one package per family; this package holds Script, the
+// JavaScript some of them need.
 //
 // Invoke a component inside a .templ file as
 //

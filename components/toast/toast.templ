@@ -32,9 +32,9 @@ type ContainerProps struct {
 // X button and hover-to-pause work.
 templ Container(p ContainerProps) {
 	<div
-		x-data={ alpineData() }
+		x-data="flintToast"
 		x-on:flint:toast.window="add($event.detail)"
-		x-on:keydown.escape.window="toasts.length && dismiss(toasts[toasts.length-1].id)"
+		x-on:keydown.escape.window="dismissLatest()"
 		aria-live="polite"
 		aria-atomic="false"
 		class={ containerClasses(p) }
@@ -76,10 +76,7 @@ templ Container(p ContainerProps) {
 				<div
 					x-show="t.duration > 0"
 					class={ progressBarClasses() }
-					x-bind:style="{
-						animation: 'flint-toast-progress ' + t.duration + 'ms linear forwards',
-						animationPlayState: t.paused ? 'paused' : 'running'
-					}"
+					x-bind:style="progressStyle(t)"
 					aria-hidden="true"
 				></div>
 			</div>

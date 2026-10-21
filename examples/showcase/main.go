@@ -14,6 +14,8 @@ import (
 
 	"github.com/a-h/templ"
 
+	flintui "github.com/flintcraftstudio/flint-ui"
+
 	"github.com/flintcraftstudio/flint-ui/examples/showcase/templates"
 )
 
@@ -27,6 +29,10 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
+	mux.HandleFunc("GET /static/flint-ui.js", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/javascript; charset=utf-8")
+		w.Write(flintui.Script())
+	})
 	mux.Handle("GET /static/",
 		http.StripPrefix("/static/", http.FileServer(http.Dir("examples/showcase/static"))))
 
