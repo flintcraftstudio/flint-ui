@@ -63,5 +63,6 @@ Horizontal resizing isn't exposed — Catalyst only ships `resize-y` vs `resize-
 
 - Always pair with `fieldset.Label{For: id}` (or a surrounding `<label>`) for screen reader users.
 - `Invalid` sets `aria-invalid="true"` so assistive tech announces validation state.
+- Text is 16px at every width (Catalyst drops to 14px above `sm`), so iOS Safari doesn't zoom into the field when it gets focus.
 - `data-invalid` targets both Headless UI's `[data-invalid]` *and* the native `:user-invalid` pseudo-class (see `styles/flint-ui.css`), so browser-validated fields light up without extra JS.
 - Focus ring is applied via `sm:focus-within:after:ring-2 sm:focus-within:after:ring-ring` on the wrapper — visible for both mouse and keyboard users.

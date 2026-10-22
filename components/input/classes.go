@@ -37,8 +37,12 @@ const wrapperBase = "relative block w-full " +
 	"has-data-disabled:opacity-50 has-data-disabled:before:bg-muted has-data-disabled:before:shadow-none"
 
 // inputBase is applied to the <input> element inside the wrapper.
+// Unlike Catalyst, the text stays 16px at every width (no sm:text-sm):
+// iOS Safari zooms into any field under 16px when it gets focus, tablets
+// included. The line height is 24px either way, so the field's height
+// doesn't change.
 const inputBase = "relative block w-full appearance-none rounded-lg px-[calc(--spacing(3.5)-1px)] py-[calc(--spacing(2.5)-1px)] sm:px-[calc(--spacing(3)-1px)] sm:py-[calc(--spacing(1.5)-1px)] " +
-	"text-base/6 text-foreground placeholder:text-muted-foreground sm:text-sm/6 " +
+	"text-base/6 text-foreground placeholder:text-muted-foreground " +
 	"border border-border data-hover:border-foreground/20 " +
 	"bg-transparent " +
 	"focus:outline-hidden " +
