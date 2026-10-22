@@ -8,9 +8,11 @@
   on (x-cloak, toast animations).
 
   @source paths resolve relative to this file, so importing it is enough
-  for Tailwind to scan every flint-ui component template.
+  for Tailwind to find every class flint-ui uses: in the component
+  templates and, for most components, in their classes.go.
 */
 @source "../components/**/*.templ";
+@source "../components/**/*.go";
 
 /*
   Token contract — clients override these to brand flint-ui to their palette.
