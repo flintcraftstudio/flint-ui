@@ -66,7 +66,7 @@ You could ship a checkbox and call it a switch, but screen readers would announc
 | `Checked`  | `bool`             | `false` | Initial state.                                         |
 | `Required` | `bool`             | `false` | Marks the input required.                              |
 | `Disabled` | `bool`             | `false` | Dims the switch and blocks interaction.                |
-| `Invalid`  | `bool`             | `false` | Adds data-invalid / aria-invalid for validation styling. |
+| `Invalid`  | `bool`             | `false` | Adds `data-invalid` + `aria-invalid="true"` for validation styling. |
 | `Class`    | `string`           | `""`    | Appended to the outer label.                           |
 | `Attrs`    | `templ.Attributes` | `nil`   | Spread onto the inner input. Use for `hx-*`, custom aria. |
 

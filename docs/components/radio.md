@@ -60,7 +60,7 @@ Radio mirrors Checkbox's visual weight — same size, same focus ring, same prim
 | `Checked`  | `bool`             | `false` | Initial checked state.                                 |
 | `Required` | `bool`             | `false` | Marks the input required.                              |
 | `Disabled` | `bool`             | `false` | Dims the radio and blocks interaction.                 |
-| `Invalid`  | `bool`             | `false` | Adds data-invalid / aria-invalid for validation error styling. |
+| `Invalid`  | `bool`             | `false` | Adds `data-invalid` + `aria-invalid="true"` for validation error styling. |
 | `Class`    | `string`           | `""`    | Appended to the outer label.                           |
 | `Attrs`    | `templ.Attributes` | `nil`   | Spread onto the inner input. Use for `hx-*`, custom aria. |
 

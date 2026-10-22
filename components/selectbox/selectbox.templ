@@ -48,7 +48,9 @@ templ Select(p Props) {
 			required?={ p.Required }
 			disabled?={ p.Disabled }
 			data-invalid?={ p.Invalid }
-			aria-invalid?={ p.Invalid }
+			if p.Invalid {
+				aria-invalid="true"
+			}
 			class={ selectClasses(p) }
 			{ p.Attrs... }
 		>

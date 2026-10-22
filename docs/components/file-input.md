@@ -93,7 +93,7 @@ The browser's "Choose file" button is restyled as a muted chip. The "No file cho
 | `Multiple` | `bool`             | `false` | Allow several files.                                     |
 | `Required` | `bool`             | `false` |                                                          |
 | `Disabled` | `bool`             | `false` |                                                          |
-| `Invalid`  | `bool`             | `false` | Danger border + `aria-invalid`.                          |
+| `Invalid`  | `bool`             | `false` | Danger border + `aria-invalid="true"`.                          |
 | `Class`    | `string`           | `""`    | Appended to the wrapper.                                 |
 | `Attrs`    | `templ.Attributes` | `nil`   | Spread onto the `<input>`. Use for `hx-*`.               |
 

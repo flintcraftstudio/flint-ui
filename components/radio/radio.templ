@@ -51,7 +51,9 @@ templ Radio(p Props) {
 			required?={ p.Required }
 			disabled?={ p.Disabled }
 			data-invalid?={ p.Invalid }
-			aria-invalid?={ p.Invalid }
+			if p.Invalid {
+				aria-invalid="true"
+			}
 			{ p.Attrs... }
 		/>
 		<span aria-hidden="true" class={ circleClasses }></span>

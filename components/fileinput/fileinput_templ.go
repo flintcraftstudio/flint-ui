@@ -181,7 +181,7 @@ func Input(p Props) templ.Component {
 			}
 		}
 		if p.Invalid {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, " aria-invalid")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, " aria-invalid=\"true\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -252,7 +252,7 @@ func Dropzone(p DropzoneProps) templ.Component {
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.ResolveAttributeValue(dropzoneData(p.Accept, p.Multiple, p.Disabled))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/fileinput/fileinput.templ`, Line: 73, Col: 57}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/fileinput/fileinput.templ`, Line: 75, Col: 57}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var11)
 		if templ_7745c5c3_Err != nil {
@@ -287,7 +287,7 @@ func Dropzone(p DropzoneProps) templ.Component {
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/fileinput/fileinput.templ`, Line: 77, Col: 13}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/fileinput/fileinput.templ`, Line: 79, Col: 13}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var14)
 		if templ_7745c5c3_Err != nil {
@@ -329,7 +329,7 @@ func Dropzone(p DropzoneProps) templ.Component {
 		var templ_7745c5c3_Var16 string
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(prompt(p))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/fileinput/fileinput.templ`, Line: 90, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/fileinput/fileinput.templ`, Line: 92, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
@@ -342,7 +342,7 @@ func Dropzone(p DropzoneProps) templ.Component {
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(" ")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/fileinput/fileinput.templ`, Line: 91, Col: 9}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/fileinput/fileinput.templ`, Line: 93, Col: 9}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -360,7 +360,7 @@ func Dropzone(p DropzoneProps) templ.Component {
 			var templ_7745c5c3_Var18 string
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(p.Hint)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/fileinput/fileinput.templ`, Line: 94, Col: 76}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/fileinput/fileinput.templ`, Line: 96, Col: 76}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
@@ -383,7 +383,7 @@ func Dropzone(p DropzoneProps) templ.Component {
 			var templ_7745c5c3_Var19 string
 			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/fileinput/fileinput.templ`, Line: 102, Col: 18}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/fileinput/fileinput.templ`, Line: 104, Col: 18}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var19)
 			if templ_7745c5c3_Err != nil {
@@ -401,7 +401,7 @@ func Dropzone(p DropzoneProps) templ.Component {
 		var templ_7745c5c3_Var20 string
 		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/fileinput/fileinput.templ`, Line: 104, Col: 13}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/fileinput/fileinput.templ`, Line: 106, Col: 13}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var20)
 		if templ_7745c5c3_Err != nil {
@@ -419,7 +419,7 @@ func Dropzone(p DropzoneProps) templ.Component {
 			var templ_7745c5c3_Var21 string
 			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.ResolveAttributeValue(p.Accept)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/fileinput/fileinput.templ`, Line: 106, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/fileinput/fileinput.templ`, Line: 108, Col: 22}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var21)
 			if templ_7745c5c3_Err != nil {
@@ -449,7 +449,7 @@ func Dropzone(p DropzoneProps) templ.Component {
 			}
 		}
 		if p.Invalid {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, " aria-invalid")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, " aria-invalid=\"true\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -52,7 +52,9 @@ templ Textarea(p Props) {
 			disabled?={ p.Disabled }
 			readonly?={ p.Readonly }
 			data-invalid?={ p.Invalid }
-			aria-invalid?={ p.Invalid }
+			if p.Invalid {
+				aria-invalid="true"
+			}
 			class={ textareaClasses(p) }
 			{ p.Attrs... }
 		>{ p.Value }</textarea>

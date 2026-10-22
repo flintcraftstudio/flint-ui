@@ -145,7 +145,7 @@ func createJob(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-- `Invalid` sets the red border and `aria-invalid`; `aria-describedby` makes screen readers read the error with the field.
+- `Invalid` sets the red border and `aria-invalid="true"`; `aria-describedby` makes screen readers read the error with the field.
 - `Indicator` on the submit button shows a spinner while the form is in flight (the `htmx-request` class lands on the `<form>`), and `hx-disable="find button"` blocks double submits.
 - The same pattern works for `selectbox`, `textarea`, `checkbox`, `radio` and `toggle`; each has an `Invalid` prop.
 

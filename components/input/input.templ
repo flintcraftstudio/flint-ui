@@ -49,7 +49,9 @@ templ Input(p Props) {
 			disabled?={ p.Disabled }
 			readonly?={ p.Readonly }
 			data-invalid?={ p.Invalid }
-			aria-invalid?={ p.Invalid }
+			if p.Invalid {
+				aria-invalid="true"
+			}
 			class={ inputClasses(p) }
 			{ p.Attrs... }
 		/>

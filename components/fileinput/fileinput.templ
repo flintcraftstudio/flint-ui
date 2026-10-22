@@ -56,7 +56,9 @@ templ Input(p Props) {
 			required?={ p.Required }
 			disabled?={ p.Disabled }
 			data-invalid?={ p.Invalid }
-			aria-invalid?={ p.Invalid }
+			if p.Invalid {
+				aria-invalid="true"
+			}
 			class={ inputClasses }
 			{ p.Attrs... }
 		/>
@@ -108,7 +110,9 @@ templ Dropzone(p DropzoneProps) {
 				multiple?={ p.Multiple }
 				required?={ p.Required }
 				disabled?={ p.Disabled }
-				aria-invalid?={ p.Invalid }
+				if p.Invalid {
+					aria-invalid="true"
+				}
 				{ p.Attrs... }
 			/>
 		</label>

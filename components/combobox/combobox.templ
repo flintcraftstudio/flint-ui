@@ -56,7 +56,9 @@ templ Combobox(p Props) {
 			required?={ p.Required }
 			disabled?={ p.Disabled }
 			data-invalid?={ p.Invalid }
-			aria-invalid?={ p.Invalid }
+			if p.Invalid {
+				aria-invalid="true"
+			}
 			x-model="query"
 			x-on:focus="open = true"
 			x-on:input="open = true"
