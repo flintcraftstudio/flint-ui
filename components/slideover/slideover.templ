@@ -52,10 +52,11 @@ type SubProps struct {
 templ Slideover(p Props) {
 	<template x-teleport="body">
 		<div
-			x-data={ alpineData(p.Name) }
-			x-on:flint:slideover-open.window={ openHandler(p.Name) }
-			x-on:flint:slideover-close.window={ closeHandler(p.Name) }
-			x-on:keydown.escape.window="open && (open = false)"
+			x-data="flintSlideover"
+			data-flint-name={ safeName(p.Name) }
+			x-on:flint:slideover-open.window="onOpen($event)"
+			x-on:flint:slideover-close.window="onClose($event)"
+			x-on:keydown.escape.window="close()"
 			x-show="open"
 			x-cloak
 			class="fixed inset-0 z-50"
@@ -68,7 +69,7 @@ templ Slideover(p Props) {
 				x-transition:leave="transition-opacity duration-150 ease-in"
 				x-transition:leave-start="opacity-100"
 				x-transition:leave-end="opacity-0"
-				x-on:click="open = false"
+				x-on:click="close()"
 				class={ backdropClasses(p) }
 				aria-hidden="true"
 			></div>

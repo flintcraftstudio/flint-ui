@@ -1,9 +1,6 @@
 package slideover
 
-import (
-	"fmt"
-	"strings"
-)
+import "strings"
 
 // Slideover reuses most of Modal's structural vocabulary (backdrop tint,
 // panel surface tokens, title/description/body typography) with two
@@ -156,32 +153,9 @@ func actionsClasses(p SubProps) string {
 // alpineData is the inline x-data expression placed on the slideover
 // root. Mirrors modal.alpineData — name is validated by safeName so a
 // malformed name produces an inert slideover instead of a syntax error.
-func alpineData(name string) string {
-	return fmt.Sprintf("{ open: false, name: '%s' }", safeName(name))
-}
-
-// detailName is the JS expression that extracts the target name from an
-// open/close event. $dispatch sends the bare name as the detail; an htmx
-// HX-Trigger header wraps a scalar payload as {value: name}. Accept both.
-// On close, any non-string detail (none, true, an object) means "close
-// all" — htmx 4 can't send a null detail (htmx.trigger throws on it).
-const detailName = "$event.detail?.value ?? $event.detail"
-
-// openHandler listens for the global open event and matches on name so
-// a single dispatch can address one slideover on a page with many.
-func openHandler(name string) string {
-	return fmt.Sprintf("const n = %s; if (n === '%s') { open = true }", detailName, safeName(name))
-}
-
-// closeHandler: no detail closes every slideover (useful after a
-// successful htmx form submit); a detail matching this slideover's name
-// closes just this one.
-func closeHandler(name string) string {
-	return fmt.Sprintf("const n = %s; if (typeof n !== 'string' || !n || n === '%s') { open = false }", detailName, safeName(name))
-}
-
-// safeName keeps only characters safe to embed in a single-quoted JS
-// string literal. Same rule as modal.safeName and tabs.safeName.
+// safeName keeps a name to the characters names are documented to use
+// ([A-Za-z0-9_-:.]), so a name renders the same as before the component
+// moved to Alpine.data. Same rule as modal.safeName and tabs.safeName.
 func safeName(s string) string {
 	var b strings.Builder
 	b.Grow(len(s))

@@ -9,6 +9,39 @@
 document.addEventListener("alpine:init", function () {
 	"use strict";
 
+	// Slide-over: see components/slideover. x-data="flintSlideover", with
+	// its name in data-flint-name. Opened and closed by the window events
+	// flint:slideover-open and flint:slideover-close.
+	Alpine.data("flintSlideover", function () {
+		return {
+			open: false,
+
+			// eventName is the name an open or close event addresses. $dispatch
+			// sends the bare name; an htmx HX-Trigger header wraps a scalar as
+			// {value: name}. Anything else is no name.
+			_eventName: function (e) {
+				var d = e.detail;
+				if (d && typeof d === "object" && "value" in d) d = d.value;
+				return typeof d === "string" ? d : "";
+			},
+
+			onOpen: function (e) {
+				if (this._eventName(e) === this.$el.dataset.flintName) this.open = true;
+			},
+
+			// No name (none, true, an object) closes every slide-over; a name
+			// closes only that one. htmx 4 can't send a null detail.
+			onClose: function (e) {
+				var n = this._eventName(e);
+				if (!n || n === this.$el.dataset.flintName) this.open = false;
+			},
+
+			close: function () {
+				this.open = false;
+			}
+		};
+	});
+
 	// Toast container: see components/toast. x-data="flintToast".
 	Alpine.data("flintToast", function () {
 		return {

@@ -111,9 +111,11 @@ If you omit Title and Description, Body fills the full panel. Mobile nav drawers
 Same as Modal and Dropdown:
 
 1. **`x-data` on a common ancestor.** Triggers' `x-on:click="$dispatch(...)"` are ignored without an enclosing Alpine scope. Put `x-data` on `<body>` in your base layout.
-2. **Alpine Focus plugin loaded before Alpine core.** `x-trap` is undefined without it and the focus trap silently no-ops.
+2. **flint-ui's script loaded before Alpine.** The slide-over's state is registered by `flintui.Script()` (`x-data="flintSlideover"`), so serve it as a file and load it before Alpine. This works with the regular Alpine build and with the CSP build (`@alpinejs/csp`), so the slide-over runs under a strict Content-Security-Policy with no `'unsafe-eval'`.
+3. **Alpine Focus plugin loaded before Alpine core.** `x-trap` is undefined without it and the focus trap silently no-ops.
 
 ```html
+<script src="/static/flint-ui.js" defer></script>   <!-- flintui.Script() -->
 <script src="https://unpkg.com/@alpinejs/focus@3.14.1/dist/cdn.min.js" defer></script>
 <script src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js" defer></script>
 ```
