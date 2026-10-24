@@ -38,6 +38,52 @@ document.addEventListener("alpine:init", function () {
 
 			close: function () {
 				this.open = false;
+			},
+
+			// With data-flint-history, the panel owns one history entry while
+			// open, marked in history.state. Back closes it; any other close
+			// calls history.back() to remove the entry. back() is
+			// asynchronous, and in Chromium a pushState made before it lands
+			// doesn't stack on top: the back() still lands on the entry before
+			// the panel's. So a panel reopened in that gap waits for the
+			// back() and then pushes, and _backing (true only while a back()
+			// of ours is in flight) tells that popstate apart from Back.
+			init: function () {
+				if (this.$el.dataset.flintHistory === undefined) return;
+				var self = this;
+				var name = this.$el.dataset.flintName;
+				var ours = function () { return !!history.state && history.state.flintSlideover === name; };
+				// Keep whatever the page or htmx stored in the entry's state.
+				var push = function () { history.pushState(Object.assign({}, history.state, { flintSlideover: name }), ""); };
+				// Loaded onto an entry still marked (a reload while open): unmark
+				// it, or Back from a reopened panel would land on it and stay open.
+				if (ours()) {
+					var unmarked = Object.assign({}, history.state);
+					delete unmarked.flintSlideover;
+					history.replaceState(unmarked, "");
+				}
+				this._backing = false;
+				this.$watch("open", function (open) {
+					if (open) {
+						if (!self._backing) push();
+					} else if (ours() && !self._backing) {
+						self._backing = true;
+						history.back();
+					}
+				});
+				this._onPopState = function () {
+					if (self._backing) {
+						self._backing = false;
+						if (self.open) push();
+					} else if (self.open && !ours()) {
+						self.open = false;
+					}
+				};
+				window.addEventListener("popstate", this._onPopState);
+			},
+
+			destroy: function () {
+				if (this._onPopState) window.removeEventListener("popstate", this._onPopState);
 			}
 		};
 	});

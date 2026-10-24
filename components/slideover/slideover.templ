@@ -33,11 +33,19 @@ const (
 // Side picks which edge the panel slides in from (default SideRight).
 // Size picks the max-width cap (default SizeLG).
 type Props struct {
-	Name  string
-	Side  Side
-	Size  Size
-	Class string
-	Attrs templ.Attributes
+	Name string
+	Side Side
+	Size Size
+	// History makes the browser's back button close the panel: opening it
+	// pushes a history entry (the URL doesn't change), Back closes it, and
+	// closing it any other way removes the entry. One slide-over with
+	// History is open at a time. If the page navigates or reloads while it
+	// is open, or htmx swaps out the slide-over itself, its entry stays
+	// behind and the next Back appears to do nothing; swap a panel's
+	// contents, never the slide-over.
+	History bool
+	Class   string
+	Attrs   templ.Attributes
 }
 
 // SubProps is the shared shape for Title / Description / Body / Actions.
@@ -54,6 +62,7 @@ templ Slideover(p Props) {
 		<div
 			x-data="flintSlideover"
 			data-flint-name={ safeName(p.Name) }
+			data-flint-history?={ p.History }
 			x-on:flint:slideover-open.window="onOpen($event)"
 			x-on:flint:slideover-close.window="onClose($event)"
 			x-on:keydown.escape.window="close()"

@@ -60,6 +60,14 @@ Same event API as Modal, with a different event name so the two don't collide:
 | ESC             | Bound globally; closes the currently-open slideover           |
 | Backdrop click  | Closes                                                        |
 
+### Back button
+
+With `History: true`, opening the panel pushes one history entry (the URL doesn't change) marked in `history.state`, keeping whatever the page or htmx stored there. The browser's or phone's back button then closes the panel instead of leaving the page, and closing it any other way (a button, ESC, the backdrop, a close event) calls `history.back()` to remove the entry, so opening and closing never piles up entries.
+
+- One slide-over with `History` is open at a time; a stack of two would need two entries and an order for closing them.
+- If a link inside the open panel navigates away, the page reloads while it is open, or htmx swaps out the slide-over element itself, its entry stays behind and the next Back appears to do nothing. Swap a panel's contents, never the slide-over. After a reload the leftover entry is unmarked, so Back still closes a reopened panel on the first press.
+- If the page pushes an entry of its own while the panel is open (htmx `hx-push-url`), Back undoes the page's entry and the panel stays open. To move the page's URL while a panel is open, replace the entry instead, after the panel closes.
+
 Mirror Modal's convention: a successful htmx form submit can dispatch `flint:slideover-close` via `HX-Trigger: {"flint:slideover-close":true}` to close whatever drawer drove the form, or `{"flint:slideover-close":"job-filters"}` to close one. htmx wraps the scalar as `{value: ...}`; the handlers accept both forms. Don't send `null` — htmx 4's `htmx.trigger` throws on a null detail.
 
 ## Side
@@ -129,6 +137,7 @@ Same as Modal and Dropdown:
 | `Name`   | `string`           | `""`         | Required. Stable URL-safe identifier; used for open/close event matching. |
 | `Side`   | `Side`             | `SideRight`  | Which edge the panel anchors to.                              |
 | `Size`   | `Size`             | `SizeLG`     | Max-width at sm+.                                             |
+| `History` | `bool`            | `false`      | The browser's back button closes the panel. See [Back button](#back-button). |
 | `Class`  | `string`           | `""`         | Appended to the panel `<div>`.                                |
 | `Attrs`  | `templ.Attributes` | `nil`        | Spread onto the panel.                                        |
 

@@ -33,6 +33,15 @@ const CSP = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 's
 //go:embed testdata/alpine-csp-3.17.4.min.js
 var alpineCSP []byte
 
+// frames drives requestAnimationFrame with a timer. Under
+// --virtual-time-budget, headless Chromium runs almost no animation
+// frames, so an Alpine transition would never finish, and reopening a
+// component during its stalled leave would make Alpine reject the
+// cancelled transition's promise. A real browser runs frames.
+const frames = `window.requestAnimationFrame = function (cb) { return setTimeout(function () { cb(performance.now()); }, 16); };
+window.cancelAnimationFrame = function (id) { clearTimeout(id); };
+`
+
 // The Focus plugin, which modal and slide-over need for x-trap.
 //
 //go:embed testdata/alpine-focus-3.17.4.min.js
@@ -64,6 +73,7 @@ func Run(t *testing.T, body templ.Component, check string) Result {
 	js := "text/javascript; charset=utf-8"
 	file("/flint-ui.js", js, flintui.Script())
 	file("/check.js", js, []byte(check))
+	file("/frames.js", js, []byte(frames))
 	file("/alpine-focus.js", js, alpineFocus)
 	file("/alpine.js", js, alpineCSP)
 	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
@@ -94,13 +104,13 @@ func Run(t *testing.T, body templ.Component, check string) Result {
 	return Result{DOM: stdout.String(), Console: consoleErrors(stderr.String())}
 }
 
-// page is the minimal document: flint-ui's script, the check script and
-// the Focus plugin before Alpine (deferred scripts run in order), and
-// nothing inline.
+// page is the minimal document: the frames shim, flint-ui's script, the
+// check script and the Focus plugin before Alpine (deferred scripts run
+// in order), and nothing inline.
 func page(body templ.Component) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
 		if _, err := w.Write([]byte(`<!doctype html><html lang="en"><head><meta charset="utf-8">` +
-			`<script src="/flint-ui.js" defer></script><script src="/check.js" defer></script>` +
+			`<script src="/frames.js" defer></script><script src="/flint-ui.js" defer></script><script src="/check.js" defer></script>` +
 			`<script src="/alpine-focus.js" defer></script><script src="/alpine.js" defer></script></head><body x-data>`)); err != nil {
 			return err
 		}
