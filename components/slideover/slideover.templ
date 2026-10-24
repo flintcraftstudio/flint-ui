@@ -85,7 +85,8 @@ templ Slideover(p Props) {
 			<div class={ anchorClasses(p) } role="dialog" aria-modal="true">
 				<div
 					x-show="open"
-					x-trap.inert.noscroll="open"
+					x-ref="panel"
+					x-trap.inert.noscroll="trapped"
 					x-transition:enter="transform transition duration-300 ease-out"
 					x-transition:enter-start={ panelHiddenClasses(p) }
 					x-transition:enter-end={ panelVisibleClasses() }

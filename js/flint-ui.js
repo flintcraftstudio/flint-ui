@@ -16,6 +16,13 @@ document.addEventListener("alpine:init", function () {
 		return {
 			open: false,
 
+			// trapped drives the panel's x-trap. It follows open, but turns
+			// true only once the panel has a box: x-show shows it on a later
+			// animation frame, and a trap started before then (the Focus
+			// plugin waits a fixed 15ms) finds nothing to focus and never
+			// retries.
+			trapped: false,
+
 			// eventName is the name an open or close event addresses. $dispatch
 			// sends the bare name; an htmx HX-Trigger header wraps a scalar as
 			// {value: name}. Anything else is no name.
@@ -49,8 +56,20 @@ document.addEventListener("alpine:init", function () {
 			// back() and then pushes, and _backing (true only while a back()
 			// of ours is in flight) tells that popstate apart from Back.
 			init: function () {
-				if (this.$el.dataset.flintHistory === undefined) return;
 				var self = this;
+				this.$watch("open", function (open) {
+					if (!open) {
+						self.trapped = false;
+						return;
+					}
+					var panel = self.$refs.panel;
+					(function shown() {
+						if (!self.open) return;
+						if (panel.getClientRects().length) self.trapped = true;
+						else requestAnimationFrame(shown);
+					})();
+				});
+				if (this.$el.dataset.flintHistory === undefined) return;
 				var name = this.$el.dataset.flintName;
 				var ours = function () { return !!history.state && history.state.flintSlideover === name; };
 				// Keep whatever the page or htmx stored in the entry's state.

@@ -110,7 +110,7 @@ If you omit Title and Description, Body fills the full panel. Mobile nav drawers
 ## Accessibility
 
 - `role="dialog"` + `aria-modal="true"` on the panel container.
-- `x-trap.inert.noscroll="open"` on the panel itself: traps Tab focus, marks page siblings `inert` for assistive tech, locks body scroll while the panel is open.
+- `x-trap.inert.noscroll="trapped"` on the panel itself: traps Tab focus, marks page siblings `inert` for assistive tech, locks body scroll while the panel is open. `trapped` follows `open` but turns true only once the panel is showing, since a trap started before x-show shows the panel never moves focus into it.
 - ESC, backdrop click, and `x-on:click="open = false"` on any panel button all close.
 - Forced-colors mode: `forced-colors:outline` preserves the panel boundary.
 

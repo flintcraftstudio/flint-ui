@@ -17,9 +17,11 @@ import (
 // slide-over opens on its own name (bare, or wrapped as htmx's
 // {value: name}) and not on another's, and closes on a close event with
 // no name or its own name (not another's), Escape, a backdrop click and a
-// panel button's open = false. Without History it never touches history.
+// panel button's open = false. Opened, and reopened, it moves focus into
+// the panel. Without History it never touches history.
 // Nothing is logged to the console. Before v1.2.3 its state was inline in
-// x-data and it never started under the CSP build.
+// x-data and it never started under the CSP build. Before v1.2.5 its trap
+// could start before x-show had shown the panel, leaving focus outside.
 func TestSlideoverUnderCSP(t *testing.T) {
 	for _, c := range []struct {
 		name  string
@@ -57,6 +59,12 @@ func TestSlideoverUnderCSP(t *testing.T) {
 			`document.getElementById("done").click()`,
 			`state("done")`,
 		}, "done=closed"},
+		{"focus", []string{
+			`fire("flint:slideover-open", "item")`,
+			`log.push("focus=" + document.activeElement.id); document.getElementById("done").click()`,
+			`fire("flint:slideover-open", "item")`,
+			`log.push("reopened=" + document.activeElement.id)`,
+		}, "focus=inside reopened=inside"},
 		{"no history", []string{
 			`fire("flint:slideover-open", "item")`,
 			`state("open"); log.push("added=" + (history.length - startLength) + " mark=" + mark())`,
