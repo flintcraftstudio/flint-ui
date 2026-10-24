@@ -21,9 +21,8 @@ const (
 // Props controls the outer Modal.
 //
 // Name is required and must be a stable identifier — callers dispatch
-// 'flint:modal-open' with this name to open the modal. Use URL-safe
-// characters only ([A-Za-z0-9_-]); the name is embedded in a JS string
-// literal so anything exotic will break parsing.
+// 'flint:modal-open' with this name to open the modal. Use
+// [A-Za-z0-9_-:.] only; other characters are dropped.
 //
 // Alert flips the layout to Catalyst's compact alert-dialog style:
 // smaller default size, tighter padding, centered title text on mobile,
@@ -51,10 +50,11 @@ type SubProps struct {
 templ Modal(p Props) {
 	<template x-teleport="body">
 		<div
-			x-data={ alpineData(p.Name) }
-			x-on:flint:modal-open.window={ openHandler(p.Name) }
-			x-on:flint:modal-close.window={ closeHandler(p.Name) }
-			x-on:keydown.escape.window="open && (open = false)"
+			x-data="flintModal"
+			data-flint-name={ safeName(p.Name) }
+			x-on:flint:modal-open.window="onOpen($event)"
+			x-on:flint:modal-close.window="onClose($event)"
+			x-on:keydown.escape.window="close()"
 			x-show="open"
 			x-cloak
 			class="fixed inset-0 z-50"
@@ -74,12 +74,13 @@ templ Modal(p Props) {
 				class={ scrollClasses(p) }
 				role="dialog"
 				aria-modal="true"
-				x-on:click.self="open = false"
+				x-on:click.self="close()"
 			>
-				<div class={ gridClasses(p) } x-on:click.self="open = false">
+				<div class={ gridClasses(p) } x-on:click.self="close()">
 					<div
 						x-show="open"
-						x-trap.inert.noscroll="open"
+						x-ref="panel"
+						x-trap.inert.noscroll="trapped"
 						x-transition:enter="transition duration-100 ease-out"
 						x-transition:enter-start={ panelHiddenClasses(p) }
 						x-transition:enter-end={ panelVisibleClasses() }

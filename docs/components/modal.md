@@ -78,7 +78,7 @@ Trigger from anywhere on the page:
 
 ## Opening and closing
 
-The modal owns its own Alpine state (`{ open: false, name: 'your-name' }`) and listens for two window events.
+The modal's Alpine state is registered by flint-ui's script (`x-data="flintModal"`, with its name in `data-flint-name`), and it listens for two window events.
 
 ### Required: `x-data` on a common ancestor
 
@@ -91,6 +91,10 @@ Alpine only processes directives (`x-on:click`, etc.) on elements inside an `x-d
 ```
 
 This adds no runtime overhead beyond Alpine walking the tree — there's no state to manage — and it means every trigger on the page works without each one needing its own scope.
+
+### Required: flint-ui's script before Alpine
+
+The modal's state is registered by `flintui.Script()`, so serve it as a file and load it before Alpine. This works with the regular Alpine build and with the CSP build (`@alpinejs/csp`), so the modal runs under a strict Content-Security-Policy with no `'unsafe-eval'`.
 
 ### Open
 
@@ -114,7 +118,7 @@ Any of these close an open modal:
 
 ## Focus management
 
-The panel uses `x-trap.inert.noscroll="open"` (from the [Alpine Focus plugin](https://alpinejs.dev/plugins/focus)):
+The panel uses `x-trap.inert.noscroll="trapped"` (from the [Alpine Focus plugin](https://alpinejs.dev/plugins/focus)). `trapped` follows `open` but turns true only once the panel is showing, since a trap started before x-show shows the panel never moves focus into it.
 
 - **Trap**: Tab cycles inside the panel only.
 - **Inert**: siblings of the modal are marked `inert`, so screen readers skip them and mouse clicks outside the panel are intercepted by the backdrop.
@@ -123,6 +127,7 @@ The panel uses `x-trap.inert.noscroll="open"` (from the [Alpine Focus plugin](ht
 **You must load `@alpinejs/focus` before `alpinejs` core** or the trap directive is a no-op:
 
 ```html
+<script src="/static/flint-ui.js" defer></script>   <!-- flintui.Script() -->
 <script src="https://unpkg.com/@alpinejs/focus@3.14.1/dist/cdn.min.js" defer></script>
 <script src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js" defer></script>
 ```

@@ -26,9 +26,8 @@ const (
 // Props controls the outer Slideover.
 //
 // Name is required and must be a stable identifier — callers dispatch
-// 'flint:slideover-open' with this name to open the panel. Use URL-safe
-// characters only ([A-Za-z0-9_-:.]); the name is embedded in a JS string
-// literal so anything exotic will break parsing.
+// 'flint:slideover-open' with this name to open the panel. Use
+// [A-Za-z0-9_-:.] only; other characters are dropped.
 //
 // Side picks which edge the panel slides in from (default SideRight).
 // Size picks the max-width cap (default SizeLG).

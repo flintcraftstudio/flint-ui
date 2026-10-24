@@ -34,9 +34,8 @@ const (
 // Props controls the outer Slideover.
 //
 // Name is required and must be a stable identifier — callers dispatch
-// 'flint:slideover-open' with this name to open the panel. Use URL-safe
-// characters only ([A-Za-z0-9_-:.]); the name is embedded in a JS string
-// literal so anything exotic will break parsing.
+// 'flint:slideover-open' with this name to open the panel. Use
+// [A-Za-z0-9_-:.] only; other characters are dropped.
 //
 // Side picks which edge the panel slides in from (default SideRight).
 // Size picks the max-width cap (default SizeLG).
@@ -93,7 +92,7 @@ func Slideover(p Props) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.ResolveAttributeValue(safeName(p.Name))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slideover/slideover.templ`, Line: 64, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slideover/slideover.templ`, Line: 63, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
 		if templ_7745c5c3_Err != nil {
@@ -169,7 +168,7 @@ func Slideover(p Props) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.ResolveAttributeValue(panelHiddenClasses(p))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slideover/slideover.templ`, Line: 91, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slideover/slideover.templ`, Line: 90, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 		if templ_7745c5c3_Err != nil {
@@ -182,7 +181,7 @@ func Slideover(p Props) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.ResolveAttributeValue(panelVisibleClasses())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slideover/slideover.templ`, Line: 92, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slideover/slideover.templ`, Line: 91, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
 		if templ_7745c5c3_Err != nil {
@@ -195,7 +194,7 @@ func Slideover(p Props) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.ResolveAttributeValue(panelVisibleClasses())
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slideover/slideover.templ`, Line: 94, Col: 53}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slideover/slideover.templ`, Line: 93, Col: 53}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var10)
 		if templ_7745c5c3_Err != nil {
@@ -208,7 +207,7 @@ func Slideover(p Props) templ.Component {
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.ResolveAttributeValue(panelHiddenClasses(p))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slideover/slideover.templ`, Line: 95, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/slideover/slideover.templ`, Line: 94, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var11)
 		if templ_7745c5c3_Err != nil {

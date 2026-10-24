@@ -13,7 +13,7 @@ flint-ui exists to speed up internal dashboard development. Start at [`AGENTS.md
 - **Per-component docs**: every component has a reference in [`docs/components/`](./docs/components/) — open it before using the component. Each doc has: import, usage examples, a full props table, variants, and accessibility notes.
 - **Semantic tokens**: components never hard-code colors. Rebrand via the CSS variables in [`styles/flint-ui.css`](./styles/flint-ui.css) (see [Tailwind](#tailwind) below).
 - **htmx**: targets **htmx 4** (see [htmx 4 notes](#htmx-4)). Every component accepts `Attrs templ.Attributes` for `hx-*` / `data-*` / `aria-*` pass-through on the root element.
-- **Alpine**: only for local UI state (open/closed, selected tab). Never application data. Components register their state from `js/flint-ui.js` (`flintui.Script()`; load it before Alpine), so they can run under Alpine's CSP build and a strict Content-Security-Policy. Converted so far: toast and slideover; see AGENTS.md.
+- **Alpine**: only for local UI state (open/closed, selected tab). Never application data. Components register their state from `js/flint-ui.js` (`flintui.Script()`; load it before Alpine), so they can run under Alpine's CSP build and a strict Content-Security-Policy. Converted so far: toast, slideover and modal; see AGENTS.md.
 - **Showcase**: run `mage Showcase` to see every component live on `:8080`.
 
 ## Install

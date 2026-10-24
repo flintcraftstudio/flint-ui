@@ -1,9 +1,6 @@
 package modal
 
-import (
-	"fmt"
-	"strings"
-)
+import "strings"
 
 // Non-color classes preserved verbatim from catalyst-ui-kit/typescript/dialog.tsx
 // and alert.tsx. Color/opacity classes are translated to the semantic token
@@ -198,38 +195,9 @@ func actionsClasses(p SubProps) string {
 	return strings.Join(parts, " ")
 }
 
-// alpineData is the inline x-data expression placed on the modal root. It
-// carries the modal name so open/close handlers can filter events targeted
-// at other modals. The name is validated by safeName — anything that would
-// break the JS string literal is stripped so malformed input produces an
-// inert modal instead of a syntax error.
-func alpineData(name string) string {
-	return fmt.Sprintf("{ open: false, name: '%s' }", safeName(name))
-}
-
-// detailName is the JS expression that extracts the target name from an
-// open/close event. $dispatch sends the bare name as the detail; an htmx
-// HX-Trigger header wraps a scalar payload as {value: name}. Accept both.
-// On close, any non-string detail (none, true, an object) means "close
-// all" — htmx 4 can't send a null detail (htmx.trigger throws on it).
-const detailName = "$event.detail?.value ?? $event.detail"
-
-// openHandler listens for the global open event and matches on name so a
-// single dispatch can address one modal on a page with many.
-func openHandler(name string) string {
-	return fmt.Sprintf("const n = %s; if (n === '%s') { open = true }", detailName, safeName(name))
-}
-
-// closeHandler: no detail closes every modal (useful after a successful
-// htmx form submit); a detail matching this modal's name closes just this one.
-func closeHandler(name string) string {
-	return fmt.Sprintf("const n = %s; if (typeof n !== 'string' || !n || n === '%s') { open = false }", detailName, safeName(name))
-}
-
-// safeName keeps only characters safe to embed in a single-quoted JS string
-// literal. Names are expected to be stable identifiers like 'delete-invoice'
-// or 'crew:123:edit'; non-matching characters are dropped so a malformed
-// name can't break the page.
+// safeName keeps a name to the characters names are documented to use
+// ([A-Za-z0-9_-:.]), so a name renders the same as before the component
+// moved to Alpine.data. Same rule as slideover.safeName and tabs.safeName.
 func safeName(s string) string {
 	var b strings.Builder
 	b.Grow(len(s))

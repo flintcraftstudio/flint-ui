@@ -4,8 +4,9 @@
 // panel. A single component handles both: set Props.Alert = true for the
 // compact layout.
 //
-// State lives in Alpine. The caller opens the modal by dispatching a window
-// event:
+// State lives in Alpine, registered by flintui.Script() as flintModal, so
+// load that script before Alpine; it runs under Alpine's CSP build. The
+// caller opens the modal by dispatching a window event:
 //
 //	<button x-on:click="$dispatch('flint:modal-open', 'delete-invoice')">
 //	    Delete

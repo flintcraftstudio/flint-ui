@@ -9,37 +9,80 @@
 document.addEventListener("alpine:init", function () {
 	"use strict";
 
+	// eventName is the name an open or close event addresses. $dispatch
+	// sends the bare name; an htmx HX-Trigger header wraps a scalar as
+	// {value: name}. Anything else is no name.
+	function eventName(e) {
+		var d = e.detail;
+		if (d && typeof d === "object" && "value" in d) d = d.value;
+		return typeof d === "string" ? d : "";
+	}
+
+	// trapOnceShown keeps c.trapped, which drives the x-trap on c's panel
+	// (x-ref="panel"), following c.open, but turns it true only once the
+	// panel has a box: x-show shows it on a later animation frame, and a
+	// trap started before then (the Focus plugin waits a fixed 15ms) finds
+	// nothing to focus and never retries.
+	function trapOnceShown(c) {
+		c.$watch("open", function (open) {
+			if (!open) {
+				c.trapped = false;
+				return;
+			}
+			var panel = c.$refs.panel;
+			(function shown() {
+				if (!c.open) return;
+				if (panel.getClientRects().length) c.trapped = true;
+				else requestAnimationFrame(shown);
+			})();
+		});
+	}
+
+	// Modal: see components/modal. x-data="flintModal", with its name in
+	// data-flint-name. Opened and closed by the window events
+	// flint:modal-open and flint:modal-close.
+	Alpine.data("flintModal", function () {
+		return {
+			open: false,
+			trapped: false,
+
+			onOpen: function (e) {
+				if (eventName(e) === this.$el.dataset.flintName) this.open = true;
+			},
+
+			// No name (none, true, an object) closes every modal; a name
+			// closes only that one. htmx 4 can't send a null detail.
+			onClose: function (e) {
+				var n = eventName(e);
+				if (!n || n === this.$el.dataset.flintName) this.open = false;
+			},
+
+			close: function () {
+				this.open = false;
+			},
+
+			init: function () {
+				trapOnceShown(this);
+			}
+		};
+	});
+
 	// Slide-over: see components/slideover. x-data="flintSlideover", with
 	// its name in data-flint-name. Opened and closed by the window events
 	// flint:slideover-open and flint:slideover-close.
 	Alpine.data("flintSlideover", function () {
 		return {
 			open: false,
-
-			// trapped drives the panel's x-trap. It follows open, but turns
-			// true only once the panel has a box: x-show shows it on a later
-			// animation frame, and a trap started before then (the Focus
-			// plugin waits a fixed 15ms) finds nothing to focus and never
-			// retries.
 			trapped: false,
 
-			// eventName is the name an open or close event addresses. $dispatch
-			// sends the bare name; an htmx HX-Trigger header wraps a scalar as
-			// {value: name}. Anything else is no name.
-			_eventName: function (e) {
-				var d = e.detail;
-				if (d && typeof d === "object" && "value" in d) d = d.value;
-				return typeof d === "string" ? d : "";
-			},
-
 			onOpen: function (e) {
-				if (this._eventName(e) === this.$el.dataset.flintName) this.open = true;
+				if (eventName(e) === this.$el.dataset.flintName) this.open = true;
 			},
 
 			// No name (none, true, an object) closes every slide-over; a name
 			// closes only that one. htmx 4 can't send a null detail.
 			onClose: function (e) {
-				var n = this._eventName(e);
+				var n = eventName(e);
 				if (!n || n === this.$el.dataset.flintName) this.open = false;
 			},
 
@@ -56,20 +99,9 @@ document.addEventListener("alpine:init", function () {
 			// back() and then pushes, and _backing (true only while a back()
 			// of ours is in flight) tells that popstate apart from Back.
 			init: function () {
-				var self = this;
-				this.$watch("open", function (open) {
-					if (!open) {
-						self.trapped = false;
-						return;
-					}
-					var panel = self.$refs.panel;
-					(function shown() {
-						if (!self.open) return;
-						if (panel.getClientRects().length) self.trapped = true;
-						else requestAnimationFrame(shown);
-					})();
-				});
+				trapOnceShown(this);
 				if (this.$el.dataset.flintHistory === undefined) return;
+				var self = this;
 				var name = this.$el.dataset.flintName;
 				var ours = function () { return !!history.state && history.state.flintSlideover === name; };
 				// Keep whatever the page or htmx stored in the entry's state.

@@ -150,9 +150,6 @@ func actionsClasses(p SubProps) string {
 	return strings.Join(parts, " ")
 }
 
-// alpineData is the inline x-data expression placed on the slideover
-// root. Mirrors modal.alpineData — name is validated by safeName so a
-// malformed name produces an inert slideover instead of a syntax error.
 // safeName keeps a name to the characters names are documented to use
 // ([A-Za-z0-9_-:.]), so a name renders the same as before the component
 // moved to Alpine.data. Same rule as modal.safeName and tabs.safeName.
