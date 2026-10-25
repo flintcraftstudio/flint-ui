@@ -23,6 +23,10 @@ import "github.com/flintcraftstudio/flint-ui/components/button"
     Read the docs
 }
 
+@button.Button(button.Props{Plain: true, Variant: button.VariantDanger}) {
+    Delete draft
+}
+
 @button.Button(button.Props{
     Variant: button.VariantDanger,
     Attrs: templ.Attributes{
@@ -40,9 +44,9 @@ import "github.com/flintcraftstudio/flint-ui/components/button"
 
 | Field      | Type               | Default           | Notes                                                                 |
 | ---------- | ------------------ | ----------------- | --------------------------------------------------------------------- |
-| `Variant`  | `Variant`          | `VariantPrimary`  | One of the five semantic variants. Ignored if `Outline` or `Plain`.   |
-| `Outline`  | `bool`             | `false`           | Neutral outline (uses `border` + `foreground` + `muted` tokens).      |
-| `Plain`    | `bool`             | `false`           | Borderless until hover.                                               |
+| `Variant`  | `Variant`          | `VariantPrimary` (solid), neutral (outline/plain) | One of the five semantic variants. Solid buttons fill with it; outline and plain buttons take its text color and hover tint. Unset, outline and plain stay neutral. |
+| `Outline`  | `bool`             | `false`           | Outline with a `border` token border. Neutral (`foreground` + `muted`) unless `Variant` is set. |
+| `Plain`    | `bool`             | `false`           | Borderless until hover. Neutral unless `Variant` is set.             |
 | `Class`    | `string`           | `""`              | Extra classes appended after the generated className.                 |
 | `Href`     | `string`           | `""`              | When set, renders `<a>` with the same styling instead of `<button>`.  |
 | `Type`     | `string`           | `"button"`        | Sets `type=` on the `<button>`. Ignored when `Href` is set.           |
@@ -75,17 +79,27 @@ Set `Indicator` and the button shows a spinner in place of its label while htmx 
 
 ## Variants
 
-| Variant          | Background token | Text token              | Typical use                 |
-| ---------------- | ---------------- | ----------------------- | --------------------------- |
-| `VariantPrimary` | `primary`        | `primary-foreground`    | Default action on a screen. |
-| `VariantAccent`  | `accent`         | `accent-foreground`     | Secondary brand action.     |
-| `VariantDanger`  | `danger`         | `danger-foreground`     | Destructive actions.        |
-| `VariantSuccess` | `success`        | `success-foreground`    | Positive confirmations.     |
-| `VariantWarning` | `warning`        | `warning-foreground`    | Caution flows.              |
+| Variant          | Solid background | Solid text           | Outline/plain text | Outline/plain hover | Typical use                 |
+| ---------------- | ---------------- | -------------------- | ------------------ | ------------------- | --------------------------- |
+| `VariantPrimary` | `primary`        | `primary-foreground` | `primary`          | `primary/10`        | Default action on a screen. |
+| `VariantAccent`  | `accent`         | `accent-foreground`  | `accent-text`      | `accent/10`         | Secondary brand action.     |
+| `VariantDanger`  | `danger`         | `danger-foreground`  | `danger-text`      | `danger/10`         | Destructive actions.        |
+| `VariantSuccess` | `success`        | `success-foreground` | `success-text`     | `success/10`        | Positive confirmations.     |
+| `VariantWarning` | `warning`        | `warning-foreground` | `warning-text`     | `warning/25`        | Caution flows.              |
+
+Outline and plain buttons use the `-text` tokens (the hue mixed toward `foreground`), the same ones badges and alerts use, because the bare hue fails AA on its own hover tint: `danger` on `danger/10` over `canvas` is 3.78:1. Primary has no `-text` mix and passes as is. The icon takes the same token, at 70% at rest and full on hover, and the outline keeps the neutral `border` token. `styles/contrast_test.go` checks each text token on `background`, `surface` and `canvas`, at rest and over its hover tint, in both themes.
+
+```go
+// Red text, no fill: a destructive action that shouldn't shout.
+@button.Button(button.Props{Outline: true, Variant: button.VariantDanger}) { Delete item }
+```
 
 ## Style precedence
 
-`Outline` > `Plain` > solid-with-`Variant`. Only one applies at a time; `Variant` is only consulted when both booleans are `false`.
+`Outline` > `Plain` > solid. Only one style applies at a time, and `Variant` colors whichever it is:
+
+- **Solid** (both booleans `false`): an unset `Variant` means `VariantPrimary`.
+- **Outline or plain**: an unset `Variant` means neutral, exactly as before v1.3.0. An explicit `VariantPrimary` tints the button with the primary hue, like any other variant; leave `Variant` unset for a neutral button. An unknown value is also neutral.
 
 ## Theming
 

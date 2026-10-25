@@ -93,6 +93,30 @@ func pairs() []pair {
 			layer{"warning-text", 0.9}, solid(base), layer{"warning", 0.25})
 	}
 
+	// Outline and plain buttons with a Variant: the hue's text token on any
+	// page background, at rest and over its own hover tint. The icon is the
+	// same token at 70% at rest; icons are non-text, so it needs 3:1.
+	buttonTint := []struct {
+		hue, fg string
+		alpha   float64
+	}{
+		{"primary", "primary", 0.10},
+		{"accent", "accent-text", 0.10},
+		{"danger", "danger-text", 0.10},
+		{"success", "success-text", 0.10},
+		{"warning", "warning-text", 0.25},
+	}
+	for _, bt := range buttonTint {
+		for _, base := range []string{"background", "surface", "canvas"} {
+			text(fmt.Sprintf("tinted button: %s on %s", bt.fg, base),
+				solid(bt.fg), solid(base))
+			text(fmt.Sprintf("tinted button: %s on %s/%g over %s", bt.fg, bt.hue, bt.alpha*100, base),
+				solid(bt.fg), solid(base), layer{bt.hue, bt.alpha})
+			ps = append(ps, pair{fmt.Sprintf("tinted button icon: %s/70 on %s", bt.fg, base),
+				layer{bt.fg, 0.7}, []layer{solid(base)}, aaNonText})
+		}
+	}
+
 	// Focus ring against whatever it sits on.
 	for _, bg := range []string{"background", "surface", "canvas"} {
 		ps = append(ps, pair{"ring on " + bg, solid("ring"), []layer{solid(bg)}, aaNonText})

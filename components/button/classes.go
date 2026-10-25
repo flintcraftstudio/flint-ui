@@ -26,11 +26,38 @@ const solidClasses = "border-transparent bg-(--btn-border) " +
 	"data-active:after:bg-(--btn-hover-overlay) data-hover:after:bg-(--btn-hover-overlay) " +
 	"data-disabled:before:shadow-none data-disabled:after:shadow-none"
 
-const outlineClasses = "border-border text-foreground data-active:bg-muted data-hover:bg-muted " +
+// outlineClasses and plainClasses are the structure of the two unfilled
+// styles; their color comes from neutralTintClasses or tintClasses.
+const outlineClasses = "border-border"
+
+const plainClasses = "border-transparent"
+
+// neutralTintClasses color an outline or plain button with no Variant.
+const neutralTintClasses = "text-foreground data-active:bg-muted data-hover:bg-muted " +
 	"[--btn-icon:var(--color-muted-foreground)] data-active:[--btn-icon:var(--color-foreground)] data-hover:[--btn-icon:var(--color-foreground)]"
 
-const plainClasses = "border-transparent text-foreground data-active:bg-muted data-hover:bg-muted " +
-	"[--btn-icon:var(--color-muted-foreground)] data-active:[--btn-icon:var(--color-foreground)] data-hover:[--btn-icon:var(--color-foreground)]"
+// tintClasses color an outline or plain button with an explicit Variant:
+// the label in the hue's text token, the icon in the same token (muted at
+// rest, full on hover), and a light tint of the hue behind it on hover.
+// The text tokens and tint strengths are the ones badges and alerts use,
+// so styles/contrast_test.go covers them on their own hover tint. Primary
+// has no -text mix; the primary hue itself passes on its /10 tint.
+var tintClasses = map[Variant]string{
+	VariantPrimary: "text-primary data-active:bg-primary/10 data-hover:bg-primary/10 " +
+		"[--btn-icon:var(--color-primary)]/70 data-active:[--btn-icon:var(--color-primary)] data-hover:[--btn-icon:var(--color-primary)]",
+
+	VariantAccent: "text-accent-text data-active:bg-accent/10 data-hover:bg-accent/10 " +
+		"[--btn-icon:var(--color-accent-text)]/70 data-active:[--btn-icon:var(--color-accent-text)] data-hover:[--btn-icon:var(--color-accent-text)]",
+
+	VariantDanger: "text-danger-text data-active:bg-danger/10 data-hover:bg-danger/10 " +
+		"[--btn-icon:var(--color-danger-text)]/70 data-active:[--btn-icon:var(--color-danger-text)] data-hover:[--btn-icon:var(--color-danger-text)]",
+
+	VariantSuccess: "text-success-text data-active:bg-success/10 data-hover:bg-success/10 " +
+		"[--btn-icon:var(--color-success-text)]/70 data-active:[--btn-icon:var(--color-success-text)] data-hover:[--btn-icon:var(--color-success-text)]",
+
+	VariantWarning: "text-warning-text data-active:bg-warning/25 data-hover:bg-warning/25 " +
+		"[--btn-icon:var(--color-warning-text)]/70 data-active:[--btn-icon:var(--color-warning-text)] data-hover:[--btn-icon:var(--color-warning-text)]",
+}
 
 // variantClasses sets the CSS custom properties that solidClasses reads.
 // Every variant has the same structure: foreground text, --btn-bg from the
@@ -69,15 +96,24 @@ const indicatorSlotClasses = "absolute inset-0 hidden items-center justify-cente
 
 // Classes returns the full className string for the button, combining the
 // base, the selected style (outline / plain / solid-with-variant), and any
-// caller-supplied extras.
+// caller-supplied extras. Outline and plain are neutral unless Variant is
+// set, which tints them; solid treats an unset Variant as primary.
 func Classes(p Props) string {
 	parts := []string{baseClasses}
 
 	switch {
-	case p.Outline:
-		parts = append(parts, outlineClasses)
-	case p.Plain:
-		parts = append(parts, plainClasses)
+	case p.Outline || p.Plain:
+		if p.Outline {
+			parts = append(parts, outlineClasses)
+		} else {
+			parts = append(parts, plainClasses)
+		}
+		// Unlike solid, an unset (or unknown) Variant means neutral here.
+		if tc, ok := tintClasses[p.Variant]; ok {
+			parts = append(parts, tc)
+		} else {
+			parts = append(parts, neutralTintClasses)
+		}
 	default:
 		v := p.Variant
 		if v == "" {
