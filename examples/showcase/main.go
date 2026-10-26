@@ -79,6 +79,7 @@ func main() {
 	mux.Handle("GET /layouts", page("Layouts", "layouts", templates.Layouts()))
 	mux.Handle("GET /navbars", page("Navbar", "navbars", templates.Navbars()))
 	mux.Handle("GET /sidebars", page("Sidebar", "sidebars", templates.Sidebars()))
+	mux.Handle("GET /tab-bars", page("Tab bar", "tab-bars", templates.TabBars()))
 	mux.Handle("GET /page-headers", page("Page header", "page-headers", templates.PageHeaders()))
 	mux.Handle("GET /empty-states", page("Empty state", "empty-states", templates.EmptyStates()))
 	mux.Handle("GET /stats", page("Stat", "stats", templates.Stats()))
@@ -95,6 +96,9 @@ func main() {
 	mux.Handle("GET /demo/stacked", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		current, title := templates.DemoNavTitle(r.URL.Query().Get("nav"))
 		bare(w, r, title, templates.StackedDemo(current, title))
+	}))
+	mux.Handle("GET /demo/tabbar", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		bare(w, r, "Tab bar", templates.TabBarDemo())
 	}))
 	mux.Handle("GET /demo/auth", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		bare(w, r, "Sign in", templates.AuthDemo())

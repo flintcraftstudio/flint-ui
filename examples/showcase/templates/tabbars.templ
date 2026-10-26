@@ -1,0 +1,55 @@
+package templates
+
+import "github.com/flintcraftstudio/flint-ui/components/tabbar"
+
+templ TabBars() {
+	<div class="space-y-12">
+		@pageHeader("Tab bar", "An app's main navigation as tabs: a bar fixed to the bottom of a phone's screen that becomes a narrow rail at the left from lg up. Plain links, no JavaScript. Current darkens and bolds the tab and sets aria-current=\"page\"; on the rail it also tints the tab. Spacer pushes later tabs to the bottom of the rail.")
+		@section("In a frame", "The bar and rail are fixed to the viewport; this frame contains them (a transform makes it their containing block). Which one shows follows the window's width, not the frame's.") {
+			<div class="relative h-96 translate-0 overflow-hidden rounded-lg border border-border bg-canvas">
+				@demoTabBar("tabbar-quotes")
+				<div class={ tabbar.ContentClasses }>
+					<p class="p-6 text-sm/6 text-muted-foreground">Page content, kept clear of the tabs by tabbar.ContentClasses.</p>
+				</div>
+			</div>
+		}
+		@section("Full page", "The tab bar on a page of its own. Narrow the window below lg to see the bar.") {
+			<a href="/demo/tabbar" class="text-sm/6 font-medium text-foreground underline">Open the tab bar demo</a>
+		}
+	</div>
+}
+
+// TabBarDemo is the tab bar on a bare page, with enough content to scroll
+// behind the bar.
+templ TabBarDemo() {
+	@demoTabBar("tabbar-quotes")
+	<main class={ tabbar.ContentClasses }>
+		<div class="p-6">
+			<h1 class="text-2xl/8 font-semibold text-foreground">Quotes</h1>
+			for i := 1; i <= 30; i++ {
+				<p class="mt-4 text-base/6 text-muted-foreground">Row { i }: the last rows stay clear of the bar.</p>
+			}
+		</div>
+	</main>
+}
+
+// demoTabBar is three tabs with a brand mark shown only on the rail and
+// the last tab at the rail's foot.
+templ demoTabBar(current string) {
+	@tabbar.TabBar(tabbar.Props{Attrs: templ.Attributes{"aria-label": "Main"}}) {
+		<span aria-hidden="true" class="mb-3 flex size-11 items-center justify-center rounded-lg bg-primary text-sm font-extrabold text-primary-foreground max-lg:hidden">FC</span>
+		@tabbar.Item(tabbar.ItemProps{Href: "#", Current: current == "tabbar-quotes"}) {
+			<svg data-slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"></path><path d="M9 12h7M9 16h5"></path></svg>
+			Quotes
+		}
+		@tabbar.Item(tabbar.ItemProps{Href: "#", Current: current == "tabbar-clients"}) {
+			<svg data-slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6"></path><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14c2 .8 3 3 3 6"></path></svg>
+			Clients
+		}
+		@tabbar.Spacer(tabbar.SubProps{})
+		@tabbar.Item(tabbar.ItemProps{Href: "#", Current: current == "tabbar-settings"}) {
+			<svg data-slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"></path><circle cx="16" cy="7" r="2"></circle><circle cx="10" cy="17" r="2"></circle></svg>
+			Settings
+		}
+	}
+}

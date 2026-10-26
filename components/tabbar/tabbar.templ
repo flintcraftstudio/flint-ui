@@ -1,0 +1,56 @@
+// Package documentation lives in doc.go.
+
+package tabbar
+
+// Props controls the <nav>. Give it an aria-label via Attrs ("Main").
+type Props struct {
+	Class string
+	Attrs templ.Attributes
+}
+
+// SubProps is the shape for Spacer.
+type SubProps struct {
+	Class string
+	Attrs templ.Attributes
+}
+
+// ItemProps controls one tab. Current marks the page the user is on: it
+// darkens the icon and label and sets aria-current="page".
+//
+// Children are an icon (<svg data-slot="icon"> drawn in currentColor)
+// followed by a short label.
+type ItemProps struct {
+	Href    string
+	Current bool
+	Class   string
+	Attrs   templ.Attributes
+}
+
+// TabBar renders the app's main navigation: a bar along the bottom of a
+// phone's screen, and a narrow rail at the left from lg up.
+templ TabBar(p Props) {
+	<nav class={ join(navClasses, p.Class) } { p.Attrs... }>
+		{ children... }
+	</nav>
+}
+
+// Item renders one tab as a link.
+templ Item(p ItemProps) {
+	<a
+		href={ templ.SafeURL(p.Href) }
+		class={ join(itemClasses, p.Class) }
+		data-current?={ p.Current }
+		if p.Current {
+			aria-current="page"
+		}
+		{ p.Attrs... }
+	>
+		{ children... }
+	</a>
+}
+
+// Spacer pushes the items after it to the bottom of the rail. On the bar
+// it renders nothing visible and takes no column.
+templ Spacer(p SubProps) {
+	<div aria-hidden="true" class={ join(spacerClasses, p.Class) } { p.Attrs... }></div>
+}
