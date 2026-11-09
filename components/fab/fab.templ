@@ -1,0 +1,55 @@
+// Package documentation lives in doc.go.
+
+package fab
+
+// Props controls a Fab or a Menu. Label names the action for screen
+// readers, since the button shows only a +: "New quote" for a Fab, what
+// the menu offers ("New") for a Menu. Href is the Fab's link; a Menu
+// ignores it.
+type Props struct {
+	Label string
+	Href  string
+	Class string
+	Attrs templ.Attributes
+}
+
+// ItemProps controls one action in a Menu. Children are its label,
+// optionally after an <svg data-slot="icon">.
+type ItemProps struct {
+	Href  string
+	Class string
+	Attrs templ.Attributes
+}
+
+// Fab renders one action as a round + link.
+templ Fab(p Props) {
+	<div class={ join(rootClasses, p.Class) }>
+		<a href={ templ.SafeURL(p.Href) } aria-label={ p.Label } class={ buttonClasses } { p.Attrs... }>
+			@plus()
+		</a>
+	</div>
+}
+
+// Menu renders a + button that opens its Items above it.
+templ Menu(p Props) {
+	<details x-data="flintFab" x-on:click.outside="close()" x-on:keydown.escape="escape()" class={ join("group "+rootClasses, p.Class) } { p.Attrs... }>
+		<summary aria-label={ p.Label } class={ buttonClasses }>
+			@plus()
+		</summary>
+		<div class={ menuClasses }>
+			{ children... }
+		</div>
+	</details>
+}
+
+// Item renders one of a Menu's actions as a link. Tapping it closes the
+// menu.
+templ Item(p ItemProps) {
+	<a href={ templ.SafeURL(p.Href) } x-on:click="close()" class={ join(itemClasses, p.Class) } { p.Attrs... }>
+		{ children... }
+	</a>
+}
+
+templ plus() {
+	<svg data-slot="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+}

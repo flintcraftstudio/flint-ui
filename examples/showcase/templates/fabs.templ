@@ -1,0 +1,28 @@
+package templates
+
+import "github.com/flintcraftstudio/flint-ui/components/fab"
+
+templ Fabs() {
+	<div class="space-y-12">
+		@pageHeader("Floating action button", "A round + button above the tab bar on phones for the section's main action; with two or more actions, a menu above it. A native <details>, so it opens without JavaScript; flintFab closes it on a tap outside, Escape or a tap on an item. Hidden from lg up, where the page header carries the action.")
+		@section("One action", "A Fab is a link. The frame contains the fixed button and bar (a transform makes it their containing block); narrow the window below lg to see them.") {
+			<div class="relative h-96 translate-0 overflow-hidden rounded-lg border border-border bg-canvas">
+				@demoTabBar("tabbar-quotes")
+				@fab.Fab(fab.Props{Label: "New quote", Href: "#"})
+			</div>
+		}
+		@section("A menu", "Two actions open above the button.") {
+			<div class="relative h-96 translate-0 overflow-hidden rounded-lg border border-border bg-canvas">
+				@demoTabBar("tabbar-clients")
+				@fab.Menu(fab.Props{Label: "New"}) {
+					@fab.Item(fab.ItemProps{Href: "#"}) {
+						New client
+					}
+					@fab.Item(fab.ItemProps{Href: "#"}) {
+						New quote
+					}
+				}
+			</div>
+		}
+	</div>
+}

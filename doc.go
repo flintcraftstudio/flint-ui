@@ -41,6 +41,7 @@
 //	breadcrumbs  navigation trail
 //	tabs         tabbed navigation, htmx-driven or Alpine-driven
 //	tabbar       bottom tab bar on phones, sidebar from lg up
+//	fab          floating + button above the tab bar, or a menu of actions
 //	pagination   numbered page navigation
 //	divider      horizontal rule
 //

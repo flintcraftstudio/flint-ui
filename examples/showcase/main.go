@@ -80,6 +80,7 @@ func main() {
 	mux.Handle("GET /navbars", page("Navbar", "navbars", templates.Navbars()))
 	mux.Handle("GET /sidebars", page("Sidebar", "sidebars", templates.Sidebars()))
 	mux.Handle("GET /tab-bars", page("Tab bar", "tab-bars", templates.TabBars()))
+	mux.Handle("GET /fabs", page("Floating action button", "fabs", templates.Fabs()))
 	mux.Handle("GET /page-headers", page("Page header", "page-headers", templates.PageHeaders()))
 	mux.Handle("GET /empty-states", page("Empty state", "empty-states", templates.EmptyStates()))
 	mux.Handle("GET /stats", page("Stat", "stats", templates.Stats()))

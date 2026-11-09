@@ -67,6 +67,30 @@ document.addEventListener("alpine:init", function () {
 		};
 	});
 
+	// Floating action button's menu: see components/fab. x-data="flintFab"
+	// on its <details>, which opens it natively; this only closes it.
+	Alpine.data("flintFab", function () {
+		return {
+			// The menu's <details>: $el is whichever element ran the handler,
+			// the <details> itself or an item inside it.
+			menu: function () {
+				return this.$el.closest("details");
+			},
+
+			close: function () {
+				this.menu().open = false;
+			},
+
+			// Escape closes an open menu and gives focus back to its button.
+			escape: function () {
+				var menu = this.menu();
+				if (!menu.open) return;
+				menu.open = false;
+				menu.querySelector("summary").focus();
+			}
+		};
+	});
+
 	// Slide-over: see components/slideover. x-data="flintSlideover", with
 	// its name in data-flint-name. Opened and closed by the window events
 	// flint:slideover-open and flint:slideover-close.
