@@ -4,8 +4,8 @@ import "github.com/flintcraftstudio/flint-ui/components/tabbar"
 
 templ TabBars() {
 	<div class="space-y-12">
-		@pageHeader("Tab bar", "An app's main navigation as tabs: a bar fixed to the bottom of a phone's screen that becomes a narrow rail at the left from lg up. Plain links, no JavaScript. Current darkens and bolds the tab and sets aria-current=\"page\"; on the rail it also tints the tab. Spacer pushes later tabs to the bottom of the rail.")
-		@section("In a frame", "The bar and rail are fixed to the viewport; this frame contains them (a transform makes it their containing block). Which one shows follows the window's width, not the frame's.") {
+		@pageHeader("Tab bar", "An app's main navigation as tabs: a bar fixed to the bottom of a phone's screen that becomes a sidebar at the left from lg up. Plain links, no JavaScript. Current darkens and bolds the tab and sets aria-current=\"page\"; on the sidebar it also tints the tab. Spacer pushes later tabs to the bottom of the sidebar.")
+		@section("In a frame", "The bar and sidebar are fixed to the viewport; this frame contains them (a transform makes it their containing block). Which one shows follows the window's width, not the frame's.") {
 			<div class="relative h-96 translate-0 overflow-hidden rounded-lg border border-border bg-canvas">
 				@demoTabBar("tabbar-quotes")
 				<div class={ tabbar.ContentClasses }>
@@ -33,8 +33,8 @@ templ TabBarDemo() {
 	</main>
 }
 
-// demoTabBar is three tabs with a brand mark shown only on the rail and
-// the last tab at the rail's foot.
+// demoTabBar is three tabs with a brand mark shown only on the sidebar and
+// the last tab at the sidebar's foot.
 templ demoTabBar(current string) {
 	@tabbar.TabBar(tabbar.Props{Attrs: templ.Attributes{"aria-label": "Main"}}) {
 		<span aria-hidden="true" class="mb-3 flex size-11 items-center justify-center rounded-lg bg-primary text-sm font-extrabold text-primary-foreground max-lg:hidden">FC</span>

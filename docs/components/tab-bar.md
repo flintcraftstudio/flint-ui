@@ -1,6 +1,6 @@
 # Tab bar
 
-An app's main navigation as tabs: a bar fixed to the bottom of a phone's screen, in the thumb zone, that becomes a narrow rail at the left from `lg` up. Catalyst has no equivalent. Use it instead of a layout shell's drawer when the app has a few top-level sections (three to five) and is used mostly on phones.
+An app's main navigation as tabs: a bar fixed to the bottom of a phone's screen, in the thumb zone, that becomes a sidebar at the left from `lg` up. Catalyst has no equivalent. Use it instead of a layout shell's drawer when the app has a few top-level sections (three to five) and is used mostly on phones.
 
 ## Import
 
@@ -12,11 +12,11 @@ import "github.com/flintcraftstudio/flint-ui/components/tabbar"
 
 | Component        | Renders | Notes                                                                 |
 | ---------------- | ------- | --------------------------------------------------------------------- |
-| `tabbar.TabBar`  | `<nav>` | Fixed bar below `lg`, fixed rail from `lg`. One equal column per child. |
+| `tabbar.TabBar`  | `<nav>` | Fixed bar below `lg`, fixed sidebar from `lg`. One equal column per child. |
 | `tabbar.Item`    | `<a>`   | One tab: an icon over a short label.                                  |
-| `tabbar.Spacer`  | `<div>` | On the rail, pushes the following items to the bottom. Nothing on the bar. |
+| `tabbar.Spacer`  | `<div>` | On the sidebar, pushes the following items to the bottom. Nothing on the bar. |
 
-`tabbar.ContentClasses` is a class string for the element wrapping the page: it keeps the content clear of the bar below `lg` and of the rail from `lg`. It sets that element's bottom and left padding, so put the page's own padding on an element inside it.
+`tabbar.ContentClasses` is a class string for the element wrapping the page: it keeps the content clear of the bar below `lg` and of the sidebar from `lg`. It sets that element's bottom and left padding, so put the page's own padding on an element inside it.
 
 ## Example
 
@@ -46,8 +46,9 @@ import "github.com/flintcraftstudio/flint-ui/components/tabbar"
 
 - **Icons**: put an `<svg data-slot="icon">` first. It's drawn at 24px and should use `currentColor` (as `stroke` or `fill`), so it follows the label's color.
 - **Labels**: one short word. The bar splits the screen's width between the tabs, and a label doesn't wrap well under an icon.
-- **Current**: `Current: true` sets `aria-current="page"` and darkens and bolds the label and icon; on the rail it also tints the tab's background. The server marks the current item on each page.
-- **Hidden below `lg`**: the bar gives each child a column, but a child with `display: none` takes none. A brand mark with `max-lg:hidden` shows only on the rail, and the Spacer takes no column on the bar.
+- **Current**: `Current: true` sets `aria-current="page"` and darkens and bolds the label and icon; on the sidebar it also tints the tab's background. The server marks the current item on each page.
+- **Hidden below `lg`**: the bar gives each child a column, but a child with `display: none` takes none. A brand mark with `max-lg:hidden` shows only on the sidebar, and the Spacer takes no column on the bar.
+- **On one form only**: an app with more destinations than a bar holds lists them all on the sidebar and ends the bar with a More tab. Give the sidebar-only items `max-lg:hidden` and the More tab `lg:hidden`; a hidden item takes no column on the bar and no row on the sidebar.
 
 ## Placement
 

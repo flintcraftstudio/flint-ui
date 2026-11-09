@@ -40,7 +40,7 @@
 //	heading      page and section headings
 //	breadcrumbs  navigation trail
 //	tabs         tabbed navigation, htmx-driven or Alpine-driven
-//	tabbar       bottom tab bar on phones, narrow rail from lg up
+//	tabbar       bottom tab bar on phones, sidebar from lg up
 //	pagination   numbered page navigation
 //	divider      horizontal rule
 //

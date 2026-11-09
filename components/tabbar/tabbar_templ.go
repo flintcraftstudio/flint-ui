@@ -35,7 +35,7 @@ type ItemProps struct {
 }
 
 // TabBar renders the app's main navigation: a bar along the bottom of a
-// phone's screen, and a narrow rail at the left from lg up.
+// phone's screen, and a sidebar at the left from lg up.
 func TabBar(p Props) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -188,7 +188,7 @@ func Item(p ItemProps) templ.Component {
 	})
 }
 
-// Spacer pushes the items after it to the bottom of the rail. On the bar
+// Spacer pushes the items after it to the bottom of the sidebar. On the bar
 // it renders nothing visible and takes no column.
 func Spacer(p SubProps) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {

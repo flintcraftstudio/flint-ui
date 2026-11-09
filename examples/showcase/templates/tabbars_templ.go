@@ -35,7 +35,7 @@ func TabBars() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = pageHeader("Tab bar", "An app's main navigation as tabs: a bar fixed to the bottom of a phone's screen that becomes a narrow rail at the left from lg up. Plain links, no JavaScript. Current darkens and bolds the tab and sets aria-current=\"page\"; on the rail it also tints the tab. Spacer pushes later tabs to the bottom of the rail.").Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = pageHeader("Tab bar", "An app's main navigation as tabs: a bar fixed to the bottom of a phone's screen that becomes a sidebar at the left from lg up. Plain links, no JavaScript. Current darkens and bolds the tab and sets aria-current=\"page\"; on the sidebar it also tints the tab. Spacer pushes later tabs to the bottom of the sidebar.").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -83,7 +83,7 @@ func TabBars() templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = section("In a frame", "The bar and rail are fixed to the viewport; this frame contains them (a transform makes it their containing block). Which one shows follows the window's width, not the frame's.").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = section("In a frame", "The bar and sidebar are fixed to the viewport; this frame contains them (a transform makes it their containing block). Which one shows follows the window's width, not the frame's.").Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -193,8 +193,8 @@ func TabBarDemo() templ.Component {
 	})
 }
 
-// demoTabBar is three tabs with a brand mark shown only on the rail and
-// the last tab at the rail's foot.
+// demoTabBar is three tabs with a brand mark shown only on the sidebar and
+// the last tab at the sidebar's foot.
 func demoTabBar(current string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context

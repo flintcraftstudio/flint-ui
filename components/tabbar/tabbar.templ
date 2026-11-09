@@ -27,7 +27,7 @@ type ItemProps struct {
 }
 
 // TabBar renders the app's main navigation: a bar along the bottom of a
-// phone's screen, and a narrow rail at the left from lg up.
+// phone's screen, and a sidebar at the left from lg up.
 templ TabBar(p Props) {
 	<nav class={ join(navClasses, p.Class) } { p.Attrs... }>
 		{ children... }
@@ -49,7 +49,7 @@ templ Item(p ItemProps) {
 	</a>
 }
 
-// Spacer pushes the items after it to the bottom of the rail. On the bar
+// Spacer pushes the items after it to the bottom of the sidebar. On the bar
 // it renders nothing visible and takes no column.
 templ Spacer(p SubProps) {
 	<div aria-hidden="true" class={ join(spacerClasses, p.Class) } { p.Attrs... }></div>

@@ -1,6 +1,6 @@
 // Package tabbar provides an app's main navigation as tabs: a bar fixed
 // to the bottom of a phone's screen, in the thumb zone, that becomes a
-// narrow rail at the left from lg up. Catalyst has no equivalent; use it
+// sidebar at the left from lg up. Catalyst has no equivalent; use it
 // in place of the layout shells' drawer when an app has a few top-level
 // sections.
 //
